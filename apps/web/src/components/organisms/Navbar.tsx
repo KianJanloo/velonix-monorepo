@@ -64,7 +64,7 @@ export function Navbar() {
               <Link href="/settings">
                 <Button variant="ghost" size="sm">Settings</Button>
               </Link>
-              <Button variant="outline" size="sm" onClick={logout}>
+              <Button variant="outline" size="sm" className="max-md:hidden" onClick={logout}>
                 Sign Out
               </Button>
             </>

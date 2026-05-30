@@ -64,17 +64,27 @@ async function request<T>(
   });
 
   if (!res.ok) {
-    let errorBody: { error?: { code?: string; message?: string } } = {};
+    let code = "UNKNOWN";
+    let message = `HTTP ${res.status}`;
     try {
-      errorBody = await res.json() as typeof errorBody;
+      const body = await res.json() as Record<string, unknown>;
+      // Our format: { error: { code, message } }
+      if (body["error"] && typeof body["error"] === "object") {
+        const e = body["error"] as Record<string, unknown>;
+        code = (e["code"] as string) ?? code;
+        message = (e["message"] as string) ?? message;
+      }
+      // NestJS default: { message: "..." }
+      else if (body["message"]) {
+        message = Array.isArray(body["message"])
+          ? (body["message"] as string[]).join("; ")
+          : (body["message"] as string);
+        code = (body["error"] as string) ?? code;
+      }
     } catch {
-      // ignore parse failure
+      // ignore JSON parse failure — keep default message
     }
-    throw new ApiError(
-      res.status,
-      errorBody.error?.code ?? "UNKNOWN",
-      errorBody.error?.message ?? `HTTP ${res.status}`
-    );
+    throw new ApiError(res.status, code, message);
   }
 
   if (res.status === 204) return undefined as unknown as T;

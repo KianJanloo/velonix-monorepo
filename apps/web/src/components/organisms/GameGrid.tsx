@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
 import { useMyGames, useDeleteGame, usePublishGame } from "@/hooks/useGames";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { GameRecord } from "@/types/game";
 
 const statusBadge = (status: GameRecord["status"]) => {
@@ -138,14 +139,19 @@ function GameRow({
             Publish
           </Button>
         )}
-        <Button
+        <ConfirmDialog
+          title="Delete game?"
+          description={`"${game.title}" will be permanently deleted along with all its components and data. This cannot be undone.`}
+          confirmLabel="Yes, delete"
           variant="danger"
-          size="sm"
-          isLoading={isDeleting}
-          onClick={onDelete}
+          onConfirm={onDelete}
         >
-          Delete
-        </Button>
+          {(open) => (
+            <Button variant="danger" size="sm" isLoading={isDeleting} onClick={open}>
+              Delete
+            </Button>
+          )}
+        </ConfirmDialog>
       </div>
     </div>
   );

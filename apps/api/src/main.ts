@@ -12,6 +12,8 @@ import helmet from "helmet";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
+import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
+import { ResponseWrapInterceptor } from "./common/interceptors/response-wrap.interceptor";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
@@ -52,6 +54,10 @@ async function bootstrap(): Promise<void> {
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   });
+
+  // ── Global filters + interceptors ────────────────────────────────────────
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalInterceptors(new ResponseWrapInterceptor());
 
   // ── Global validation pipe ────────────────────────────────────────────────
   app.useGlobalPipes(

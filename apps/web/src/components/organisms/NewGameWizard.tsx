@@ -69,12 +69,14 @@ export function NewGameWizard() {
   }
 
   async function onSubmit(data: CreateGameDto) {
+    if (createGame.isPending) return; // prevent double-submit
     try {
       const game = await createGame.mutateAsync(data);
       toast.success("Game created! Opening studio…");
       router.push(`/studio/${game.id}`);
-    } catch {
-      toast.error("Failed to create game. Please try again.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to create game. Please try again.";
+      toast.error(msg);
     }
   }
 
