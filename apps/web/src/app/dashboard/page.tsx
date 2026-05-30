@@ -18,13 +18,18 @@ export default function DashboardPage() {
               Manage your games, track earnings, and publish to the marketplace.
             </p>
           </div>
-          <a href="/studio/new" className="v-btn-primary">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M7 4v6M4 7h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            <span className="max-lg:hidden"> New Game </span>
-          </a>
+          <div className="flex items-center gap-3">
+            <a href="/pricing" className="px-4 py-2 rounded-lg border border-warm-wood-light text-parchment-light text-sm font-ui font-semibold hover:border-royal-gold/50 hover:text-royal-gold transition-all">
+              Plans
+            </a>
+            <a href="/studio/new" className="v-btn-primary">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M7 4v6M4 7h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              <span className="max-lg:hidden"> New Game </span>
+            </a>
+          </div>
         </div>
 
         {/* Stats row */}

@@ -9,14 +9,16 @@ import { useCurrentUser, useLogout } from "@/hooks/useAuth";
 
 const NAV_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Blog" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/studio/new", label: "Studio" },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
   const user = useCurrentUser();
   const logout = useLogout();
+  const isAdmin = user?.role === "admin";
 
   return (
     <header className="sticky top-0 z-200 h-14 bg-rich-wood-dark/90 backdrop-blur-md border-b border-warm-wood">
@@ -61,6 +63,11 @@ export function Navbar() {
                   {user.displayName}
                 </span>
               </Link>
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button variant="ghost" size="sm" className="text-crimson-flame hover:text-crimson-bright">Admin</Button>
+                </Link>
+              )}
               <Link href="/settings">
                 <Button variant="ghost" size="sm">Settings</Button>
               </Link>

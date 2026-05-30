@@ -2,13 +2,16 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { UserEntity } from "./user.entity";
+import { GameEntity } from "../games/game.entity";
 import type { UpdateProfileDto } from "@velonix/game-engine";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepo: Repository<UserEntity>
+    private readonly userRepo: Repository<UserEntity>,
+    @InjectRepository(GameEntity)
+    private readonly gameRepo: Repository<GameEntity>,
   ) {}
 
   async findById(id: string) {
@@ -35,6 +38,19 @@ export class UsersService {
 
   async getPublicProfile(username: string) {
     const user = await this.findByUsername(username);
-    return user.toPublicProfile();
+    const games = await this.gameRepo.find({
+      where: { creatorId: user.id, status: "published" },
+      order: { totalPurchases: "DESC" },
+      take: 24,
+    });
+
+    return {
+      ...user.toPublicProfile(),
+      stats: {
+        publishedGames: games.length,
+        totalSales: user.totalSales,
+      },
+      games: games.map(g => g.toSummary()),
+    };
   }
 }

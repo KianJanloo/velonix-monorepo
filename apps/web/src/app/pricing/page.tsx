@@ -75,7 +75,7 @@ const TIER_PRICES: Record<string, { monthly: number; yearly: number }> = {
 
 export default function PricingPage() {
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
-  const { data: tiers, isLoading } = useSubscriptionTiers();
+  const { isLoading } = useSubscriptionTiers();
   const checkout = useSubscriptionCheckout();
   const user = useCurrentUser();
 

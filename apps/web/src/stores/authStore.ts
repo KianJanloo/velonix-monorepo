@@ -7,6 +7,7 @@ export interface AuthUser {
   displayName: string;
   avatarUrl: string | null;
   bio: string | null;
+  role: string;
   subscriptionTier: string;
   totalSales: number;
   createdAt: string;

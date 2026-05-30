@@ -4,14 +4,9 @@ import { Repository } from "typeorm";
 import { GameEntity } from "./game.entity";
 import { UserEntity } from "../users/user.entity";
 import { createStarterGameData } from "@velonix/game-engine";
+import { SUBSCRIPTION_LIMITS } from "@velonix/types";
+import type { SubscriptionTier } from "@velonix/types";
 import type { CreateGameDto, UpdateGameDto } from "@velonix/game-engine";
-
-const TIER_GAME_LIMITS: Record<string, number> = {
-  free: 3,
-  creator: 15,
-  pro: Infinity,
-  studio: Infinity,
-};
 
 @Injectable()
 export class GamesService {
@@ -23,16 +18,18 @@ export class GamesService {
   ) {}
 
   async create(creatorId: string, dto: CreateGameDto) {
-    // Enforce per-tier game limits
+    // Enforce per-tier game project limits (single source of truth: SUBSCRIPTION_LIMITS)
     const user = await this.userRepo.findOne({ where: { id: creatorId } });
-    const tier = user?.subscriptionTier ?? "free";
-    const limit = TIER_GAME_LIMITS[tier] ?? 3;
+    const tier = (user?.subscriptionTier ?? "free") as SubscriptionTier;
+    const maxProjects = SUBSCRIPTION_LIMITS[tier]?.maxProjects ?? 3;
 
-    const existingCount = await this.gameRepo.count({ where: { creatorId } });
-    if (existingCount >= limit) {
-      throw new BadRequestException(
-        `Your ${tier} plan allows up to ${limit} game project${limit === 1 ? "" : "s"}. Upgrade to create more.`
-      );
+    if (maxProjects !== null) {
+      const existingCount = await this.gameRepo.count({ where: { creatorId } });
+      if (existingCount >= maxProjects) {
+        throw new BadRequestException(
+          `Your ${tier} plan allows up to ${maxProjects} game project${maxProjects === 1 ? "" : "s"}. Upgrade your plan to create more.`
+        );
+      }
     }
 
     const game = this.gameRepo.create({

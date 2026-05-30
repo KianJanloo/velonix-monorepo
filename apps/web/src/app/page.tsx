@@ -267,7 +267,7 @@ const STEPS = [
     step: "03",
     title: "Earn from every sale",
     desc: "Revenue is paid directly to your Stripe account. Free tier keeps 75%, Pro keeps 83%, Studio keeps 85%. No hidden fees — transparent from day one.",
-    cta: { label: "View Pricing", href: "/#pricing" },
+    cta: { label: "View Pricing", href: "/pricing" },
   },
 ];
 
@@ -300,141 +300,6 @@ function HowItWorks() {
                 className="text-emerald-glow text-xs font-ui font-semibold hover:text-emerald-bright transition-colors underline-offset-2 hover:underline"
               >
                 {cta.label} →
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── Pricing ───────────────────────────────────────────────────────────────────
-
-const PLANS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    commission: "25% commission",
-    features: [
-      "3 game projects",
-      "Basic components library",
-      "2D preview & export",
-      "Marketplace publishing",
-      "Community support",
-    ],
-    cta: { label: "Start for free", href: "/auth/register", primary: false },
-  },
-  {
-    name: "Creator",
-    price: "$12",
-    period: "/ month",
-    commission: "20% commission",
-    badge: "Most Popular",
-    features: [
-      "15 game projects",
-      "Full component library",
-      "3D preview mode",
-      "Analytics dashboard",
-      "Priority review queue",
-      "Email support",
-    ],
-    cta: { label: "Get Creator", href: "/auth/register?plan=creator", primary: true },
-  },
-  {
-    name: "Pro",
-    price: "$29",
-    period: "/ month",
-    commission: "17% commission",
-    features: [
-      "Unlimited projects",
-      "Custom domain",
-      "Advanced analytics",
-      "Team collaboration (2 seats)",
-      "Rule engine access",
-      "Priority support",
-    ],
-    cta: { label: "Get Pro", href: "/auth/register?plan=pro", primary: false },
-  },
-  {
-    name: "Studio",
-    price: "$79",
-    period: "/ month",
-    commission: "15% commission",
-    features: [
-      "Everything in Pro",
-      "Team collaboration (10 seats)",
-      "White-label export",
-      "API access",
-      "Dedicated account manager",
-      "SLA support",
-    ],
-    cta: { label: "Get Studio", href: "/auth/register?plan=studio", primary: false },
-  },
-];
-
-function Pricing() {
-  return (
-    <section id="pricing" className="py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <SectionLabel>Transparent pricing</SectionLabel>
-          <h2 className="font-display text-4xl md:text-5xl font-bold tracking-display text-parchment-light mb-4">
-            Plans for every creator
-          </h2>
-          <p className="text-soft-gray text-sm font-ui">
-            All plans include a 14-day free trial. No credit card required.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-          {PLANS.map(({ name, price, period, commission, badge, features, cta }) => (
-            <div
-              key={name}
-              className={`relative flex flex-col rounded-2xl border p-6 ${
-                badge
-                  ? "border-emerald-glow/50 bg-emerald-ghost shadow-[0_0_32px_rgba(0,212,165,0.12)]"
-                  : "border-warm-wood bg-rich-wood-dark"
-              }`}
-            >
-              {badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-glow text-deep-void text-2xs font-ui font-bold px-3 py-1 rounded-full">
-                  {badge}
-                </span>
-              )}
-
-              <div className="mb-5">
-                <p className="font-display text-sm font-bold tracking-[0.1em] text-parchment-mid uppercase mb-2">
-                  {name}
-                </p>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="font-display text-3xl font-black text-parchment-light">{price}</span>
-                  <span className="text-soft-gray text-sm font-ui">{period}</span>
-                </div>
-                <p className="text-soft-gray-dark text-xs font-ui">{commission}</p>
-              </div>
-
-              <ul className="flex flex-col gap-2.5 mb-8 flex-1">
-                {features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm font-ui text-parchment-mid">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-0.5 text-emerald-glow">
-                      <path d="M2.5 7l3 3 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href={cta.href}
-                className={`w-full py-2.5 rounded-xl text-sm font-ui font-bold text-center transition-all active:scale-95 ${
-                  cta.primary
-                    ? "bg-emerald-glow text-deep-void hover:bg-emerald-bright"
-                    : "border border-warm-wood-light text-parchment-light hover:border-parchment-mid"
-                }`}
-              >
-                {cta.label}
               </Link>
             </div>
           ))}
@@ -498,7 +363,6 @@ export default function HomePage() {
       <StatsBar />
       <Features />
       <HowItWorks />
-      <Pricing />
       <CTABanner />
     </main>
   );

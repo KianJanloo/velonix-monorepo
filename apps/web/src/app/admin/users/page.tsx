@@ -11,7 +11,7 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
 
-  const { data, isLoading, isFetching } = useAdminUsers(page, 20, search || undefined);
+  const { data, isLoading } = useAdminUsers(page, 20, search || undefined);
   const updateRole = useAdminUpdateRole();
   const deleteUser = useAdminDeleteUser();
 

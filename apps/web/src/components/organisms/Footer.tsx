@@ -5,22 +5,22 @@ const LINKS = {
   Product: [
     { label: "Marketplace", href: "/marketplace" },
     { label: "Studio", href: "/studio/new" },
-    { label: "Pricing", href: "/#pricing" },
+    { label: "Pricing", href: "/pricing" },
   ],
   Creators: [
     { label: "Dashboard", href: "/dashboard" },
-    { label: "Publishing Guide", href: "#" },
-    { label: "Earnings & Payouts", href: "#" },
+    { label: "Blog", href: "/blog" },
+    { label: "Pricing & Plans", href: "/pricing" },
   ],
   Company: [
-    { label: "About", href: "#" },
-    { label: "Blog", href: "#" },
-    { label: "Careers", href: "#" },
+    { label: "About", href: "/about" },
+    { label: "Blog", href: "/blog" },
+    { label: "Marketplace", href: "/marketplace" },
   ],
   Legal: [
-    { label: "Terms of Service", href: "#" },
-    { label: "Privacy Policy", href: "#" },
-    { label: "Cookie Policy", href: "#" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Cookie Policy", href: "/cookies" },
   ],
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  useRef, useState, useCallback,
+  useRef, useState, useCallback, useEffect,
   type PointerEvent as ReactPointerEvent,
   type WheelEvent as ReactWheelEvent,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useStudioStore, selectCanUndo, selectCanRedo, selectZoomPercent } from "@/stores/studioStore";
 import { useGame, usePublishGame } from "@/hooks/useGames";
 import { useStudio } from "@/hooks/useStudio";
+import { usePlan } from "@/hooks/usePlan";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -291,12 +292,16 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     leftPanelTab, setLeftPanelTab, rightPanelTab, setRightPanelTab,
     showGrid, toggleGrid, snapToGrid, toggleSnap,
     isDirty, isSaving, zoomIn, zoomOut, resetZoom,
+    markDirty,
   } = useStudioStore();
   const canUndo = useStudioStore(selectCanUndo);
   const canRedo = useStudioStore(selectCanRedo);
   const zoomPercent = useStudioStore(selectZoomPercent);
   const storeZoom = useStudioStore(s => s.viewport.zoom);
   const { saveNow } = useStudio(gameId);
+  const plan = usePlan();
+  // Rule engine is a Pro+ feature (team collaboration tier and up)
+  const hasRuleEngine = plan.hasTeamCollaboration;
 
   // Canvas state
   const [components, setComponents] = useState<CanvasComp[]>(INITIAL_COMPS);
@@ -445,7 +450,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     if (e.key === "h" || e.key === "H") setTool("hand");
     if (e.key === "r" || e.key === "R") setTool("shape_rect");
     if ((e.metaKey || e.ctrlKey) && e.key === "d") { e.preventDefault(); duplicateSelected(); }
-    if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); void saveNow(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); void handleSave(); }
     if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === "z") { e.preventDefault(); useStudioStore.getState().undo(); }
     if ((e.metaKey || e.ctrlKey) && (e.shiftKey && e.key === "z" || e.key === "y")) { e.preventDefault(); useStudioStore.getState().redo(); }
     if (e.key === "[" && selectedId) moveCompZ(selectedId, "down");
@@ -460,9 +465,26 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     }
   }, [deleteSelected, setTool, duplicateSelected, saveNow, selectedId, moveCompZ, selectedComp, updateComp]);
 
+  // ── Dirty tracking ───────────────────────────────────────────────────────
+  // Mark the project dirty whenever the component set changes (skip first mount).
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    if (!mountedRef.current) { mountedRef.current = true; return; }
+    markDirty();
+  }, [components, markDirty]);
+
+  // ── Save ───────────────────────────────────────────────────────────────────
+
+  const handleSave = useCallback(async () => {
+    if (isNew) { toast.error("Create the game first."); return; }
+    await saveNow({ components } as unknown as Record<string, unknown>);
+  }, [isNew, saveNow, components]);
+
   // ── Publish ────────────────────────────────────────────────────────────────
 
   async function handlePublish() {
+    // Persist latest design before submitting for review
+    if (!isNew) await saveNow({ components } as unknown as Record<string, unknown>);
     try {
       await publish.mutateAsync();
       toast.success("Submitted for review!");
@@ -554,7 +576,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
           <span className={`text-2xs font-ui hidden md:inline ${isSaving ? "text-royal-gold" : isDirty ? "text-soft-gray-dark" : "text-emerald-glow"}`}>
             {isSaving ? "Saving…" : isDirty ? "Unsaved" : "Saved"}
           </span>
-          <button onClick={() => void saveNow()} className="v-tool-btn text-2xs font-ui px-2" title="Save (⌘S)">Save</button>
+          <button onClick={() => void handleSave()} className="v-tool-btn text-2xs font-ui px-2" title="Save (⌘S)">Save</button>
           <button onClick={handlePublish} disabled={publish.isPending || game?.status === "reviewing"}
             className="px-3 py-1 rounded-md bg-emerald-glow text-deep-void text-xs font-ui font-bold hover:bg-emerald-bright transition-colors disabled:opacity-50">
             {game?.status === "reviewing" ? "In Review" : "Publish"}
@@ -925,15 +947,29 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
                 <div className="p-3 bg-warm-wood/20 rounded-lg border border-warm-wood/40">
                   <p className="text-2xs text-soft-gray font-ui leading-relaxed">Define win conditions, turn order, and component effects using the visual rule engine.</p>
                 </div>
-                {["On turn start", "On card played", "On token moved", "Win condition"].map(rule => (
-                  <button key={rule} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border border-warm-wood text-soft-gray-dark text-2xs font-ui hover:border-warm-wood-light hover:text-soft-gray transition-colors">
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" strokeWidth="1"/><path d="M3.5 5h3M5 3.5v3" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
-                    {rule}
-                  </button>
-                ))}
-                <button className="w-full py-2 rounded-lg bg-royal-gold/10 border border-royal-gold/30 text-royal-gold text-2xs font-ui font-semibold hover:bg-royal-gold/20 transition-colors">
-                  Upgrade to Pro →
-                </button>
+                {hasRuleEngine ? (
+                  <>
+                    {["On turn start", "On card played", "On token moved", "Win condition"].map(rule => (
+                      <button key={rule} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border border-warm-wood text-soft-gray text-2xs font-ui hover:border-emerald-glow/40 hover:text-parchment-light transition-colors">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" strokeWidth="1"/><path d="M3.5 5h3M5 3.5v3" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
+                        {rule}
+                      </button>
+                    ))}
+                    <button className="w-full py-2 rounded-lg bg-emerald-ghost border border-emerald-glow/20 text-emerald-glow text-2xs font-ui font-semibold hover:bg-emerald-glow hover:text-deep-void transition-colors">
+                      + Add Rule
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-3 py-6 text-center">
+                    <div className="w-10 h-10 rounded-full bg-[rgba(245,196,81,0.1)] border border-royal-gold/30 flex items-center justify-center">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-royal-gold"><rect x="3" y="8" width="12" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><path d="M6 8V5.5a3 3 0 016 0V8" stroke="currentColor" strokeWidth="1.5"/></svg>
+                    </div>
+                    <p className="text-2xs text-soft-gray font-ui leading-relaxed">The visual rule engine is available on the <span className="text-royal-gold font-semibold">Pro</span> and <span className="text-royal-gold font-semibold">Studio</span> plans.</p>
+                    <Link href="/pricing" className="w-full py-2 rounded-lg bg-royal-gold/10 border border-royal-gold/30 text-royal-gold text-2xs font-ui font-semibold hover:bg-royal-gold/20 transition-colors">
+                      Upgrade to Pro →
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </div>

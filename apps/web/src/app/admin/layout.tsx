@@ -19,12 +19,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!user) { router.push("/auth/login"); return; }
-    if (user.role !== "admin" && (user as { role?: string }).role !== "admin") {
+    if (user.role !== "admin") {
       router.push("/unauthorized");
     }
   }, [user, router]);
 
-  if (!user || (user as { role?: string }).role !== "admin") {
+  if (!user || user.role !== "admin") {
     return (
       <div className="min-h-screen bg-deep-void flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-emerald-glow/30 border-t-emerald-glow rounded-full animate-spin" />

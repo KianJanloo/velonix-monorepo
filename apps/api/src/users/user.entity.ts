@@ -129,10 +129,10 @@ export class UserEntity {
       displayName: this.displayName,
       avatarUrl: this.avatarUrl,
       bio: this.bio,
+      role: this.role,
       subscriptionTier: this.subscriptionTier,
       totalSales: this.totalSales,
-      createdAt: this.createdAt
-      // .toISOString(),
+      createdAt: this.createdAt,
     };
   }
 }

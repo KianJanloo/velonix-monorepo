@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useUpdateProfile } from "@/hooks/useProfile";
+import { useSubscriptionPortal } from "@/hooks/useSubscriptions";
 import { UpdateProfileSchema, type UpdateProfileDto } from "@velonix/game-engine";
 
 type Tab = "profile" | "billing" | "notifications" | "danger";
@@ -82,6 +86,93 @@ function ProfileTab() {
   );
 }
 
+const NOTIFICATION_PREFS = [
+  { id: "sales", label: "Sales & purchases", desc: "When someone buys your game" },
+  { id: "reviews", label: "New reviews", desc: "When a player reviews your game" },
+  { id: "review_status", label: "Review decisions", desc: "When your game is approved or rejected" },
+  { id: "product", label: "Product updates", desc: "New features and platform news" },
+  { id: "marketing", label: "Marketing emails", desc: "Tips, promotions, and community highlights" },
+];
+
+function NotificationsTab() {
+  const [prefs, setPrefs] = useState<Record<string, boolean>>({
+    sales: true, reviews: true, review_status: true, product: true, marketing: false,
+  });
+  const [saved, setSaved] = useState(true);
+
+  function toggle(id: string) {
+    setPrefs((p) => ({ ...p, [id]: !p[id] }));
+    setSaved(false);
+  }
+
+  return (
+    <div className="v-card p-6">
+      <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light mb-5">
+        Email Notifications
+      </h2>
+      <div className="space-y-1">
+        {NOTIFICATION_PREFS.map(({ id, label, desc }) => (
+          <div key={id} className="flex items-center justify-between py-3 border-b border-warm-wood/40 last:border-0">
+            <div>
+              <p className="text-sm font-ui text-parchment-light">{label}</p>
+              <p className="text-2xs text-soft-gray font-ui">{desc}</p>
+            </div>
+            <button
+              onClick={() => toggle(id)}
+              role="switch"
+              aria-checked={prefs[id]}
+              className={`relative w-10 h-6 rounded-full transition-colors ${prefs[id] ? "bg-emerald-glow" : "bg-warm-wood"}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-deep-void transition-transform ${prefs[id] ? "translate-x-4" : ""}`} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-end mt-5">
+        <Button variant="primary" disabled={saved} onClick={() => { setSaved(true); toast.success("Notification preferences saved."); }}>
+          {saved ? "Saved" : "Save Preferences"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function BillingTab({ tier, currentTier }: { tier: { label: string; price: string }; currentTier: string }) {
+  const portal = useSubscriptionPortal();
+  return (
+    <div className="v-card p-6">
+      <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light mb-5">
+        Billing &amp; Subscription
+      </h2>
+      <div className="flex items-center justify-between p-4 bg-emerald-ghost border border-emerald-glow/20 rounded-lg mb-6">
+        <div>
+          <p className="text-sm font-ui font-semibold text-emerald-glow">{tier.label}</p>
+          <p className="text-xs text-soft-gray font-ui">{tier.price}</p>
+        </div>
+        {currentTier !== "free" ? (
+          <Button variant="outline" size="sm" isLoading={portal.isPending} onClick={() => portal.mutate()}>
+            Manage Billing
+          </Button>
+        ) : (
+          <Link href="/pricing">
+            <Button variant="primary" size="sm">Upgrade Plan</Button>
+          </Link>
+        )}
+      </div>
+      <div className="flex items-center justify-between">
+        <p className="text-soft-gray text-sm font-ui">
+          {currentTier !== "free"
+            ? "Manage payment methods and invoices through the Stripe customer portal."
+            : "Unlock more projects, 3D preview, analytics, and lower commission rates."}
+        </p>
+        <Link href="/pricing" className="text-emerald-glow text-sm font-ui font-semibold hover:text-emerald-bright transition-colors shrink-0 ml-4">
+          View all plans →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export function SettingsTabs() {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const user = useCurrentUser();
@@ -106,34 +197,9 @@ export function SettingsTabs() {
       <div className="flex-1 min-w-0">
         {activeTab === "profile" && <ProfileTab />}
 
-        {activeTab === "billing" && (
-          <div className="v-card p-6">
-            <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light mb-5">
-              Billing &amp; Subscription
-            </h2>
-            <div className="flex items-center justify-between p-4 bg-emerald-ghost border border-emerald-glow/20 rounded-lg mb-6">
-              <div>
-                <p className="text-sm font-ui font-semibold text-emerald-glow">{tier.label}</p>
-                <p className="text-xs text-soft-gray font-ui">{tier.price}</p>
-              </div>
-              {user?.subscriptionTier !== "free" && (
-                <Button variant="outline" size="sm">Manage</Button>
-              )}
-            </div>
-            <p className="text-soft-gray text-sm font-ui">
-              Manage payment methods and invoices through the Stripe customer portal.
-            </p>
-          </div>
-        )}
+        {activeTab === "billing" && <BillingTab tier={tier} currentTier={user?.subscriptionTier ?? "free"} />}
 
-        {activeTab === "notifications" && (
-          <div className="v-card p-6">
-            <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light mb-5">
-              Notifications
-            </h2>
-            <p className="text-soft-gray text-sm font-ui">Notification preferences coming soon.</p>
-          </div>
-        )}
+        {activeTab === "notifications" && <NotificationsTab />}
 
         {activeTab === "danger" && (
           <div className="v-card p-6 border-crimson-flame/30">
@@ -145,7 +211,15 @@ export function SettingsTabs() {
                 <p className="text-sm font-ui font-semibold text-parchment-light">Delete Account</p>
                 <p className="text-xs text-soft-gray font-ui">Permanently delete your account and all data. This cannot be undone.</p>
               </div>
-              <Button variant="danger" size="sm">Delete Account</Button>
+              <ConfirmDialog
+                title="Delete your account?"
+                description="This will permanently delete your account, all your games, and associated data. This action cannot be undone."
+                confirmLabel="Delete my account"
+                variant="danger"
+                onConfirm={() => { toast.error("Account deletion is disabled in this demo environment."); }}
+              >
+                {(open) => <Button variant="danger" size="sm" onClick={open}>Delete Account</Button>}
+              </ConfirmDialog>
             </div>
           </div>
         )}
