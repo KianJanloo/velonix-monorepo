@@ -22,9 +22,17 @@ export class PaymentsService {
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
     private readonly subscriptionsService: SubscriptionsService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {
-    this.stripe = new Stripe(this.config.get<string>("stripe.secretKey") ?? "", {
+    const secretKey = this.config.get<string>("stripe.secretKey");
+
+    if (!secretKey) {
+      throw new Error(
+        "STRIPE_SECRET_KEY is missing. Check ConfigModule envFilePath.",
+      );
+    }
+
+    this.stripe = new Stripe(secretKey, {
       apiVersion: "2025-02-24.acacia",
     });
   }
@@ -41,12 +49,17 @@ export class PaymentsService {
     });
 
     if (!game) throw new BadRequestException("Game not found.");
-    if (game.isFree) throw new BadRequestException("This game is free — no payment required.");
+    if (game.isFree)
+      throw new BadRequestException("This game is free — no payment required.");
     if (!game.priceUsd) throw new BadRequestException("Game has no price set.");
-    if (game.status !== "published") throw new BadRequestException("Game is not available for purchase.");
+    if (game.status !== "published")
+      throw new BadRequestException("Game is not available for purchase.");
 
-    const alreadyOwned = await this.purchaseRepo.findOne({ where: { buyerId, gameId } });
-    if (alreadyOwned) throw new BadRequestException("You already own this game.");
+    const alreadyOwned = await this.purchaseRepo.findOne({
+      where: { buyerId, gameId },
+    });
+    if (alreadyOwned)
+      throw new BadRequestException("You already own this game.");
 
     const creatorConnectId = game.creator?.stripeConnectAccountId;
     const creatorTier = game.creator?.subscriptionTier ?? "free";
@@ -121,7 +134,11 @@ export class PaymentsService {
 
     let event: Stripe.Event;
     try {
-      event = this.stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+      event = this.stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        webhookSecret,
+      );
     } catch (err) {
       this.logger.error("Webhook signature verification failed", err);
       throw new BadRequestException("Invalid webhook signature.");
@@ -131,14 +148,16 @@ export class PaymentsService {
 
     switch (event.type) {
       case "payment_intent.succeeded":
-        await this.handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
+        await this.handlePaymentSucceeded(
+          event.data.object as Stripe.PaymentIntent,
+        );
         break;
 
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
         await this.subscriptionsService.syncSubscriptionFromWebhook(
-          event.data.object as Stripe.Subscription
+          event.data.object as Stripe.Subscription,
         );
         break;
 
@@ -157,11 +176,17 @@ export class PaymentsService {
       return;
     }
 
-    const game = await this.gameRepo.findOne({ where: { id: velonixGameId }, relations: ["creator"] });
+    const game = await this.gameRepo.findOne({
+      where: { id: velonixGameId },
+      relations: ["creator"],
+    });
     if (!game) return;
 
     const creatorTier = game.creator?.subscriptionTier ?? "free";
-    const { platformFee, creatorEarnings } = calculateCommission(intent.amount, creatorTier);
+    const { platformFee, creatorEarnings } = calculateCommission(
+      intent.amount,
+      creatorTier,
+    );
 
     // Record the purchase
     const existing = await this.purchaseRepo.findOne({
@@ -176,19 +201,23 @@ export class PaymentsService {
           platformFeeUsd: platformFee,
           creatorEarningsUsd: creatorEarnings,
           stripePaymentIntentId: intent.id,
-        })
+        }),
       );
       await this.gameRepo.increment({ id: velonixGameId }, "totalPurchases", 1);
     }
 
     // Update creator earnings
     if (velonixCreatorId) {
-      await this.userRepo.increment({ id: velonixCreatorId }, "totalEarnings", creatorEarnings);
+      await this.userRepo.increment(
+        { id: velonixCreatorId },
+        "totalEarnings",
+        creatorEarnings,
+      );
       await this.userRepo.increment({ id: velonixCreatorId }, "totalSales", 1);
     }
 
     this.logger.log(
-      `Purchase recorded: game=${velonixGameId} buyer=${velonixBuyerId} amount=${intent.amount}`
+      `Purchase recorded: game=${velonixGameId} buyer=${velonixBuyerId} amount=${intent.amount}`,
     );
   }
 }

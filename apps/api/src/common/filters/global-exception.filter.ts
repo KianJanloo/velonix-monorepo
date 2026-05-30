@@ -61,7 +61,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         message,
         ...(details !== undefined ? { details } : {}),
         path: request.url,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date()
+        // .toISOString(),
       },
       statusCode,
     });

@@ -14,7 +14,7 @@ export default function DashboardPage() {
             <h1 className="font-display text-3xl font-bold tracking-display text-parchment-light mb-1">
               Dashboard
             </h1>
-            <p className="text-soft-gray font-ui text-sm">
+            <p className="text-soft-gray font-ui text-sm max-lg:hidden">
               Manage your games, track earnings, and publish to the marketplace.
             </p>
           </div>
@@ -23,7 +23,7 @@ export default function DashboardPage() {
               <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" />
               <path d="M7 4v6M4 7h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-            New Game
+            <span className="max-lg:hidden"> New Game </span>
           </a>
         </div>
 

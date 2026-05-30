@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { HeroCTA } from "@/components/atoms/HeroCTA";
 
 export const metadata: Metadata = {
   title: "Velonix — Play. Think. Conquer.",
@@ -65,16 +66,7 @@ export default function HomePage() {
           className="flex flex-col sm:flex-row gap-4 animate-fade-in-up"
           style={{ animationDelay: "320ms" }}
         >
-          <Link href="/auth/register" className="v-btn-primary text-base px-8 py-3">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M8 5v6M5 8h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            Start Building Free
-          </Link>
-          <Link href="/marketplace" className="v-btn-outline text-base px-8 py-3">
-            Browse Marketplace
-          </Link>
+          <HeroCTA />
         </div>
 
         {/* Scroll indicator */}

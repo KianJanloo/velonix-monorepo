@@ -158,7 +158,9 @@ export class GameEntity {
       totalRatings: this.totalRatings,
       totalPurchases: this.totalPurchases,
       status: this.status,
-      publishedAt: this.publishedAt?.toISOString() ?? null,
+      publishedAt: this.publishedAt
+      // ?.toISOString()
+      ?? null,
     };
   }
 }

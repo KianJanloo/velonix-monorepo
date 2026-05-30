@@ -345,7 +345,8 @@ export const useStudioStore = create<StudioState & StudioActions>()(
           set((state) => {
             state.isSaving = false;
             state.isDirty = false;
-            state.lastSavedAt = new Date().toISOString();
+            state.lastSavedAt = new Date()
+            .toISOString();
           }),
         setAutoSave: (enabled) =>
           set((state) => { state.autoSaveEnabled = enabled; }),

@@ -1,5 +1,6 @@
 const path = require("path");
 const resolve = require("resolve");
+const fs = require("fs");
 
 /** @type {import('postcss-load-config').Config} */
 const config = {
@@ -7,18 +8,25 @@ const config = {
     "postcss-import": {
       resolve(id, baseDir) {
         // Handle bare package imports with exports field support
-        if (id.startsWith("@") || (!id.startsWith(".") && !id.startsWith("/"))) {
+        if (
+          id.startsWith("@") ||
+          (!id.startsWith(".") && !id.startsWith("/"))
+        ) {
           const [scope, name, ...rest] = id.startsWith("@")
             ? id.slice(1).split("/")
             : [null, ...id.split("/")];
-          const pkg = id.startsWith("@") ? `@${scope}/${name}` : scope ?? name ?? id;
+          const pkg = id.startsWith("@")
+            ? `@${scope}/${name}`
+            : (scope ?? name ?? id);
           const subpath = rest.length ? rest.join("/") : null;
 
           try {
             const pkgDir = path.dirname(
-              resolve.sync(`${pkg}/package.json`, { basedir: baseDir })
+              resolve.sync(`${pkg}/package.json`, { basedir: baseDir }),
             );
-            const pkgJson = require(`${pkgDir}/package.json`);
+            const pkgJson = JSON.parse(
+              fs.readFileSync(path.join(pkgDir, "package.json"), "utf8"),
+            );
             // Resolve via exports field
             if (subpath && pkgJson.exports) {
               const exportsKey = `./${subpath}`;

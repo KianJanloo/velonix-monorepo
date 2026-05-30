@@ -9,9 +9,15 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { WinstonModule } from "nest-winston";
 import * as winston from "winston";
+import * as path from "path";
 
 import { DatabaseConfig } from "./config/database.config";
-import { appConfig, jwtConfig, stripeConfig, storageConfig } from "./config/app.config";
+import {
+  appConfig,
+  jwtConfig,
+  stripeConfig,
+  storageConfig,
+} from "./config/app.config";
 
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
@@ -23,10 +29,18 @@ import { PaymentsModule } from "./payments/payments.module";
 @Module({
   imports: [
     // ── Configuration ────────────────────────────────────────────────────
+
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, jwtConfig, stripeConfig, storageConfig],
-      envFilePath: [".env.local", ".env"],
+
+      envFilePath: [
+        path.resolve(process.cwd(), "../../.env.local"),
+        path.resolve(process.cwd(), "../../.env"),
+        ".env.local",
+        ".env",
+      ],
+
       cache: true,
       expandVariables: true,
     }),
@@ -37,9 +51,12 @@ import { PaymentsModule } from "./payments/payments.module";
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         winston.format.colorize(),
         winston.format.printf((info: winston.Logform.TransformableInfo) => {
-          const { timestamp, level, message, context } = info as Record<string, unknown>;
+          const { timestamp, level, message, context } = info as Record<
+            string,
+            unknown
+          >;
           return `${timestamp} [${(context as string) ?? "App"}] ${level}: ${message}`;
-        })
+        }),
       ),
       transports: [
         new winston.transports.Console(),

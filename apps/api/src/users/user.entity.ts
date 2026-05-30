@@ -131,7 +131,8 @@ export class UserEntity {
       bio: this.bio,
       subscriptionTier: this.subscriptionTier,
       totalSales: this.totalSales,
-      createdAt: this.createdAt.toISOString(),
+      createdAt: this.createdAt
+      // .toISOString(),
     };
   }
 }
