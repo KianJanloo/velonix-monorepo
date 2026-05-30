@@ -1,0 +1,230 @@
+/**
+ * Velonix Global Styles
+ * apps/web/src/styles/globals.css
+ */
+
+/* ── Import Velonix design tokens (CSS variables + base resets) ─────────── */
+@import "@velonix/design-tokens/css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Google Fonts — loaded via Next.js font optimization in layout.tsx ──── */
+/* Cinzel, Cinzel Decorative, Crimson Pro, DM Sans, JetBrains Mono          */
+
+/* ── ShadCN/Radix theming ───────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ── Component-level styles ─────────────────────────────────────────────── */
+@layer components {
+
+  /* ── Velonix Card ────────────────────────────────────────────────────── */
+  .v-card {
+    @apply
+      bg-rich-wood-dark
+      border border-warm-wood
+      rounded-xl
+      shadow-md
+      transition-all duration-200
+      wood-texture;
+  }
+  .v-card:hover {
+    @apply border-warm-wood-light shadow-lg;
+  }
+
+  /* ── Velonix Panel (studio sidebar) ─────────────────────────────────── */
+  .v-panel {
+    @apply
+      bg-rich-wood-dark
+      border-r border-warm-wood
+      wood-texture;
+  }
+
+  /* ── Primary Button ─────────────────────────────────────────────────── */
+  .v-btn-primary {
+    @apply
+      inline-flex items-center justify-center gap-2
+      bg-emerald-glow text-deep-void
+      font-ui font-semibold text-sm tracking-wide
+      px-5 py-2.5 rounded-lg
+      transition-all duration-200
+      shadow-sm
+      hover:bg-emerald-dark hover:shadow-emerald
+      active:scale-[0.98]
+      focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-emerald-glow focus-visible:ring-offset-2
+      focus-visible:ring-offset-deep-void
+      disabled:opacity-50 disabled:cursor-not-allowed
+      disabled:hover:bg-emerald-glow disabled:hover:shadow-sm;
+  }
+
+  /* ── Gold / Premium Button ──────────────────────────────────────────── */
+  .v-btn-gold {
+    @apply
+      inline-flex items-center justify-center gap-2
+      bg-royal-gold text-deep-void
+      font-ui font-semibold text-sm tracking-wide
+      px-5 py-2.5 rounded-lg
+      transition-all duration-200
+      shadow-sm
+      hover:bg-royal-gold-dark hover:shadow-gold
+      active:scale-[0.98]
+      focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-royal-gold focus-visible:ring-offset-2
+      focus-visible:ring-offset-deep-void;
+  }
+
+  /* ── Outline / Ghost Button ─────────────────────────────────────────── */
+  .v-btn-outline {
+    @apply
+      inline-flex items-center justify-center gap-2
+      bg-transparent text-parchment-light
+      border border-warm-wood-light
+      font-ui font-medium text-sm
+      px-5 py-2.5 rounded-lg
+      transition-all duration-200
+      hover:bg-warm-wood hover:border-soft-gray
+      active:scale-[0.98]
+      focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-emerald-glow focus-visible:ring-offset-2
+      focus-visible:ring-offset-deep-void;
+  }
+
+  /* ── Danger Button ──────────────────────────────────────────────────── */
+  .v-btn-danger {
+    @apply
+      inline-flex items-center justify-center gap-2
+      bg-crimson-flame text-white
+      font-ui font-semibold text-sm
+      px-5 py-2.5 rounded-lg
+      transition-all duration-200
+      hover:bg-crimson-dark hover:shadow-crimson
+      active:scale-[0.98];
+  }
+
+  /* ── Form Input ─────────────────────────────────────────────────────── */
+  .v-input {
+    @apply
+      w-full
+      bg-rich-wood-mid text-parchment-light
+      border border-warm-wood
+      rounded-lg px-3.5 py-2.5
+      text-sm font-ui
+      placeholder:text-soft-gray-dark
+      transition-all duration-150
+      focus:outline-none
+      focus:border-emerald-glow focus:ring-1 focus:ring-emerald-glow
+      focus:shadow-[0_0_0_3px_rgba(0,212,165,0.15)];
+  }
+
+  /* ── Studio Toolbar Button ──────────────────────────────────────────── */
+  .v-tool-btn {
+    @apply
+      w-9 h-9
+      flex items-center justify-center
+      text-soft-gray rounded-lg
+      transition-all duration-150
+      hover:text-parchment-light hover:bg-warm-wood
+      cursor-pointer;
+  }
+  .v-tool-btn.active {
+    @apply
+      text-emerald-glow bg-emerald-ghost
+      shadow-[inset_0_0_0_1px_rgba(0,212,165,0.3)];
+  }
+
+  /* ── Section Header (Cinzel) ────────────────────────────────────────── */
+  .v-section-title {
+    @apply
+      font-display
+      text-2xl font-bold
+      text-parchment-light
+      tracking-display;
+  }
+
+  /* ── Premium Badge ──────────────────────────────────────────────────── */
+  .v-badge-premium {
+    @apply
+      inline-flex items-center gap-1
+      bg-royal-gold-ghost text-royal-gold
+      border border-[rgba(245,196,81,0.3)]
+      text-2xs font-ui font-semibold tracking-widest uppercase
+      px-2 py-0.5 rounded-full
+      shadow-gold;
+  }
+
+  /* ── Status Badge ───────────────────────────────────────────────────── */
+  .v-badge-status {
+    @apply
+      inline-flex items-center gap-1.5
+      text-2xs font-ui font-semibold tracking-wide uppercase
+      px-2.5 py-1 rounded-full;
+  }
+
+  /* ── Marketplace Game Card ──────────────────────────────────────────── */
+  .v-game-card {
+    @apply
+      v-card
+      group cursor-pointer
+      overflow-hidden
+      flex flex-col;
+  }
+  .v-game-card:hover .v-game-card__image img {
+    @apply scale-105;
+  }
+
+  /* ── Stat Display ───────────────────────────────────────────────────── */
+  .v-stat {
+    @apply flex flex-col gap-0.5;
+  }
+  .v-stat__value {
+    @apply
+      font-display text-2xl font-bold
+      text-parchment-light tracking-tight;
+  }
+  .v-stat__label {
+    @apply
+      font-ui text-xs text-soft-gray
+      uppercase tracking-widest;
+  }
+
+  /* ── Sidebar Nav Item ───────────────────────────────────────────────── */
+  .v-nav-item {
+    @apply
+      flex items-center gap-3
+      px-3 py-2.5 rounded-lg
+      text-soft-gray font-ui text-sm font-medium
+      transition-all duration-150
+      hover:text-parchment-light hover:bg-warm-wood
+      cursor-pointer;
+  }
+  .v-nav-item.active {
+    @apply
+      text-emerald-glow
+      bg-emerald-ghost
+      shadow-[inset_0_0_0_1px_rgba(0,212,165,0.2)];
+  }
+
+  /* ── Three.js Canvas Container ──────────────────────────────────────── */
+  .v-canvas-container {
+    @apply
+      relative w-full h-full
+      bg-deep-void
+      rounded-xl overflow-hidden;
+    background-image: radial-gradient(
+      ellipse 120% 80% at 50% 110%,
+      rgba(58,42,31,0.4),
+      transparent
+    );
+  }
+}

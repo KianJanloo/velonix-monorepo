@@ -1,0 +1,263 @@
+/**
+ * Velonix CSS Custom Properties
+ * Generated from @velonix/design-tokens
+ *
+ * Import this file into your global CSS:
+ *   @import "@velonix/design-tokens/css";
+ */
+
+@layer base {
+  :root {
+    /* ── Background & Surface ───────────────────────────────────────────── */
+    --color-deep-void: #0a0a0a;
+    --color-void-elevated: #0f0b08;
+    --color-rich-wood-dark: #1c140f;
+    --color-rich-wood-mid: #241a12;
+    --color-warm-wood: #3a2a1f;
+    --color-warm-wood-light: #4a3728;
+    --color-felt-dark: #2e1f14;
+
+    /* ── Emerald Glow — Primary ─────────────────────────────────────────── */
+    --color-emerald-glow: #00d4a5;
+    --color-emerald-dark: #00b88e;
+    --color-emerald-bright: #00f0bc;
+    --color-emerald-ghost: rgba(0, 212, 165, 0.15);
+    --color-emerald-subtle: rgba(0, 212, 165, 0.08);
+
+    /* ── Royal Gold — Premium ───────────────────────────────────────────── */
+    --color-royal-gold: #f5c451;
+    --color-royal-gold-dark: #d4a93a;
+    --color-royal-gold-bright: #ffe080;
+    --color-royal-gold-ghost: rgba(245, 196, 81, 0.15);
+
+    /* ── Crimson Flame — Danger ─────────────────────────────────────────── */
+    --color-crimson-flame: #ff3b5c;
+    --color-crimson-dark: #e0243e;
+    --color-crimson-ghost: rgba(255, 59, 92, 0.15);
+
+    /* ── Cyan Spark — Interactive ───────────────────────────────────────── */
+    --color-cyan-spark: #00e5ff;
+    --color-cyan-dark: #00c4db;
+    --color-cyan-ghost: rgba(0, 229, 255, 0.12);
+
+    /* ── Typography ─────────────────────────────────────────────────────── */
+    --color-parchment-light: #e8d5b8;
+    --color-parchment-mid: #c4b49a;
+    --color-soft-gray: #a8a29e;
+    --color-soft-gray-dark: #6b6460;
+    --color-white: #ffffff;
+
+    /* ── ShadCN Semantic Aliases ────────────────────────────────────────── */
+    --background: 0 0% 4%;                  /* #0a0a0a */
+    --foreground: 35 38% 82%;               /* #e8d5b8 */
+    --card: 22 38% 9%;                      /* #1c140f */
+    --card-foreground: 35 38% 82%;
+    --popover: 22 38% 9%;
+    --popover-foreground: 35 38% 82%;
+    --primary: 164 100% 42%;                /* #00d4a5 */
+    --primary-foreground: 0 0% 4%;
+    --secondary: 22 38% 9%;
+    --secondary-foreground: 35 38% 82%;
+    --muted: 22 30% 18%;                    /* #3a2a1f */
+    --muted-foreground: 25 8% 64%;          /* #a8a29e */
+    --accent: 44 89% 71%;                   /* #f5c451 */
+    --accent-foreground: 0 0% 4%;
+    --destructive: 349 100% 61%;            /* #ff3b5c */
+    --destructive-foreground: 0 0% 100%;
+    --border: 22 30% 18%;                   /* #3a2a1f */
+    --input: 22 38% 12%;                    /* #241a12 */
+    --ring: 164 100% 42%;                   /* #00d4a5 */
+    --radius: 0.5rem;
+
+    /* ── Shadows ────────────────────────────────────────────────────────── */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow: 0 4px 12px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.4);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.7), 0 4px 8px rgba(0,0,0,0.5);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.8), 0 8px 16px rgba(0,0,0,0.6);
+    --shadow-xl: 0 24px 64px rgba(0,0,0,0.85), 0 12px 32px rgba(0,0,0,0.6);
+    --shadow-emerald: 0 0 20px rgba(0,212,165,0.35), 0 0 8px rgba(0,212,165,0.2);
+    --shadow-gold: 0 0 20px rgba(245,196,81,0.4), 0 0 8px rgba(245,196,81,0.2);
+    --shadow-crimson: 0 0 16px rgba(255,59,92,0.35), 0 0 6px rgba(255,59,92,0.2);
+    --shadow-cyan: 0 0 16px rgba(0,229,255,0.3), 0 0 6px rgba(0,229,255,0.15);
+
+    /* ── Typography ─────────────────────────────────────────────────────── */
+    --font-display: 'Cinzel', 'Trajan Pro', serif;
+    --font-decorative: 'Cinzel Decorative', serif;
+    --font-body: 'Crimson Pro', 'Palatino Linotype', Georgia, serif;
+    --font-ui: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* ── Studio Layout ──────────────────────────────────────────────────── */
+    --studio-panel-left: 280px;
+    --studio-panel-right: 300px;
+    --studio-toolbar-h: 52px;
+    --studio-statusbar-h: 28px;
+  }
+}
+
+/* ── Base resets and global styles ───────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    border-color: var(--color-warm-wood);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-deep-void);
+    color: var(--color-parchment-light);
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  /* Headings use the display serif */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
+    line-height: 1.15;
+    color: var(--color-parchment-light);
+  }
+
+  /* Scrollbar styling — subtle wood-toned */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-rich-wood-dark);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-warm-wood-light);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-soft-gray-dark);
+  }
+
+  /* Selection highlight */
+  ::selection {
+    background-color: var(--color-emerald-ghost);
+    color: var(--color-emerald-bright);
+  }
+
+  /* Focus visible ring */
+  :focus-visible {
+    outline: 2px solid var(--color-emerald-glow);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Utility classes not covered by Tailwind ─────────────────────────────── */
+@layer utilities {
+  .font-display { font-family: var(--font-display); }
+  .font-decorative { font-family: var(--font-decorative); }
+  .font-body { font-family: var(--font-body); }
+  .font-ui { font-family: var(--font-ui); }
+  .font-mono { font-family: var(--font-mono); }
+
+  /* Wood grain texture overlay — apply to panel backgrounds */
+  .wood-texture {
+    background-image:
+      repeating-linear-gradient(
+        92deg,
+        transparent 0px,
+        transparent 2px,
+        rgba(255,255,255,0.008) 2px,
+        rgba(255,255,255,0.008) 3px
+      ),
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 8px,
+        rgba(0,0,0,0.03) 8px,
+        rgba(0,0,0,0.03) 9px
+      );
+  }
+
+  /* Parchment texture overlay — rulebook areas */
+  .parchment-texture {
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* Glow effects */
+  .glow-emerald { box-shadow: var(--shadow-emerald); }
+  .glow-gold    { box-shadow: var(--shadow-gold); }
+  .glow-crimson { box-shadow: var(--shadow-crimson); }
+  .glow-cyan    { box-shadow: var(--shadow-cyan); }
+
+  /* Text glow */
+  .text-glow-emerald { text-shadow: 0 0 12px rgba(0,212,165,0.6); }
+  .text-glow-gold    { text-shadow: 0 0 12px rgba(245,196,81,0.6); }
+  .text-glow-crimson { text-shadow: 0 0 12px rgba(255,59,92,0.6); }
+  .text-glow-cyan    { text-shadow: 0 0 12px rgba(0,229,255,0.6); }
+
+  /* Gradient text */
+  .gradient-emerald-gold {
+    background: linear-gradient(135deg, var(--color-emerald-glow), var(--color-royal-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-gold-parchment {
+    background: linear-gradient(135deg, var(--color-royal-gold), var(--color-parchment-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Divider with ornament */
+  .divider-ornamental {
+    position: relative;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-warm-wood-light), transparent);
+  }
+
+  /* Premium badge shimmer */
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(245,196,81,0.15) 40%,
+      rgba(245,196,81,0.25) 50%,
+      rgba(245,196,81,0.15) 60%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite linear;
+  }
+
+  /* Pulse glow for live indicators */
+  @keyframes pulse-emerald {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,165,0.4); }
+    50%       { box-shadow: 0 0 0 6px rgba(0,212,165,0); }
+  }
+  .pulse-emerald { animation: pulse-emerald 2s ease-in-out infinite; }
+
+  /* Floating animation for decorative elements */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+  }
+  .animate-float { animation: float 4s ease-in-out infinite; }
+
+  /* Card flip keyframes */
+  @keyframes card-flip-in {
+    from { transform: rotateY(90deg); opacity: 0; }
+    to   { transform: rotateY(0deg); opacity: 1; }
+  }
+  .animate-card-flip { animation: card-flip-in 0.4s cubic-bezier(0.5,0,0.5,1) both; }
+}
