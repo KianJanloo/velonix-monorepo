@@ -11,7 +11,7 @@ import { calculateCommission } from "@velonix/game-engine";
 
 @Injectable()
 export class PaymentsService {
-  private readonly stripe: Stripe;
+  private _stripe?: Stripe;
   private readonly logger = new Logger(PaymentsService.name);
 
   constructor(
@@ -23,18 +23,15 @@ export class PaymentsService {
     private readonly userRepo: Repository<UserEntity>,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly config: ConfigService,
-  ) {
-    const secretKey = this.config.get<string>("stripe.secretKey");
+  ) {}
 
-    if (!secretKey) {
-      throw new Error(
-        "STRIPE_SECRET_KEY is missing. Check ConfigModule envFilePath.",
-      );
+  private get stripe(): Stripe {
+    if (!this._stripe) {
+      const key = this.config.get<string>("stripe.secretKey");
+      if (!key) throw new BadRequestException("Stripe is not configured. Set STRIPE_SECRET_KEY.");
+      this._stripe = new Stripe(key, { apiVersion: "2025-02-24.acacia" });
     }
-
-    this.stripe = new Stripe(secretKey, {
-      apiVersion: "2025-02-24.acacia",
-    });
+    return this._stripe;
   }
 
   /**

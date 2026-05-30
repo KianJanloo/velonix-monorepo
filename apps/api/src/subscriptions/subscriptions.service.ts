@@ -11,17 +11,22 @@ type BillingInterval = "monthly" | "yearly";
 
 @Injectable()
 export class SubscriptionsService {
-  private readonly stripe: Stripe;
+  private _stripe?: Stripe;
   private readonly logger = new Logger(SubscriptionsService.name);
 
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
     private readonly config: ConfigService
-  ) {
-    this.stripe = new Stripe(this.config.get<string>("stripe.secretKey") ?? "", {
-      apiVersion: "2025-02-24.acacia",
-    });
+  ) {}
+
+  private get stripe(): Stripe {
+    if (!this._stripe) {
+      const key = this.config.get<string>("stripe.secretKey");
+      if (!key) throw new BadRequestException("Stripe is not configured. Set STRIPE_SECRET_KEY.");
+      this._stripe = new Stripe(key, { apiVersion: "2025-02-24.acacia" });
+    }
+    return this._stripe;
   }
 
   /** Returns all tier details for the pricing page */

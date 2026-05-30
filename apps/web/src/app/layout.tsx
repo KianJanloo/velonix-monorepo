@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Cinzel_Decorative, Crimson_Pro, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/templates/Providers";
+import { MainShell } from "@/components/templates/MainShell";
 import "@/styles/globals.css";
 
 // ── Font definitions (Next.js font optimization) ─────────────────────────────
@@ -10,6 +11,8 @@ const cinzel = Cinzel({
   variable: "--font-display",
   display: "swap",
   weight: ["400", "500", "600", "700", "800", "900"],
+  fallback: ["Georgia", "Times New Roman", "serif"],
+  preload: false,
 });
 
 const cinzelDecorative = Cinzel_Decorative({
@@ -17,21 +20,27 @@ const cinzelDecorative = Cinzel_Decorative({
   variable: "--font-decorative",
   display: "swap",
   weight: ["400", "700", "900"],
+  fallback: ["Georgia", "serif"],
+  preload: false,
 });
 
 const crimsonPro = Crimson_Pro({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "600", "700"],
   style: ["normal", "italic"],
+  fallback: ["Georgia", "Times New Roman", "serif"],
+  preload: false,
 });
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-ui",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
+  fallback: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+  preload: false,
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -39,6 +48,8 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   display: "swap",
   weight: ["400", "500", "600", "700"],
+  fallback: ["Courier New", "Consolas", "monospace"],
+  preload: false,
 });
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
@@ -126,7 +137,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     >
       <body className="bg-deep-void text-parchment-light font-ui antialiased">
         <Providers>
-          {children}
+          <MainShell>{children}</MainShell>
         </Providers>
       </body>
     </html>
