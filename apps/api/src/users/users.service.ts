@@ -24,7 +24,12 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
-    await this.userRepo.update(userId, dto);
+    const patch: Record<string, unknown> = {};
+    if (dto.displayName !== undefined) patch["displayName"] = dto.displayName;
+    if (dto.bio !== undefined) patch["bio"] = dto.bio;
+    if (Object.keys(patch).length > 0) {
+      await this.userRepo.update(userId, patch);
+    }
     return this.findById(userId);
   }
 

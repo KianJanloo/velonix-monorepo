@@ -4,6 +4,8 @@
  * Uses native fetch — no extra runtime dependency.
  */
 
+import { getAccessToken } from "@/stores/authStore";
+
 const API_BASE =
   typeof window === "undefined"
     ? (process.env["API_URL"] ?? "http://localhost:3001/api/v1")
@@ -45,12 +47,16 @@ async function request<T>(
     }
   }
 
+  const token = typeof window !== "undefined" ? getAccessToken() : null; // getAccessToken reads localStorage — server returns null
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
   const res = await fetch(url.toString(), {
     method,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...authHeader,
       ...headers,
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
@@ -73,7 +79,18 @@ async function request<T>(
 
   if (res.status === 204) return undefined as unknown as T;
 
-  return res.json() as Promise<T>;
+  const json = await res.json() as unknown;
+  // Unwrap the { success: true, data: T } envelope added by ResponseWrapInterceptor
+  if (
+    json !== null &&
+    typeof json === "object" &&
+    "success" in (json as object) &&
+    (json as Record<string, unknown>)["success"] === true &&
+    "data" in (json as object)
+  ) {
+    return (json as Record<string, unknown>)["data"] as T;
+  }
+  return json as T;
 }
 
 export const apiClient = {

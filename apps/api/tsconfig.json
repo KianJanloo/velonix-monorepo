@@ -14,12 +14,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "paths": {
-      "@velonix/types": ["../../packages/types/src/index.ts"],
-      "@velonix/game-engine": ["../../packages/game-engine/src/index.ts"]
-    }
+    "preserveSymlinks": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

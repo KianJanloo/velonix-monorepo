@@ -10,16 +10,23 @@
 
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { config } from "dotenv";
 import { join } from "path";
 
-// Load .env.local in development
-config({ path: join(__dirname, "../../.env.local") });
-config({ path: join(__dirname, "../../.env") });
+// Load .env for CLI migrations (dotenv is optional at runtime)
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const dotenv = require("dotenv") as { config: (opts: { path: string }) => void };
+  dotenv.config({ path: join(__dirname, "../../.env.local") });
+  dotenv.config({ path: join(__dirname, "../../.env") });
+} catch {
+  // dotenv not available — rely on process.env being pre-populated
+}
+
+const databaseUrl = process.env["DATABASE_URL"];
 
 export const AppDataSource = new DataSource({
   type: "postgres",
-  url: process.env["DATABASE_URL"],
+  ...(databaseUrl ? { url: databaseUrl } : {}),
   host: process.env["DB_HOST"] ?? "localhost",
   port: parseInt(process.env["DB_PORT"] ?? "5432", 10),
   username: process.env["DB_USER"] ?? "velonix",

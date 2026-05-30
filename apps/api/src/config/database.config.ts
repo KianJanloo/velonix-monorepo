@@ -15,17 +15,18 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
   createTypeOrmOptions(): TypeOrmModuleOptions {
     const isProduction = this.configService.get("app.nodeEnv") === "production";
 
+    const databaseUrl = this.configService.get<string>("DATABASE_URL");
+
     return {
       type: "postgres",
 
-      // Connection — prefer DATABASE_URL in production, individual vars in dev
-      url: this.configService.get<string>("DATABASE_URL"),
+      // Prefer DATABASE_URL (production), otherwise use individual vars (dev)
+      ...(databaseUrl ? { url: databaseUrl } : {}),
       host: this.configService.get<string>("DB_HOST") ?? "localhost",
       port: this.configService.get<number>("DB_PORT") ?? 5432,
-      username: this.configService.get<string>("DB_USER") ?? "velonix",
-      password: this.configService.get<string>("DB_PASS") ?? "velonix_dev",
-      database: this.configService.get<string>("DB_NAME") ?? "velonix",
-      schema: 'velonix',
+      username: this.configService.get<string>("DB_USER") ?? "postgres",
+      password: this.configService.get<string>("DB_PASS") ?? "1388ki8831",
+      database: this.configService.get<string>("DB_NAME") ?? "postgres",
 
       // SSL in production
       ssl: isProduction

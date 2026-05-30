@@ -49,7 +49,7 @@ export class GameEntity {
   @Column({ name: "short_description", length: 160 })
   shortDescription!: string;
 
-  @Column({ name: "thumbnail_url", length: 512, nullable: true })
+  @Column({ name: "thumbnail_url", type: "varchar", length: 512, nullable: true })
   thumbnailUrl!: string | null;
 
   @Column({ name: "preview_images", type: "jsonb", default: [] })
@@ -147,6 +147,7 @@ export class GameEntity {
     return {
       id: this.id,
       creatorId: this.creatorId,
+      creatorUsername: this.creator?.username ?? "",
       title: this.title,
       shortDescription: this.shortDescription,
       thumbnailUrl: this.thumbnailUrl,

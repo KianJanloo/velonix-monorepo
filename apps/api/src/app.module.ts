@@ -11,10 +11,7 @@ import { WinstonModule } from "nest-winston";
 import * as winston from "winston";
 
 import { DatabaseConfig } from "./config/database.config";
-import { appConfig } from "./config/app.config";
-import { jwtConfig } from "./config/jwt.config";
-import { stripeConfig } from "./config/stripe.config";
-import { storageConfig } from "./config/storage.config";
+import { appConfig, jwtConfig, stripeConfig, storageConfig } from "./config/app.config";
 
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
@@ -36,27 +33,25 @@ import { PaymentsModule } from "./payments/payments.module";
 
     // ── Logging ──────────────────────────────────────────────────────────
     WinstonModule.forRoot({
+      format: winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.colorize(),
+        winston.format.printf((info: winston.Logform.TransformableInfo) => {
+          const { timestamp, level, message, context } = info as Record<string, unknown>;
+          return `${timestamp} [${(context as string) ?? "App"}] ${level}: ${message}`;
+        })
+      ),
       transports: [
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-            winston.format.colorize(),
-            winston.format.printf(({ timestamp, level, message, context }) =>
-              `${timestamp} [${context ?? "App"}] ${level}: ${message}`
-            )
-          ),
-        }),
+        new winston.transports.Console(),
         // Production: add file transport or CloudWatch transport
         ...(process.env["NODE_ENV"] === "production"
           ? [
               new winston.transports.File({
                 filename: "logs/error.log",
-                level: "error",
-                format: winston.format.json(),
+                // level: "error",
               }),
               new winston.transports.File({
                 filename: "logs/combined.log",
-                format: winston.format.json(),
               }),
             ]
           : []),

@@ -30,7 +30,7 @@ export class ReviewEntity {
   @Column({ type: "smallint" })
   rating!: 1 | 2 | 3 | 4 | 5;
 
-  @Column({ length: 120, nullable: true })
+  @Column({ type: "varchar", length: 120, nullable: true })
   title!: string | null;
 
   @Column({ type: "text", nullable: true })

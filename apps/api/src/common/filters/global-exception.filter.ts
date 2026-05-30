@@ -2,7 +2,14 @@ import {
   ExceptionFilter, Catch, ArgumentsHost,
   HttpException, HttpStatus, Logger
 } from "@nestjs/common";
-import type { Request, Response } from "express";
+// Minimal shape to avoid @types/express v5 compatibility issues with NestJS
+interface HttpResponse {
+  status(code: number): this;
+  json(body: unknown): this;
+}
+interface HttpRequest {
+  url: string;
+}
 
 /**
  * Global HTTP exception filter.
@@ -15,8 +22,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const response = ctx.getResponse<HttpResponse>();
+    const request = ctx.getRequest<HttpRequest>();
 
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let code = "INTERNAL_ERROR";

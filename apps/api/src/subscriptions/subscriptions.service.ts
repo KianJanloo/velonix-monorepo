@@ -20,7 +20,7 @@ export class SubscriptionsService {
     private readonly config: ConfigService
   ) {
     this.stripe = new Stripe(this.config.get<string>("stripe.secretKey") ?? "", {
-      apiVersion: "2024-12-18.acacia",
+      apiVersion: "2025-02-24.acacia",
     });
   }
 
@@ -60,10 +60,6 @@ export class SubscriptionsService {
     tier: Exclude<SubscriptionTier, "free">,
     interval: BillingInterval
   ) {
-    if (tier === "free") {
-      throw new BadRequestException("Cannot create checkout for free tier.");
-    }
-
     const customer = await this.getOrCreateCustomer(userId);
     const priceKey = `stripe.prices.${tier}${interval === "monthly" ? "Monthly" : "Yearly"}`;
     const priceId = this.config.get<string>(priceKey);

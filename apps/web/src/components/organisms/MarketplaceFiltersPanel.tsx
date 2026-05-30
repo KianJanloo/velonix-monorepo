@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 
 const CATEGORIES = [
   { value: "", label: "All Categories" },
@@ -20,9 +21,35 @@ interface MarketplaceFiltersPanelProps {
 }
 
 export function MarketplaceFiltersPanel({ initialCategory = "" }: MarketplaceFiltersPanelProps) {
-  const [category, setCategory] = useState(initialCategory);
-  const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all");
-  const [complexity, setComplexity] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const category = searchParams.get("category") ?? initialCategory;
+  const price = searchParams.get("price") ?? "all";
+  const complexity = searchParams.get("complexity") ?? "";
+
+  const updateParam = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+      params.delete("page");
+      router.push(`?${params.toString()}`);
+    },
+    [router, searchParams]
+  );
+
+  const clearAll = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("category");
+    params.delete("price");
+    params.delete("complexity");
+    params.delete("page");
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <aside className="flex flex-col gap-6">
@@ -35,7 +62,7 @@ export function MarketplaceFiltersPanel({ initialCategory = "" }: MarketplaceFil
           {CATEGORIES.map(({ value, label }) => (
             <button
               key={value}
-              onClick={() => setCategory(value)}
+              onClick={() => updateParam("category", value)}
               className={`text-left px-3 py-2 rounded-lg text-sm font-ui transition-all duration-100 ${
                 category === value
                   ? "text-emerald-glow bg-emerald-ghost"
@@ -57,9 +84,9 @@ export function MarketplaceFiltersPanel({ initialCategory = "" }: MarketplaceFil
           {(["all", "free", "paid"] as const).map((v) => (
             <button
               key={v}
-              onClick={() => setPriceFilter(v)}
+              onClick={() => updateParam("price", v === "all" ? "" : v)}
               className={`text-left px-3 py-2 rounded-lg text-sm font-ui capitalize transition-all duration-100 ${
-                priceFilter === v
+                price === v || (v === "all" && !price)
                   ? "text-emerald-glow bg-emerald-ghost"
                   : "text-soft-gray hover:text-parchment-light hover:bg-warm-wood"
               }`}
@@ -79,7 +106,7 @@ export function MarketplaceFiltersPanel({ initialCategory = "" }: MarketplaceFil
           {["", "light", "medium", "medium_heavy", "heavy"].map((v) => (
             <button
               key={v}
-              onClick={() => setComplexity(v)}
+              onClick={() => updateParam("complexity", v)}
               className={`text-left px-3 py-2 rounded-lg text-sm font-ui capitalize transition-all duration-100 ${
                 complexity === v
                   ? "text-emerald-glow bg-emerald-ghost"
@@ -94,7 +121,7 @@ export function MarketplaceFiltersPanel({ initialCategory = "" }: MarketplaceFil
 
       {/* Reset */}
       <button
-        onClick={() => { setCategory(""); setPriceFilter("all"); setComplexity(""); }}
+        onClick={clearAll}
         className="text-soft-gray-dark text-xs font-ui hover:text-soft-gray transition-colors text-left px-3"
       >
         Clear all filters

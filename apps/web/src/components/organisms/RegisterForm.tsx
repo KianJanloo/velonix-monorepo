@@ -5,8 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
 import { RegisterSchema, type RegisterDto } from "@velonix/game-engine";
+import { useRegister } from "@/hooks/useAuth";
 
 export function RegisterForm() {
+  const register_ = useRegister();
   const {
     register,
     handleSubmit,
@@ -15,13 +17,8 @@ export function RegisterForm() {
     resolver: zodResolver(RegisterSchema),
   });
 
-  async function onSubmit(data: RegisterDto) {
-    console.log("Register:", data);
-    await new Promise((r) => setTimeout(r, 800));
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit((data) => register_.mutate(data))} noValidate className="flex flex-col gap-4">
       <Input
         {...register("displayName")}
         label="Display Name"
@@ -56,7 +53,7 @@ export function RegisterForm() {
         error={!!errors.password}
         errorMessage={errors.password?.message}
       />
-      <Button type="submit" variant="primary" isLoading={isSubmitting} className="w-full mt-2">
+      <Button type="submit" variant="primary" isLoading={isSubmitting || register_.isPending} className="w-full mt-2">
         Create Account — Free
       </Button>
       <p className="text-2xs text-soft-gray-dark font-ui text-center">

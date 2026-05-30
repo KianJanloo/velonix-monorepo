@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
-import type { Game, GameSummary, PaginatedResponse } from "@velonix/types";
+import type { GameRecord } from "@/types/game";
+import type { GameSummary, PaginatedResponse } from "@velonix/types";
 import type { CreateGameDto, UpdateGameDto, MarketplaceFiltersDto } from "@velonix/game-engine";
 
 // ── Query Keys ────────────────────────────────────────────────────────────────
@@ -19,7 +20,7 @@ export const gameKeys = {
 export function useMyGames() {
   return useQuery({
     queryKey: gameKeys.myGames(),
-    queryFn: () => apiClient.get<Game[]>("/games/mine"),
+    queryFn: () => apiClient.get<GameRecord[]>("/games/mine"),
   });
 }
 
@@ -27,8 +28,9 @@ export function useMyGames() {
 export function useMarketplace(filters: Partial<MarketplaceFiltersDto> = {}) {
   return useQuery({
     queryKey: gameKeys.list(filters),
-    queryFn: () => apiClient.get<PaginatedResponse<GameSummary>>("/marketplace", { params: filters }),
-    staleTime: 2 * 60 * 1000, // 2 min — marketplace is relatively stable
+    queryFn: () =>
+      apiClient.get<PaginatedResponse<GameSummary>>("/marketplace", { params: filters as Record<string, string | number | boolean | string[] | undefined | null> }),
+    staleTime: 2 * 60 * 1000,
   });
 }
 
@@ -36,7 +38,7 @@ export function useMarketplace(filters: Partial<MarketplaceFiltersDto> = {}) {
 export function useGame(gameId: string) {
   return useQuery({
     queryKey: gameKeys.detail(gameId),
-    queryFn: () => apiClient.get<Game>(`/games/${gameId}`),
+    queryFn: () => apiClient.get<GameRecord>(`/games/${gameId}`),
     enabled: !!gameId,
   });
 }
@@ -45,7 +47,7 @@ export function useGame(gameId: string) {
 export function useCreateGame() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (dto: CreateGameDto) => apiClient.post<Game>("/games", dto),
+    mutationFn: (dto: CreateGameDto) => apiClient.post<GameRecord>("/games", dto),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: gameKeys.myGames() });
     },
@@ -56,7 +58,7 @@ export function useCreateGame() {
 export function useUpdateGame(gameId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (dto: UpdateGameDto) => apiClient.patch<Game>(`/games/${gameId}`, dto),
+    mutationFn: (dto: UpdateGameDto) => apiClient.patch<GameRecord>(`/games/${gameId}`, dto),
     onSuccess: (updated) => {
       qc.setQueryData(gameKeys.detail(gameId), updated);
       void qc.invalidateQueries({ queryKey: gameKeys.myGames() });
@@ -64,11 +66,11 @@ export function useUpdateGame(gameId: string) {
   });
 }
 
-/** Publish a game to the marketplace */
+/** Submit a game for marketplace review */
 export function usePublishGame(gameId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => apiClient.post<Game>(`/games/${gameId}/publish`),
+    mutationFn: () => apiClient.post<GameRecord>(`/games/${gameId}/publish`),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: gameKeys.detail(gameId) });
       void qc.invalidateQueries({ queryKey: gameKeys.myGames() });

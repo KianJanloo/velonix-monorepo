@@ -5,8 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
 import { LoginSchema, type LoginDto } from "@velonix/game-engine";
+import { useLogin } from "@/hooks/useAuth";
 
 export function LoginForm() {
+  const login = useLogin();
   const {
     register,
     handleSubmit,
@@ -16,14 +18,8 @@ export function LoginForm() {
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 
-  async function onSubmit(data: LoginDto) {
-    // TODO: call auth API
-    console.log("Login:", data);
-    await new Promise((r) => setTimeout(r, 800));
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit((data) => login.mutate(data))} noValidate className="flex flex-col gap-4">
       <Input
         {...register("email")}
         label="Email"
@@ -57,7 +53,7 @@ export function LoginForm() {
         </a>
       </div>
 
-      <Button type="submit" variant="primary" isLoading={isSubmitting} className="w-full mt-2">
+      <Button type="submit" variant="primary" isLoading={isSubmitting || login.isPending} className="w-full mt-2">
         Sign In
       </Button>
     </form>

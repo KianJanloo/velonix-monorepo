@@ -95,7 +95,10 @@ export class MarketplaceService {
     });
 
     const review = this.reviewRepo.create({
-      ...dto,
+      gameId: dto.gameId,
+      title: dto.title,
+      body: dto.body,
+      rating: dto.rating as 1 | 2 | 3 | 4 | 5,
       authorId,
       isVerifiedPurchase: !!isVerified,
     });

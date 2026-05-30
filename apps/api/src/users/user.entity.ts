@@ -37,7 +37,7 @@ export class UserEntity {
   @Column({ name: "password_hash", select: false })
   passwordHash!: string;
 
-  @Column({ name: "avatar_url", length: 512, nullable: true })
+  @Column({ name: "avatar_url", type: "varchar", length: 512, nullable: true })
   avatarUrl!: string | null;
 
   @Column({ type: "text", nullable: true })
@@ -56,25 +56,25 @@ export class UserEntity {
   @Column({ name: "subscription_expires_at", type: "timestamptz", nullable: true })
   subscriptionExpiresAt!: Date | null;
 
-  @Column({ name: "stripe_customer_id", length: 64, nullable: true })
+  @Column({ name: "stripe_customer_id", type: "varchar", length: 64, nullable: true })
   stripeCustomerId!: string | null;
 
-  @Column({ name: "stripe_connect_account_id", length: 64, nullable: true })
+  @Column({ name: "stripe_connect_account_id", type: "varchar", length: 64, nullable: true })
   stripeConnectAccountId!: string | null;
 
   @Column({ name: "is_email_verified", default: false })
   isEmailVerified!: boolean;
 
-  @Column({ name: "email_verification_token", length: 128, nullable: true, select: false })
+  @Column({ name: "email_verification_token", type: "varchar", length: 128, nullable: true, select: false })
   emailVerificationToken!: string | null;
 
-  @Column({ name: "password_reset_token", length: 128, nullable: true, select: false })
+  @Column({ name: "password_reset_token", type: "varchar", length: 128, nullable: true, select: false })
   passwordResetToken!: string | null;
 
   @Column({ name: "password_reset_expires_at", type: "timestamptz", nullable: true, select: false })
   passwordResetExpiresAt!: Date | null;
 
-  @Column({ name: "refresh_token_hash", length: 255, nullable: true, select: false })
+  @Column({ name: "refresh_token_hash", type: "varchar", length: 255, nullable: true, select: false })
   refreshTokenHash!: string | null;
 
   /** Total earnings in cents (USD) */
