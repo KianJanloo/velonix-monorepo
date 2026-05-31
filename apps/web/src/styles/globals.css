@@ -13,6 +13,39 @@
 /* ── Google Fonts — loaded via Next.js font optimization in layout.tsx ──── */
 /* Cinzel, Cinzel Decorative, Crimson Pro, DM Sans, JetBrains Mono          */
 
+/* ── Theme color channels (RGB triplets consumed by tailwind.config) ────── */
+:root,
+:root.dark,
+[data-theme="dark"] {
+  --c-deep-void:        10 10 10;
+  --c-void-elevated:    15 11 8;
+  --c-rich-wood-dark:   28 20 15;
+  --c-rich-wood-mid:    36 26 18;
+  --c-warm-wood:        58 42 31;
+  --c-warm-wood-light:  74 55 40;
+  --c-felt-dark:        46 31 20;
+  --c-parchment-light:  232 213 184;
+  --c-parchment-mid:    196 180 154;
+  --c-soft-gray:        168 162 158;
+  --c-soft-gray-dark:   107 100 96;
+}
+
+/* Light theme — warm parchment surfaces, dark ink text */
+:root.light,
+[data-theme="light"] {
+  --c-deep-void:        245 241 232;
+  --c-void-elevated:    250 247 240;
+  --c-rich-wood-dark:   255 255 255;
+  --c-rich-wood-mid:    248 244 236;
+  --c-warm-wood:        222 213 197;
+  --c-warm-wood-light:  200 188 168;
+  --c-felt-dark:        236 230 219;
+  --c-parchment-light:  38 30 22;
+  --c-parchment-mid:    74 60 46;
+  --c-soft-gray:        110 100 90;
+  --c-soft-gray-dark:   150 140 128;
+}
+
 /* ── ShadCN/Radix theming ───────────────────────────────────────────────── */
 @layer base {
   * {
@@ -20,7 +53,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-deep-void text-parchment-light;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -124,7 +157,7 @@
       transition-all duration-150
       focus:outline-none
       focus:border-emerald-glow focus:ring-1 focus:ring-emerald-glow
-      focus:shadow-[0_0_0_3px_rgba(0,212,165,0.15)];
+      focus:shadow-[0_0_0_3px_rgba(124,92,255,0.15)];
   }
 
   /* ── Studio Toolbar Button ──────────────────────────────────────────── */
@@ -140,7 +173,7 @@
   .v-tool-btn.active {
     @apply
       text-emerald-glow bg-emerald-ghost
-      shadow-[inset_0_0_0_1px_rgba(0,212,165,0.3)];
+      shadow-[inset_0_0_0_1px_rgba(124,92,255,0.3)];
   }
 
   /* ── Section Header (Cinzel) ────────────────────────────────────────── */
@@ -212,7 +245,7 @@
     @apply
       text-emerald-glow
       bg-emerald-ghost
-      shadow-[inset_0_0_0_1px_rgba(0,212,165,0.2)];
+      shadow-[inset_0_0_0_1px_rgba(124,92,255,0.2)];
   }
 
   /* ── Three.js Canvas Container ──────────────────────────────────────── */

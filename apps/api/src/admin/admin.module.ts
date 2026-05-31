@@ -4,9 +4,10 @@ import { AdminController } from "./admin.controller";
 import { AdminService } from "./admin.service";
 import { UserEntity } from "../users/user.entity";
 import { GameEntity } from "../games/game.entity";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, GameEntity])],
+  imports: [TypeOrmModule.forFeature([UserEntity, GameEntity]), NotificationsModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

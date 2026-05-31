@@ -14,7 +14,7 @@ interface StatBlockProps {
 const accentStyles: Record<AccentColor, { bar: string; value: string }> = {
   emerald: {
     bar: "bg-emerald-glow shadow-emerald",
-    value: "text-emerald-glow [text-shadow:0_0_14px_rgba(0,212,165,0.35)]",
+    value: "text-emerald-glow [text-shadow:0_0_14px_rgba(124,92,255,0.35)]",
   },
   gold: {
     bar: "bg-royal-gold shadow-gold",

@@ -9,8 +9,12 @@ import type { LoginDto, RegisterDto } from "@velonix/game-engine";
 
 interface AuthResponse {
   accessToken: string;
+  refreshToken: string;
   user: AuthUser;
 }
+
+const API_ROOT =
+  (process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001") + "/api/v1";
 
 export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -19,14 +23,12 @@ export function useLogin() {
   return useMutation({
     mutationFn: (dto: LoginDto) =>
       apiClient.post<AuthResponse>("/auth/login", dto),
-    onSuccess: ({ accessToken, user }) => {
-      setAuth(user, accessToken);
+    onSuccess: ({ accessToken, refreshToken, user }) => {
+      setAuth(user, accessToken, refreshToken);
       router.push("/dashboard");
     },
     onError: (err) => {
-      const message =
-        err instanceof ApiError ? err.message : "Something went wrong. Try again.";
-      toast.error(message);
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
     },
   });
 }
@@ -38,14 +40,12 @@ export function useRegister() {
   return useMutation({
     mutationFn: (dto: RegisterDto) =>
       apiClient.post<AuthResponse>("/auth/register", dto),
-    onSuccess: ({ accessToken, user }) => {
-      setAuth(user, accessToken);
+    onSuccess: ({ accessToken, refreshToken, user }) => {
+      setAuth(user, accessToken, refreshToken);
       router.push("/dashboard");
     },
     onError: (err) => {
-      const message =
-        err instanceof ApiError ? err.message : "Something went wrong. Try again.";
-      toast.error(message);
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
     },
   });
 }
@@ -56,10 +56,17 @@ export function useLogout() {
   const router = useRouter();
 
   return () => {
+    // Best-effort server-side revoke; ignore errors
+    void apiClient.post("/auth/logout").catch(() => {});
     clearAuth();
     qc.clear();
     router.push("/");
   };
+}
+
+/** Redirect the browser to the API's Google OAuth entry point. */
+export function loginWithGoogle() {
+  window.location.href = `${API_ROOT}/auth/google`;
 }
 
 export function useCurrentUser() {

@@ -6,6 +6,7 @@ import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
 import { LoginSchema, type LoginDto } from "@velonix/game-engine";
 import { useLogin } from "@/hooks/useAuth";
+import { GoogleButton } from "@/components/molecules/GoogleButton";
 
 export function LoginForm() {
   const login = useLogin();
@@ -56,6 +57,8 @@ export function LoginForm() {
       <Button type="submit" variant="primary" isLoading={isSubmitting || login.isPending} className="w-full mt-2">
         Sign In
       </Button>
+
+      <GoogleButton label="Sign in with Google" />
     </form>
   );
 }

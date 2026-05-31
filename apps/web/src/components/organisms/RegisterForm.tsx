@@ -6,6 +6,7 @@ import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
 import { RegisterSchema, type RegisterDto } from "@velonix/game-engine";
 import { useRegister } from "@/hooks/useAuth";
+import { GoogleButton } from "@/components/molecules/GoogleButton";
 
 export function RegisterForm() {
   const register_ = useRegister();
@@ -56,6 +57,7 @@ export function RegisterForm() {
       <Button type="submit" variant="primary" isLoading={isSubmitting || register_.isPending} className="w-full mt-2">
         Create Account — Free
       </Button>
+      <GoogleButton label="Sign up with Google" />
       <p className="text-2xs text-soft-gray-dark font-ui text-center">
         By creating an account you agree to our Terms of Service and Privacy Policy.
       </p>

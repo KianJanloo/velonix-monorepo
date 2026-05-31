@@ -64,7 +64,7 @@ velonix/                          # Turborepo monorepo root
 | Deep Void Black | `#0a0a0a` | Main background |
 | Rich Wood Dark | `#1c140f` | Panels, cards, sidebars |
 | Warm Wood | `#3a2a1f` | Borders, dividers |
-| Emerald Glow | `#00d4a5` | Primary buttons, create actions |
+| Emerald Glow | `#7c5cff` | Primary buttons, create actions |
 | Royal Gold | `#f5c451` | Premium elements, earnings |
 | Crimson Flame | `#ff3b5c` | Warnings, delete, danger |
 | Cyan Spark | `#00e5ff` | Hover states, interactive |

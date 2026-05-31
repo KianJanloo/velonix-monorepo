@@ -30,6 +30,7 @@ export class UsersService {
     const patch: Record<string, unknown> = {};
     if (dto.displayName !== undefined) patch["displayName"] = dto.displayName;
     if (dto.bio !== undefined) patch["bio"] = dto.bio;
+    if (dto.avatarUrl !== undefined) patch["avatarUrl"] = dto.avatarUrl || null;
     if (Object.keys(patch).length > 0) {
       await this.userRepo.update(userId, patch);
     }

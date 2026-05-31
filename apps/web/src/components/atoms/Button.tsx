@@ -16,7 +16,7 @@ const buttonVariants = cva(
         outline:
           "bg-transparent text-parchment-light border border-warm-wood-light hover:bg-warm-wood hover:border-soft-gray focus-visible:ring-emerald-glow",
         ghost:
-          "bg-emerald-ghost text-emerald-glow border border-[rgba(0,212,165,0.22)] hover:bg-[rgba(0,212,165,0.15)] focus-visible:ring-emerald-glow",
+          "bg-emerald-ghost text-emerald-glow border border-[rgba(124,92,255,0.22)] hover:bg-[rgba(124,92,255,0.15)] focus-visible:ring-emerald-glow",
         danger:
           "bg-crimson-flame text-white hover:bg-crimson-dark hover:shadow-crimson focus-visible:ring-crimson-flame",
         subtle:

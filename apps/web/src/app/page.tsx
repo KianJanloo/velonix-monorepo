@@ -81,7 +81,7 @@ function Hero() {
       >
         <Link
           href="/auth/register"
-          className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_24px_rgba(0,212,165,0.35)]"
+          className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_24px_rgba(124,92,255,0.35)]"
         >
           Start Creating — Free
         </Link>
@@ -338,7 +338,7 @@ function CTABanner() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/auth/register"
-            className="inline-flex items-center justify-center px-10 py-4 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_32px_rgba(0,212,165,0.3)]"
+            className="inline-flex items-center justify-center px-10 py-4 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_32px_rgba(124,92,255,0.3)]"
           >
             Create Free Account
           </Link>

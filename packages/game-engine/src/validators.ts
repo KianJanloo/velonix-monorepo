@@ -179,6 +179,7 @@ export const LoginSchema = z.object({
 export const UpdateProfileSchema = z.object({
   displayName: z.string().min(2).max(64).trim().optional(),
   bio: z.string().max(500).trim().nullable().optional(),
+  avatarUrl: z.string().url("Must be a valid URL").max(512).nullable().optional().or(z.literal("")),
 });
 
 // ---------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import { PurchaseEntity } from "./purchase.entity";
 import { calculateCommission } from "@velonix/game-engine";
 import type { MarketplaceFiltersDto, CreateReviewDto } from "@velonix/game-engine";
 import type { SubscriptionTier } from "@velonix/types";
+import { NotificationsService } from "../notifications/notifications.service";
 
 @Injectable()
 export class MarketplaceService {
@@ -18,7 +19,8 @@ export class MarketplaceService {
     @InjectRepository(ReviewEntity)
     private readonly reviewRepo: Repository<ReviewEntity>,
     @InjectRepository(PurchaseEntity)
-    private readonly purchaseRepo: Repository<PurchaseEntity>
+    private readonly purchaseRepo: Repository<PurchaseEntity>,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // ── Listings ───────────────────────────────────────────────────────────────
@@ -107,6 +109,18 @@ export class MarketplaceService {
 
     // Recalculate game rating
     await this.recalculateRating(dto.gameId);
+
+    // Notify the game's creator about the new review
+    const game = await this.gameRepo.findOne({ where: { id: dto.gameId } });
+    if (game && game.creatorId !== authorId) {
+      await this.notifications.create({
+        userId: game.creatorId,
+        type: "new_review",
+        title: `New ${dto.rating}★ review on "${game.title}"`,
+        body: dto.title || dto.body || "A player left a review on your game.",
+        linkUrl: `/marketplace/${game.id}`,
+      });
+    }
     return saved;
   }
 

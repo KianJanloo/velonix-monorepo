@@ -11,12 +11,15 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useUpdateProfile } from "@/hooks/useProfile";
 import { useSubscriptionPortal } from "@/hooks/useSubscriptions";
+import { useTheme } from "next-themes";
+import { useEffect } from "react";
 import { UpdateProfileSchema, type UpdateProfileDto } from "@velonix/game-engine";
 
-type Tab = "profile" | "billing" | "notifications" | "danger";
+type Tab = "profile" | "appearance" | "billing" | "notifications" | "danger";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "profile", label: "Profile" },
+  { id: "appearance", label: "Appearance" },
   { id: "billing", label: "Billing & Subscription" },
   { id: "notifications", label: "Notifications" },
   { id: "danger", label: "Danger Zone" },
@@ -36,53 +39,88 @@ function ProfileTab() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isDirty, isSubmitting },
   } = useForm<UpdateProfileDto>({
     resolver: zodResolver(UpdateProfileSchema),
     defaultValues: {
       displayName: user?.displayName ?? "",
       bio: user?.bio ?? "",
+      avatarUrl: user?.avatarUrl ?? "",
     },
   });
 
+  const avatarUrl = watch("avatarUrl");
+  const displayName = watch("displayName");
+
   return (
-    <form
-      onSubmit={handleSubmit((data) => updateProfile.mutate(data))}
-      className="v-card p-6 flex flex-col gap-5"
-    >
-      <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light">
-        Profile Settings
-      </h2>
-      <Input
-        {...register("displayName")}
-        label="Display Name"
-        error={!!errors.displayName}
-        errorMessage={errors.displayName?.message}
-      />
-      <div>
-        <label className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider block mb-1.5">
-          Bio
-        </label>
-        <textarea
-          {...register("bio")}
-          className="v-input resize-none h-24"
-          placeholder="Tell the community about yourself..."
+    <div className="space-y-6">
+      {/* Account info card */}
+      <div className="v-card p-6">
+        <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light mb-5">Account</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-1">Username</p>
+            <p className="text-sm text-parchment-light font-mono">@{user?.username}</p>
+          </div>
+          <div>
+            <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-1">Role</p>
+            <p className="text-sm font-ui text-parchment-light capitalize">{user?.role ?? "user"}</p>
+          </div>
+          <div>
+            <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-1">Plan</p>
+            <p className="text-sm font-ui text-emerald-glow capitalize">{user?.subscriptionTier ?? "free"}</p>
+          </div>
+          <div>
+            <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-1">Member since</p>
+            <p className="text-sm font-ui text-parchment-light">{user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "—"}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Editable profile */}
+      <form onSubmit={handleSubmit((data) => updateProfile.mutate(data))} className="v-card p-6 flex flex-col gap-5">
+        <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light">Public Profile</h2>
+
+        {/* Avatar */}
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-warm-wood border-2 border-royal-gold/30 flex items-center justify-center shrink-0 overflow-hidden">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span className="font-display text-xl text-royal-gold font-bold">{displayName?.[0]?.toUpperCase() ?? "V"}</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <Input
+              {...register("avatarUrl")}
+              label="Avatar URL"
+              placeholder="https://…"
+              error={!!errors.avatarUrl}
+              errorMessage={errors.avatarUrl?.message}
+            />
+          </div>
+        </div>
+
+        <Input
+          {...register("displayName")}
+          label="Display Name"
+          error={!!errors.displayName}
+          errorMessage={errors.displayName?.message}
         />
-        {errors.bio && (
-          <p className="text-xs text-crimson-flame mt-1 font-ui">{errors.bio.message}</p>
-        )}
-      </div>
-      <div className="flex justify-end">
-        <Button
-          type="submit"
-          variant="primary"
-          isLoading={isSubmitting || updateProfile.isPending}
-          disabled={!isDirty}
-        >
-          Save Changes
-        </Button>
-      </div>
-    </form>
+        <div>
+          <label className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider block mb-1.5">Bio</label>
+          <textarea {...register("bio")} className="v-input resize-none h-24" placeholder="Tell the community about yourself..." />
+          {errors.bio && <p className="text-xs text-crimson-flame mt-1 font-ui">{errors.bio.message}</p>}
+        </div>
+        <div className="flex justify-end">
+          <Button type="submit" variant="primary" isLoading={isSubmitting || updateProfile.isPending} disabled={!isDirty}>
+            Save Changes
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -132,6 +170,44 @@ function NotificationsTab() {
         <Button variant="primary" disabled={saved} onClick={() => { setSaved(true); toast.success("Notification preferences saved."); }}>
           {saved ? "Saved" : "Save Preferences"}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function AppearanceTab() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const current = mounted ? (theme === "system" ? resolvedTheme : theme) ?? "dark" : "dark";
+
+  const options = [
+    { id: "dark", label: "Dark", desc: "The classic Velonix table", bg: "#0a0a0a", fg: "#e8d5b8", accent: "#7c5cff" },
+    { id: "light", label: "Light", desc: "Bright parchment surfaces", bg: "#f5f1e8", fg: "#261e16", accent: "#6344e6" },
+  ];
+
+  return (
+    <div className="v-card p-6">
+      <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light mb-2">Appearance</h2>
+      <p className="text-soft-gray text-sm font-ui mb-6">Choose how Velonix looks. Your preference is saved on this device.</p>
+      <div className="grid grid-cols-2 gap-4 max-w-md">
+        {options.map(opt => (
+          <button key={opt.id} onClick={() => setTheme(opt.id)}
+            className={`rounded-xl border-2 p-3 text-left transition-all ${current === opt.id ? "border-emerald-glow" : "border-warm-wood hover:border-warm-wood-light"}`}>
+            <div className="rounded-lg overflow-hidden mb-3 border border-warm-wood" style={{ background: opt.bg }}>
+              <div className="h-16 p-2 flex flex-col gap-1.5">
+                <div className="h-2 w-2/3 rounded-full" style={{ background: opt.fg, opacity: 0.8 }} />
+                <div className="h-2 w-1/2 rounded-full" style={{ background: opt.fg, opacity: 0.4 }} />
+                <div className="h-3 w-10 rounded mt-1" style={{ background: opt.accent }} />
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-ui font-semibold text-parchment-light">{opt.label}</span>
+              {current === opt.id && <span className="text-emerald-glow text-xs">●</span>}
+            </div>
+            <p className="text-2xs text-soft-gray font-ui">{opt.desc}</p>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -196,6 +272,8 @@ export function SettingsTabs() {
       {/* Content */}
       <div className="flex-1 min-w-0">
         {activeTab === "profile" && <ProfileTab />}
+
+        {activeTab === "appearance" && <AppearanceTab />}
 
         {activeTab === "billing" && <BillingTab tier={tier} currentTier={user?.subscriptionTier ?? "free"} />}
 

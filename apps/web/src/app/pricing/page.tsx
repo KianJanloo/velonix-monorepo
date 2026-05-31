@@ -24,7 +24,7 @@ const TIER_META: Record<string, {
   },
   creator: {
     label: "Creator", tagline: "For dedicated designers",
-    color: "border-emerald-glow/50 bg-emerald-ghost shadow-[0_0_40px_rgba(0,212,165,0.12)]",
+    color: "border-emerald-glow/50 bg-emerald-ghost shadow-[0_0_40px_rgba(124,92,255,0.12)]",
     highlighted: true,
     features: [
       "15 game projects",

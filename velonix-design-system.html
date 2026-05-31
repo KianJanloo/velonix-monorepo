@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velonix — Design System Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --deep-void: #0a0a0a;
+  --void-elevated: #0f0b08;
+  --rich-wood-dark: #1c140f;
+  --rich-wood-mid: #241a12;
+  --warm-wood: #3a2a1f;
+  --warm-wood-light: #4a3728;
+  --felt-dark: #2e1f14;
+  --emerald-glow: #7c5cff;
+  --emerald-dark: #6344e6;
+  --emerald-bright: #9277ff;
+  --royal-gold: #f5c451;
+  --royal-gold-dark: #d4a93a;
+  --crimson-flame: #ff3b5c;
+  --cyan-spark: #00e5ff;
+  --parchment-light: #e8d5b8;
+  --parchment-mid: #c4b49a;
+  --soft-gray: #a8a29e;
+  --soft-gray-dark: #6b6460;
+  --shadow-emerald: 0 0 20px rgba(124,92,255,0.35), 0 0 8px rgba(124,92,255,0.2);
+  --shadow-gold: 0 0 20px rgba(245,196,81,0.4), 0 0 8px rgba(245,196,81,0.2);
+  --shadow-crimson: 0 0 16px rgba(255,59,92,0.35);
+  --shadow-cyan: 0 0 16px rgba(0,229,255,0.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--rich-wood-dark)}::-webkit-scrollbar-thumb{background:var(--warm-wood-light);border-radius:3px}
+::selection{background:rgba(124,92,255,0.2);color:var(--emerald-bright)}
+
+.page{max-width:1160px;margin:0 auto;padding:0 32px 100px}
+
+/* HERO */
+.hero{text-align:center;padding:80px 0 56px;position:relative}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(124,92,255,0.07),transparent);pointer-events:none}
+.hero-logo{margin-bottom:32px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.hero-title{font-family:'Cinzel',serif;font-size:clamp(2.8rem,6vw,4.5rem);font-weight:900;letter-spacing:0.12em;line-height:1;background:linear-gradient(135deg,var(--parchment-light) 0%,var(--royal-gold) 45%,var(--parchment-light) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+.hero-tagline{font-family:'DM Sans',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.4em;text-transform:uppercase;color:var(--soft-gray);margin-bottom:16px}
+.hero-ornament{display:flex;align-items:center;gap:14px;max-width:300px;margin:0 auto 20px}
+.hero-ornament::before,.hero-ornament::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--warm-wood-light),transparent)}
+.ornament-diamond{width:6px;height:6px;background:var(--royal-gold);transform:rotate(45deg);box-shadow:0 0 8px rgba(245,196,81,0.5)}
+.hero-sub{font-family:'Crimson Pro',serif;font-size:1.15rem;color:var(--parchment-mid);font-style:italic;max-width:520px;margin:0 auto}
+
+/* SECTION */
+.section{margin-top:68px}
+.section-header{display:flex;align-items:baseline;gap:16px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--warm-wood);position:relative}
+.section-header::after{content:'';position:absolute;bottom:-1px;left:0;width:56px;height:2px;background:var(--emerald-glow)}
+.section-title{font-family:'Cinzel',serif;font-size:0.9rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--parchment-light)}
+.section-sub{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--soft-gray-dark);letter-spacing:0.04em}
+
+/* COLOR SWATCHES */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.swatch{border-radius:10px;overflow:hidden;border:1px solid var(--warm-wood);transition:transform 0.15s,box-shadow 0.15s;cursor:default}
+.swatch:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+.swatch-color{height:68px}
+.swatch-info{background:var(--rich-wood-dark);padding:10px 12px}
+.swatch-name{font-size:0.7rem;font-weight:600;color:var(--parchment-light);letter-spacing:0.02em}
+.swatch-hex{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--soft-gray);margin-top:2px}
+.swatch-desc{font-size:0.62rem;color:var(--soft-gray-dark);margin-top:3px;line-height:1.35}
+
+/* TYPOGRAPHY */
+.type-row{display:flex;flex-direction:column;gap:10px}
+.type-sample{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:10px;padding:20px 24px}
+.type-meta{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--soft-gray-dark);margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase}
+
+/* BUTTONS */
+.button-grid{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.875rem;letter-spacing:0.02em;cursor:pointer;border:none;transition:all 0.15s;text-decoration:none;position:relative;overflow:hidden}
+.btn-primary{background:var(--emerald-glow);color:var(--deep-void)}
+.btn-primary:hover{background:var(--emerald-dark);box-shadow:var(--shadow-emerald)}
+.btn-gold{background:var(--royal-gold);color:var(--deep-void)}
+.btn-gold:hover{background:var(--royal-gold-dark);box-shadow:var(--shadow-gold)}
+.btn-outline{background:transparent;color:var(--parchment-light);border:1px solid var(--warm-wood-light)}
+.btn-outline:hover{background:var(--warm-wood);border-color:var(--soft-gray)}
+.btn-danger{background:var(--crimson-flame);color:white}
+.btn-danger:hover{box-shadow:var(--shadow-crimson)}
+.btn-ghost{background:rgba(124,92,255,0.08);color:var(--emerald-glow);border:1px solid rgba(124,92,255,0.22)}
+.btn-ghost:hover{background:rgba(124,92,255,0.15)}
+.btn-cyan{background:rgba(0,229,255,0.08);color:var(--cyan-spark);border:1px solid rgba(0,229,255,0.22)}
+.btn-sm{padding:7px 14px;font-size:0.78rem}
+.btn-lg{padding:14px 28px;font-size:1rem}
+
+/* BADGES */
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase}
+.badge-premium{background:rgba(245,196,81,0.1);color:var(--royal-gold);border:1px solid rgba(245,196,81,0.28);box-shadow:0 0 12px rgba(245,196,81,0.15)}
+.badge-published{background:rgba(124,92,255,0.1);color:var(--emerald-glow);border:1px solid rgba(124,92,255,0.28)}
+.badge-draft{background:rgba(168,162,158,0.08);color:var(--soft-gray);border:1px solid rgba(168,162,158,0.18)}
+.badge-sale{background:rgba(255,59,92,0.1);color:var(--crimson-flame);border:1px solid rgba(255,59,92,0.28)}
+.badge-info{background:rgba(0,229,255,0.08);color:var(--cyan-spark);border:1px solid rgba(0,229,255,0.22)}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* GAME CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(226px,1fr));gap:14px}
+.game-card{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:12px;overflow:hidden;transition:all 0.2s;cursor:pointer}
+.game-card:hover{border-color:var(--warm-wood-light);box-shadow:0 10px 36px rgba(0,0,0,0.6);transform:translateY(-2px)}
+.card-thumb{height:136px;background:var(--felt-dark);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.card-thumb-art{width:76px;height:76px;border-radius:8px;border:1px solid rgba(245,196,81,0.18);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:2rem;color:var(--royal-gold);opacity:0.55;position:relative;z-index:1}
+.card-thumb-grad{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(28,20,15,0.92))}
+.card-thumb-badge{position:absolute;top:8px;right:8px;z-index:2}
+.card-body{padding:14px 16px}
+.card-title{font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;color:var(--parchment-light);letter-spacing:0.05em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-creator{font-size:0.72rem;color:var(--soft-gray);margin-bottom:8px}
+.card-creator span{color:var(--emerald-glow)}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.card-tag{font-size:0.58rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--warm-wood);color:var(--soft-gray)}
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--warm-wood)}
+.card-price{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;color:var(--emerald-glow)}
+.card-price.free-tag{color:var(--soft-gray);font-size:0.72rem;font-weight:500}
+.stars{color:var(--royal-gold);font-size:0.7rem;letter-spacing:1px}
+.rating-count{font-size:0.65rem;color:var(--soft-gray-dark);margin-left:4px}
+
+/* INPUTS */
+.input-col{display:flex;flex-direction:column;gap:12px;max-width:400px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:0.7rem;font-weight:600;color:var(--parchment-mid);letter-spacing:0.06em;text-transform:uppercase}
+.v-input{background:var(--rich-wood-mid);border:1px solid var(--warm-wood);border-radius:8px;padding:10px 14px;color:var(--parchment-light);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;transition:all 0.15s;width:100%}
+.v-input:focus{border-color:var(--emerald-glow);box-shadow:0 0 0 3px rgba(124,92,255,0.14)}
+.v-input::placeholder{color:var(--soft-gray-dark)}
+.v-input.input-error{border-color:var(--crimson-flame);box-shadow:0 0 0 3px rgba(255,59,92,0.1)}
+.field-hint{font-size:0.68rem;color:var(--soft-gray-dark)}
+.field-error{font-size:0.68rem;color:var(--crimson-flame)}
+
+/* STUDIO MOCKUP */
+.studio-mockup{background:var(--deep-void);border:1px solid var(--warm-wood);border-radius:16px;overflow:hidden;box-shadow:0 28px 72px rgba(0,0,0,0.75)}
+.studio-toolbar{height:52px;background:var(--rich-wood-dark);border-bottom:1px solid var(--warm-wood);display:flex;align-items:center;padding:0 14px;gap:6px}
+.toolbar-logo{font-family:'Cinzel',serif;font-size:0.78rem;font-weight:700;color:var(--royal-gold);letter-spacing:0.14em;margin-right:14px;display:flex;align-items:center;gap:8px}
+.toolbar-sep{width:1px;height:22px;background:var(--warm-wood);margin:0 4px}
+.tb{width:30px;height:30px;border-radius:6px;border:none;background:transparent;color:var(--soft-gray);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.1s}
+.tb:hover{background:var(--warm-wood);color:var(--parchment-light)}
+.tb.active{background:rgba(124,92,255,0.12);color:var(--emerald-glow);box-shadow:inset 0 0 0 1px rgba(124,92,255,0.3)}
+.toolbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.toolbar-zoom{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--soft-gray);background:var(--warm-wood);padding:4px 10px;border-radius:5px}
+.toolbar-save{font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:600;padding:6px 14px;border-radius:6px;background:var(--emerald-glow);color:var(--deep-void);border:none;cursor:pointer}
+.studio-body{display:grid;grid-template-columns:256px 1fr 272px;height:400px}
+.studio-left,.studio-right{background:var(--rich-wood-dark);overflow:hidden}
+.studio-left{border-right:1px solid var(--warm-wood)}
+.studio-right{border-left:1px solid var(--warm-wood)}
+.panel-tabs{display:flex;border-bottom:1px solid var(--warm-wood)}
+.ptab{flex:1;padding:9px 4px;text-align:center;font-size:0.62rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--soft-gray);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.12s}
+.ptab.active{color:var(--emerald-glow);border-bottom-color:var(--emerald-glow)}
+.panel-section{padding:8px 10px;border-bottom:1px solid rgba(58,42,31,0.6)}
+.psec-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--soft-gray-dark);margin-bottom:5px;padding:0 2px}
+.layer-item{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:5px;cursor:pointer;transition:background 0.1s}
+.layer-item:hover{background:var(--warm-wood)}
+.layer-item.sel{background:rgba(124,92,255,0.09);box-shadow:inset 0 0 0 1px rgba(124,92,255,0.18)}
+.li-icon{width:17px;height:17px;border-radius:3px;background:var(--warm-wood);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--soft-gray);flex-shrink:0}
+.li-name{font-size:0.72rem;color:var(--parchment-mid)}
+.layer-item.sel .li-name{color:var(--emerald-glow)}
+.li-eye{margin-left:auto;font-size:10px;color:var(--soft-gray-dark);opacity:0.6}
+.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px}
+.asset-thumb{aspect-ratio:1;border-radius:5px;background:var(--warm-wood);border:1px solid rgba(58,42,31,0.8);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all 0.1s;color:var(--parchment-mid)}
+.asset-thumb:hover{border-color:var(--emerald-glow);background:rgba(124,92,255,0.07)}
+.studio-canvas{background:#0c0c0c;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background-image:linear-gradient(rgba(58,42,31,0.35) 1px,transparent 1px),linear-gradient(90deg,rgba(58,42,31,0.35) 1px,transparent 1px);background-size:32px 32px}
+.canvas-board{width:210px;height:158px;background:linear-gradient(145deg,#1a2535,#141d2b);border-radius:6px;position:relative;box-shadow:0 12px 40px rgba(0,0,0,0.8),0 0 0 1px rgba(245,196,81,0.14)}
+.canvas-grid-ov{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.05) 1px,transparent 1px);background-size:18px 18px;border-radius:6px}
+.canvas-card-obj{position:absolute;border-radius:3px;background:linear-gradient(145deg,#1f2d42,#172233);border:1px solid rgba(124,92,255,0.25);box-shadow:2px 3px 8px rgba(0,0,0,0.7)}
+.canvas-token-obj{position:absolute;border-radius:50%;border:2px solid rgba(245,196,81,0.5)}
+.sel-ring{position:absolute;inset:-3px;border:1px dashed var(--cyan-spark);border-radius:4px;pointer-events:none;box-shadow:0 0 10px rgba(0,229,255,0.2)}
+.sel-handle{position:absolute;width:7px;height:7px;background:var(--cyan-spark);border-radius:1px;border:1px solid rgba(0,0,0,0.4)}
+.props-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;border-bottom:1px solid var(--warm-wood)}
+.props-title{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--parchment-mid)}
+.prop-row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid rgba(58,42,31,0.4);gap:10px}
+.prop-label{font-size:0.68rem;color:var(--soft-gray);flex-shrink:0}
+.prop-val{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--parchment-mid);background:var(--rich-wood-mid);border:1px solid var(--warm-wood);padding:3px 8px;border-radius:4px;min-width:80px;text-align:right}
+.prop-val.em{color:var(--emerald-glow);border-color:rgba(124,92,255,0.2)}
+.prop-val.go{color:var(--royal-gold);border-color:rgba(245,196,81,0.2)}
+.color-chips{display:flex;gap:4px}
+.chip{width:18px;height:18px;border-radius:3px;cursor:pointer;border:1px solid rgba(255,255,255,0.07);transition:transform 0.1s}
+.chip:hover{transform:scale(1.25)}
+.props-section-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--soft-gray-dark);padding:8px 12px 3px}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.pricing-card{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:14px;padding:24px 18px;position:relative;transition:all 0.2s}
+.pricing-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,0.55)}
+.pricing-card.featured{border-color:var(--emerald-glow);box-shadow:0 0 28px rgba(124,92,255,0.14)}
+.pricing-card.gold-tier{border-color:var(--royal-gold);box-shadow:var(--shadow-gold)}
+.tier-pill{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:0.58rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;padding:3px 12px;border-radius:999px;white-space:nowrap}
+.tier-pill.green{background:var(--emerald-glow);color:var(--deep-void)}
+.tier-pill.gold{background:var(--royal-gold);color:var(--deep-void)}
+.p-tier-name{font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;letter-spacing:0.12em;color:var(--parchment-light);text-align:center;margin-bottom:14px}
+.p-price{text-align:center;margin-bottom:14px}
+.p-amount{font-family:'Cinzel',serif;font-size:2rem;font-weight:900;color:var(--parchment-light)}
+.p-amount sup{font-size:0.9rem;vertical-align:top;margin-top:5px;display:inline-block;color:var(--parchment-mid)}
+.p-period{display:block;font-size:0.68rem;color:var(--soft-gray);margin-top:2px}
+.p-commission{text-align:center;font-size:0.68rem;font-weight:700;color:var(--royal-gold);margin-bottom:14px;padding:5px 8px;background:rgba(245,196,81,0.05);border-radius:5px;border:1px solid rgba(245,196,81,0.1)}
+.p-features{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:18px}
+.p-features li{font-size:0.75rem;color:var(--parchment-mid);display:flex;gap:8px;align-items:flex-start}
+.p-features li::before{content:'—';color:var(--emerald-glow);flex-shrink:0;font-weight:700}
+.p-features li.dim{color:var(--soft-gray-dark)}
+.p-features li.dim::before{color:var(--soft-gray-dark)}
+.p-cta{width:100%;padding:9px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;border:none;transition:all 0.15s}
+.p-cta-primary{background:var(--emerald-glow);color:var(--deep-void)}
+.p-cta-primary:hover{background:var(--emerald-dark);box-shadow:var(--shadow-emerald)}
+.p-cta-gold{background:var(--royal-gold);color:var(--deep-void)}
+.p-cta-gold:hover{background:var(--royal-gold-dark);box-shadow:var(--shadow-gold)}
+.p-cta-outline{background:transparent;color:var(--parchment-light);border:1px solid var(--warm-wood-light)}
+.p-cta-outline:hover{background:var(--warm-wood)}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px}
+.stat-card{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:10px;padding:18px 16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.em::before{background:var(--emerald-glow);box-shadow:0 0 8px rgba(124,92,255,0.5)}
+.stat-card.go::before{background:var(--royal-gold);box-shadow:0 0 8px rgba(245,196,81,0.4)}
+.stat-card.cr::before{background:var(--crimson-flame)}
+.stat-card.cy::before{background:var(--cyan-spark)}
+.stat-label-txt{font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft-gray-dark);margin-bottom:6px}
+.stat-num{font-family:'Cinzel',serif;font-size:1.9rem;font-weight:900;line-height:1;margin-bottom:4px}
+.stat-num.em{color:var(--emerald-glow);text-shadow:0 0 14px rgba(124,92,255,0.35)}
+.stat-num.go{color:var(--royal-gold);text-shadow:0 0 14px rgba(245,196,81,0.35)}
+.stat-num.pa{color:var(--parchment-light)}
+.stat-num.cy{color:var(--cyan-spark);text-shadow:0 0 14px rgba(0,229,255,0.3)}
+.stat-change{font-size:0.68rem;font-weight:600;color:var(--emerald-glow)}
+.stat-change.down{color:var(--crimson-flame)}
+
+/* SHADOW GALLERY */
+.shadow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.shadow-sample{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:10px;padding:20px 14px;text-align:center}
+.shadow-box{width:52px;height:52px;border-radius:8px;background:var(--rich-wood-mid);margin:0 auto 12px}
+.shadow-name{font-size:0.7rem;font-weight:600;color:var(--parchment-mid);margin-bottom:3px}
+.shadow-code{font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--soft-gray-dark)}
+
+/* ANIMATION SAMPLES */
+.anim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.anim-demo{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:10px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.anim-label{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--soft-gray)}
+
+/* ANIMATIONS */
+@keyframes float-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes shimmer-move{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(124,92,255,0.5)}50%{box-shadow:0 0 0 8px rgba(124,92,255,0)}}
+@keyframes glow-blink{0%,100%{opacity:1;filter:brightness(1)}50%{opacity:0.55;filter:brightness(0.7)}}
+@keyframes spin-orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes card-appear{from{transform:rotateY(90deg) scale(0.8);opacity:0}to{transform:rotateY(0deg) scale(1);opacity:1}}
+
+.float-demo{animation:float-up 3s ease-in-out infinite}
+.shimmer-box{width:80px;height:28px;border-radius:6px;background:linear-gradient(90deg,transparent 0%,rgba(245,196,81,0.3) 50%,transparent 100%);background-size:200% 100%;animation:shimmer-move 2s linear infinite;border:1px solid rgba(245,196,81,0.2)}
+.pulse-dot{width:40px;height:40px;border-radius:50%;background:var(--emerald-glow);animation:pulse-ring 2s ease-in-out infinite;box-shadow:var(--shadow-emerald)}
+.glow-gem{width:40px;height:40px;border-radius:6px;transform:rotate(45deg);background:var(--royal-gold);animation:glow-blink 2s ease-in-out infinite;box-shadow:var(--shadow-gold)}
+.orbit-ring{width:44px;height:44px;border-radius:50%;border:2px solid rgba(0,229,255,0.3);border-top-color:var(--cyan-spark);animation:spin-orbit 1.5s linear infinite}
+.card-flip-demo{width:44px;height:60px;border-radius:5px;background:linear-gradient(135deg,#1f2d42,#141d2b);border:1px solid rgba(124,92,255,0.3);animation:card-appear 1.5s cubic-bezier(0.5,0,0.5,1) infinite alternate}
+
+/* MONOREPO STRUCTURE */
+.tree-block{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:12px;padding:24px 28px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.8;overflow-x:auto}
+.tree-dir{color:var(--royal-gold);font-weight:500}
+.tree-file{color:var(--parchment-mid)}
+.tree-comment{color:var(--soft-gray-dark);font-style:italic}
+.tree-pkg{color:var(--emerald-glow)}
+.tree-key{color:var(--cyan-spark)}
+
+/* FOOTER */
+.footer{text-align:center;margin-top:80px;padding-top:32px;border-top:1px solid var(--warm-wood)}
+.footer-logo{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;letter-spacing:0.14em;color:var(--royal-gold);margin-bottom:8px}
+.footer-sub{font-family:'Crimson Pro',serif;font-size:0.95rem;color:var(--soft-gray);font-style:italic}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="vgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#c4b49a"/>
+          <stop offset="50%" stop-color="#f5c451"/>
+          <stop offset="100%" stop-color="#c4b49a"/>
+        </linearGradient>
+      </defs>
+      <!-- Double V chevron -->
+      <polyline points="8,18 40,62 72,18" fill="none" stroke="url(#vgrad)" stroke-width="5" stroke-linejoin="miter" stroke-linecap="butt"/>
+      <polyline points="18,18 40,52 62,18" fill="none" stroke="url(#vgrad)" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" opacity="0.5"/>
+      <!-- King crown top -->
+      <circle cx="40" cy="15" r="3.5" fill="url(#vgrad)"/>
+      <rect x="37.5" y="8" width="5" height="2.5" rx="1" fill="url(#vgrad)"/>
+      <circle cx="40" cy="7" r="2" fill="url(#vgrad)" opacity="0.8"/>
+    </svg>
+  </div>
+  <div class="hero-title">VELONIX</div>
+  <div class="hero-tagline">Play &nbsp;&bull;&nbsp; Think &nbsp;&bull;&nbsp; Conquer</div>
+  <div class="hero-ornament"><div class="ornament-diamond"></div></div>
+  <div class="hero-sub">Design System Reference &amp; Component Library — Premium Digital Board Game Platform</div>
+</div>
+
+<!-- COLOR PALETTE -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Color Palette</span>
+    <span class="section-sub">@velonix/design-tokens — colors</span>
+  </div>
+
+  <div style="margin-bottom:12px;font-size:0.72rem;color:var(--soft-gray-dark);font-family:'Cinzel',serif;letter-spacing:0.1em;text-transform:uppercase">Backgrounds &amp; Surfaces</div>
+  <div class="swatches" style="margin-bottom:20px">
+    <div class="swatch"><div class="swatch-color" style="background:#0a0a0a;border-bottom:1px solid #222"></div><div class="swatch-info"><div class="swatch-name">Deep Void</div><div class="swatch-hex">#0a0a0a</div><div class="swatch-desc">Main background</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#1c140f"></div><div class="swatch-info"><div class="swatch-name">Rich Wood Dark</div><div class="swatch-hex">#1c140f</div><div class="swatch-desc">Panels, cards, sidebars</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#241a12"></div><div class="swatch-info"><div class="swatch-name">Rich Wood Mid</div><div class="swatch-hex">#241a12</div><div class="swatch-desc">Input fields, modals</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#3a2a1f"></div><div class="swatch-info"><div class="swatch-name">Warm Wood</div><div class="swatch-hex">#3a2a1f</div><div class="swatch-desc">Borders, dividers</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#4a3728"></div><div class="swatch-info"><div class="swatch-name">Warm Wood Light</div><div class="swatch-hex">#4a3728</div><div class="swatch-desc">Hover borders, active</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#2e1f14"></div><div class="swatch-info"><div class="swatch-name">Felt Dark</div><div class="swatch-hex">#2e1f14</div><div class="swatch-desc">Board canvas, felt</div></div></div>
+  </div>
+
+  <div style="margin-bottom:12px;font-size:0.72rem;color:var(--soft-gray-dark);font-family:'Cinzel',serif;letter-spacing:0.1em;text-transform:uppercase">Accent Colors</div>
+  <div class="swatches">
+    <div class="swatch" style="box-shadow:0 0 14px rgba(124,92,255,0.25)"><div class="swatch-color" style="background:#7c5cff"></div><div class="swatch-info"><div class="swatch-name">Emerald Glow</div><div class="swatch-hex">#7c5cff</div><div class="swatch-desc">Primary actions, create</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 14px rgba(124,92,255,0.12)"><div class="swatch-color" style="background:#6344e6"></div><div class="swatch-info"><div class="swatch-name">Emerald Dark</div><div class="swatch-hex">#6344e6</div><div class="swatch-desc">Button hover state</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 16px rgba(245,196,81,0.35)"><div class="swatch-color" style="background:#f5c451"></div><div class="swatch-info"><div class="swatch-name">Royal Gold</div><div class="swatch-hex">#f5c451</div><div class="swatch-desc">Premium, earnings</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 14px rgba(245,196,81,0.15)"><div class="swatch-color" style="background:#d4a93a"></div><div class="swatch-info"><div class="swatch-name">Royal Gold Dark</div><div class="swatch-hex">#d4a93a</div><div class="swatch-desc">Gold hover state</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 14px rgba(255,59,92,0.3)"><div class="swatch-color" style="background:#ff3b5c"></div><div class="swatch-info"><div class="swatch-name">Crimson Flame</div><div class="swatch-hex">#ff3b5c</div><div class="swatch-desc">Warnings, danger</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 14px rgba(0,229,255,0.25)"><div class="swatch-color" style="background:#00e5ff"></div><div class="swatch-info"><div class="swatch-name">Cyan Spark</div><div class="swatch-hex">#00e5ff</div><div class="swatch-desc">Interactive, hover</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#e8d5b8"></div><div class="swatch-info"><div class="swatch-name">Parchment Light</div><div class="swatch-hex">#e8d5b8</div><div class="swatch-desc">Primary text</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#a8a29e"></div><div class="swatch-info"><div class="swatch-name">Soft Gray</div><div class="swatch-hex">#a8a29e</div><div class="swatch-desc">Secondary text</div></div></div>
+  </div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Typography</span>
+    <span class="section-sub">@velonix/design-tokens — typography.fonts</span>
+  </div>
+  <div class="type-row">
+    <div class="type-sample">
+      <div class="type-meta">font-display — Cinzel 900 — Headings, game titles, brand wordmark</div>
+      <div style="font-family:'Cinzel',serif;font-size:2.4rem;font-weight:900;letter-spacing:0.1em;color:var(--parchment-light);line-height:1.1">The Board Awaits</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">font-decorative — Cinzel Decorative 700 — Premium badges, hero moments</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:1.5rem;font-weight:700;letter-spacing:0.08em;background:linear-gradient(135deg,var(--royal-gold),var(--parchment-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Studio Tier</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">font-body — Crimson Pro 400/600 — Descriptions, rulebook text, long-form</div>
+      <div style="font-family:'Crimson Pro',serif;font-size:1.1rem;color:var(--parchment-mid);line-height:1.75">Velonix is where designers and enthusiasts create, publish, and sell digital board games. From elegant abstract puzzles to sprawling epic sagas — your imagination defines the rules.</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">font-ui — DM Sans 400/600 — Navigation, labels, buttons, UI controls</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.95rem;color:var(--parchment-light);display:flex;gap:24px;flex-wrap:wrap">
+        <span style="font-weight:300">Light 300</span>
+        <span style="font-weight:400">Regular 400</span>
+        <span style="font-weight:500">Medium 500</span>
+        <span style="font-weight:600">SemiBold 600</span>
+      </div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">font-mono — JetBrains Mono — Code blocks, values, game rule scripting</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--emerald-glow);line-height:1.6">IF player.tokens &gt; 0 THEN<br>&nbsp;&nbsp;player.score += board.cell.value * multiplier<br>END</div>
+    </div>
+  </div>
+</div>
+
+<!-- BUTTONS -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Buttons</span>
+    <span class="section-sub">.btn-primary / .btn-gold / .btn-outline / .btn-danger / .btn-ghost</span>
+  </div>
+  <div class="button-grid" style="margin-bottom:14px">
+    <button class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v6M4 7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Create Game
+    </button>
+    <button class="btn btn-gold">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5L12 5l-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1z" fill="currentColor"/></svg>
+      Upgrade to Pro
+    </button>
+    <button class="btn btn-outline">View Marketplace</button>
+    <button class="btn btn-danger">Delete Project</button>
+    <button class="btn btn-ghost">Preview 3D</button>
+    <button class="btn btn-cyan">Learn More</button>
+  </div>
+  <div class="button-grid">
+    <button class="btn btn-sm btn-primary">Publish</button>
+    <button class="btn btn-sm btn-outline">Cancel</button>
+    <button class="btn btn-sm btn-ghost">Save Draft</button>
+    <button class="btn btn-lg btn-primary">Get Started Free</button>
+  </div>
+</div>
+
+<!-- BADGES -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Badges &amp; Status</span>
+    <span class="section-sub">.badge-premium / .badge-published / .badge-draft / .badge-sale</span>
+  </div>
+  <div class="badge-row">
+    <span class="badge badge-premium"><span class="badge-dot"></span>Premium</span>
+    <span class="badge badge-published"><span class="badge-dot"></span>Published</span>
+    <span class="badge badge-draft">Draft</span>
+    <span class="badge badge-sale"><span class="badge-dot"></span>Hot Sale</span>
+    <span class="badge badge-info">New</span>
+    <span class="badge" style="background:rgba(124,92,255,0.08);color:var(--emerald-glow);border:1px solid rgba(124,92,255,0.2)">Free</span>
+    <span class="badge" style="background:rgba(245,196,81,0.08);color:var(--royal-gold);border:1px solid rgba(245,196,81,0.2)">Strategy</span>
+    <span class="badge" style="background:rgba(255,59,92,0.08);color:var(--crimson-flame);border:1px solid rgba(255,59,92,0.2)">Limited</span>
+    <span class="badge" style="background:rgba(168,162,158,0.07);color:var(--soft-gray);border:1px solid rgba(168,162,158,0.15)">Cooperative</span>
+  </div>
+</div>
+
+<!-- GAME CARDS -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Game Marketplace Cards</span>
+    <span class="section-sub">.game-card — marketplace listing component</span>
+  </div>
+  <div class="cards-grid">
+    <div class="game-card">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#0e1a28,#1a2535)">
+        <div class="card-thumb-art" style="background:rgba(124,92,255,0.07);border-color:rgba(124,92,255,0.2)">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="4" y="4" width="28" height="28" rx="3" stroke="rgba(124,92,255,0.6)" stroke-width="1.5"/><path d="M4 14h28M14 4v28" stroke="rgba(124,92,255,0.4)" stroke-width="1"/><circle cx="18" cy="18" r="4" fill="rgba(124,92,255,0.3)"/></svg>
+        </div>
+        <div class="card-thumb-grad"></div>
+        <div class="card-thumb-badge"><span class="badge badge-published" style="font-size:0.55rem;padding:2px 7px"><span class="badge-dot"></span>Published</span></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Verdant Conquest</div>
+        <div class="card-creator">by <span>stormrider</span></div>
+        <div class="card-tags"><span class="card-tag">Strategy</span><span class="card-tag">4 Players</span><span class="card-tag">Euro</span></div>
+        <div class="card-footer">
+          <div class="card-price">$8.99</div>
+          <div><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="rating-count">(142)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="game-card">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#1a0e10,#2a1018)">
+        <div class="card-thumb-art" style="background:rgba(255,59,92,0.07);border-color:rgba(255,59,92,0.2)">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><polygon points="18,4 32,30 4,30" stroke="rgba(255,59,92,0.7)" stroke-width="1.5" fill="none"/><circle cx="18" cy="22" r="3" fill="rgba(255,59,92,0.4)"/><line x1="18" y1="12" x2="18" y2="18" stroke="rgba(255,59,92,0.5)" stroke-width="1.5"/></svg>
+        </div>
+        <div class="card-thumb-grad" style="background:linear-gradient(to bottom,transparent 40%,rgba(20,8,12,0.92))"></div>
+        <div class="card-thumb-badge"><span class="badge badge-premium" style="font-size:0.55rem;padding:2px 7px"><span class="badge-dot"></span>Premium</span></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Shadow Tribunal</div>
+        <div class="card-creator">by <span>darkweave</span></div>
+        <div class="card-tags"><span class="card-tag">Deduction</span><span class="card-tag">2-6p</span><span class="card-tag">Heavy</span></div>
+        <div class="card-footer">
+          <div class="card-price">$14.99</div>
+          <div><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span><span class="rating-count">(87)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="game-card">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#0e1a0e,#121f12)">
+        <div class="card-thumb-art" style="background:rgba(245,196,81,0.06);border-color:rgba(245,196,81,0.18)">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="12" stroke="rgba(245,196,81,0.5)" stroke-width="1.5"/><path d="M18 10l2 5h5l-4 3 1.5 5L18 20l-4.5 3L15 18l-4-3h5z" fill="rgba(245,196,81,0.3)"/></svg>
+        </div>
+        <div class="card-thumb-grad" style="background:linear-gradient(to bottom,transparent 40%,rgba(10,14,10,0.92))"></div>
+        <div class="card-thumb-badge"><span class="badge" style="font-size:0.55rem;padding:2px 7px;background:rgba(0,229,255,0.1);color:var(--cyan-spark);border:1px solid rgba(0,229,255,0.25)">New</span></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Gilded Realm</div>
+        <div class="card-creator">by <span>aurumcraft</span></div>
+        <div class="card-tags"><span class="card-tag">RPG</span><span class="card-tag">1-5p</span></div>
+        <div class="card-footer">
+          <div class="card-price free-tag">Free</div>
+          <div><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="rating-count">(23)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="game-card">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#0a0f1a,#0e1528)">
+        <div class="card-thumb-art" style="background:rgba(0,229,255,0.06);border-color:rgba(0,229,255,0.18)">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="6" y="6" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><rect x="20" y="6" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><rect x="6" y="20" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><rect x="20" y="20" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><circle cx="18" cy="18" r="2" fill="rgba(0,229,255,0.5)"/></svg>
+        </div>
+        <div class="card-thumb-grad" style="background:linear-gradient(to bottom,transparent 40%,rgba(8,10,18,0.92))"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Quantum Tiles</div>
+        <div class="card-creator">by <span>hexmind</span></div>
+        <div class="card-tags"><span class="card-tag">Abstract</span><span class="card-tag">2p</span><span class="card-tag">Light</span></div>
+        <div class="card-footer">
+          <div class="card-price">$4.99</div>
+          <div><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span><span class="rating-count">(61)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDIO MOCKUP -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Board Game Designer Studio</span>
+    <span class="section-sub">The core feature — design canvas with layer panel + properties panel</span>
+  </div>
+  <div class="studio-mockup">
+    <!-- Toolbar -->
+    <div class="studio-toolbar">
+      <div class="toolbar-logo">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="2,5 9,15 16,5" fill="none" stroke="#d4a93a" stroke-width="2" stroke-linejoin="miter"/><polyline points="5,5 9,12 13,5" fill="none" stroke="#d4a93a" stroke-width="1.2" stroke-linejoin="miter" opacity="0.5"/></svg>
+        VELONIX
+      </div>
+      <div class="toolbar-sep"></div>
+      <!-- Tool buttons with inline SVGs -->
+      <button class="tb active" title="Select">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2l4 9 1.5-3.5L11 6 2 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tb" title="Hand/Pan">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5 5V2.5a1 1 0 012 0V5m0 0V2a1 1 0 012 0v3m0 0V3a1 1 0 012 0v5a4 4 0 01-4 4H5a4 4 0 01-4-4V6a1 1 0 012 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tb" title="Text">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 3h9M6.5 3v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tb" title="Rectangle">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="2" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+      <button class="tb" title="Ellipse">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><ellipse cx="6.5" cy="6.5" rx="4.5" ry="4.5" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+      <button class="tb" title="Image">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="4.5" cy="4.5" r="1" fill="currentColor" opacity="0.7"/><path d="M1.5 9l3-3 2.5 2.5 2-2 2 2.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="toolbar-sep"></div>
+      <button class="tb" title="Undo">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 8.5A4.5 4.5 0 019 4h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M3 5l-1 3.5L5.5 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tb" title="Redo">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M10 8.5A4.5 4.5 0 004 4H2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M10 5l1 3.5L7.5 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="toolbar-right">
+        <span class="toolbar-zoom">100%</span>
+        <span style="font-size:0.65rem;color:var(--emerald-glow);background:rgba(124,92,255,0.08);border:1px solid rgba(124,92,255,0.2);padding:3px 10px;border-radius:4px;font-family:'DM Sans',sans-serif;font-weight:600">Saved</span>
+        <button class="toolbar-save">Publish</button>
+      </div>
+    </div>
+    <!-- Body -->
+    <div class="studio-body">
+      <!-- Left panel -->
+      <div class="studio-left">
+        <div class="panel-tabs">
+          <div class="ptab active">Layers</div>
+          <div class="ptab">Components</div>
+          <div class="ptab">Assets</div>
+        </div>
+        <div class="panel-section">
+          <div class="psec-title">Board</div>
+          <div class="layer-item sel">
+            <div class="li-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-name">Background</div>
+            <div class="li-eye">&#9728;</div>
+          </div>
+          <div class="layer-item">
+            <div class="li-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5h8M5 1v8" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-name">Grid Layer</div>
+            <div class="li-eye">&#9728;</div>
+          </div>
+          <div class="layer-item">
+            <div class="li-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-name">Border Accents</div>
+            <div class="li-eye" style="opacity:0.3">&#9728;</div>
+          </div>
+        </div>
+        <div class="panel-section">
+          <div class="psec-title">Cards (60)</div>
+          <div class="layer-item">
+            <div class="li-icon" style="background:rgba(124,92,255,0.1);color:var(--emerald-glow)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="1" width="6" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-name">Player Card</div>
+            <div class="li-eye">&#9728;</div>
+          </div>
+          <div class="layer-item">
+            <div class="li-icon" style="background:rgba(245,196,81,0.1);color:var(--royal-gold)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="1" width="6" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-name">Action Card</div>
+            <div class="li-eye">&#9728;</div>
+          </div>
+        </div>
+        <div class="panel-section">
+          <div class="psec-title">Tokens (30)</div>
+          <div class="layer-item">
+            <div class="li-icon" style="background:rgba(0,229,255,0.08);color:var(--cyan-spark)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-name">Resource Token</div>
+            <div class="li-eye">&#9728;</div>
+          </div>
+        </div>
+        <div class="asset-grid">
+          <div class="asset-thumb"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M2 8h18M8 2v18" stroke="currentColor" stroke-width="0.8" opacity="0.5"/></svg></div>
+          <div class="asset-thumb"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="5" y="2" width="12" height="18" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg></div>
+          <div class="asset-thumb"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="11" r="3" fill="currentColor" opacity="0.3"/></svg></div>
+          <div class="asset-thumb"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2l2.5 7h7l-5.5 4 2 7L11 16l-6 4 2-7L1 9h7z" stroke="currentColor" stroke-width="1.1"/></svg></div>
+        </div>
+      </div>
+      <!-- Canvas -->
+      <div class="studio-canvas">
+        <div class="canvas-board">
+          <div class="canvas-grid-ov"></div>
+          <!-- Selection ring on a card -->
+          <div class="canvas-card-obj" style="width:26px;height:38px;top:28px;left:24px">
+            <div class="sel-ring"></div>
+            <div class="sel-handle" style="top:-3px;left:-3px"></div>
+            <div class="sel-handle" style="top:-3px;right:-3px"></div>
+            <div class="sel-handle" style="bottom:-3px;left:-3px"></div>
+            <div class="sel-handle" style="bottom:-3px;right:-3px"></div>
+          </div>
+          <div class="canvas-card-obj" style="width:26px;height:38px;top:40px;left:56px;transform:rotate(5deg)"></div>
+          <div class="canvas-card-obj" style="width:26px;height:38px;top:26px;left:90px;transform:rotate(-3deg)"></div>
+          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:32px;background:rgba(124,92,255,0.25)"></div>
+          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:58px;background:rgba(245,196,81,0.2);border-color:rgba(245,196,81,0.5)"></div>
+          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:84px;background:rgba(255,59,92,0.2);border-color:rgba(255,59,92,0.5)"></div>
+          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:110px;background:rgba(0,229,255,0.15);border-color:rgba(0,229,255,0.5)"></div>
+          <div class="canvas-card-obj" style="width:26px;height:38px;top:38px;left:148px"></div>
+          <div class="canvas-card-obj" style="width:26px;height:38px;top:33px;left:150px;transform:rotate(2deg)"></div>
+          <!-- Alignment guide line -->
+          <div style="position:absolute;top:47px;left:0;right:0;height:1px;background:rgba(0,229,255,0.3);pointer-events:none"></div>
+        </div>
+      </div>
+      <!-- Right properties panel -->
+      <div class="studio-right">
+        <div class="props-header">
+          <div class="props-title">Properties</div>
+          <div style="display:flex;gap:4px">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--emerald-glow);box-shadow:var(--shadow-emerald)"></div>
+          </div>
+        </div>
+        <div class="props-section-title">Transform</div>
+        <div class="prop-row"><div class="prop-label">X</div><div class="prop-val em">24 px</div></div>
+        <div class="prop-row"><div class="prop-label">Y</div><div class="prop-val em">28 px</div></div>
+        <div class="prop-row"><div class="prop-label">W</div><div class="prop-val">26 px</div></div>
+        <div class="prop-row"><div class="prop-label">H</div><div class="prop-val">38 px</div></div>
+        <div class="prop-row"><div class="prop-label">Rotate</div><div class="prop-val">0.0°</div></div>
+        <div class="props-section-title">Appearance</div>
+        <div class="prop-row"><div class="prop-label">Opacity</div><div class="prop-val">100%</div></div>
+        <div class="prop-row">
+          <div class="prop-label">Fill</div>
+          <div class="color-chips">
+            <div class="chip" style="background:#1f2d42"></div>
+            <div class="chip" style="background:var(--emerald-glow)"></div>
+            <div class="chip" style="background:var(--royal-gold)"></div>
+            <div class="chip" style="background:var(--crimson-flame)"></div>
+            <div class="chip" style="background:var(--cyan-spark)"></div>
+          </div>
+        </div>
+        <div class="prop-row"><div class="prop-label">Radius</div><div class="prop-val">3 px</div></div>
+        <div class="props-section-title">Component</div>
+        <div class="prop-row"><div class="prop-label">Type</div><div class="prop-val go">Card</div></div>
+        <div class="prop-row"><div class="prop-label">Qty</div><div class="prop-val">60</div></div>
+        <div class="prop-row"><div class="prop-label">Size</div><div class="prop-val em">63 × 88 mm</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM INPUTS -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Form Inputs</span>
+    <span class="section-sub">.v-input — text, focus, error states</span>
+  </div>
+  <div class="input-col">
+    <div class="field">
+      <label>Game Title</label>
+      <input class="v-input" type="text" value="Verdant Conquest" />
+    </div>
+    <div class="field">
+      <label>Short Description</label>
+      <input class="v-input" type="text" placeholder="Describe your game in 160 characters..." />
+      <div class="field-hint">Shown on marketplace listing cards. Max 160 characters.</div>
+    </div>
+    <div class="field">
+      <label>Price (USD)</label>
+      <input class="v-input input-error" type="number" value="0" />
+      <div class="field-error">Paid games must have a price of at least $0.99</div>
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <input class="v-input" type="text" value="Strategy" style="border-color:var(--emerald-glow);box-shadow:0 0 0 3px rgba(124,92,255,0.14)" />
+    </div>
+  </div>
+</div>
+
+<!-- SUBSCRIPTION PRICING -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Subscription Tiers</span>
+    <span class="section-sub">Creator revenue share based on plan — 15% to 25% platform commission</span>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="p-tier-name">Free</div>
+      <div class="p-price">
+        <div class="p-amount"><sup>$</sup>0</div>
+        <span class="p-period">forever free</span>
+      </div>
+      <div class="p-commission">25% platform commission</div>
+      <ul class="p-features">
+        <li>3 projects</li>
+        <li>50 components / project</li>
+        <li>1 GB storage</li>
+        <li>3D board preview</li>
+        <li class="dim">No analytics</li>
+        <li class="dim">No team features</li>
+      </ul>
+      <button class="p-cta p-cta-outline">Get Started</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="tier-pill green">Most Popular</div>
+      <div class="p-tier-name">Creator</div>
+      <div class="p-price">
+        <div class="p-amount"><sup>$</sup>12</div>
+        <span class="p-period">per month</span>
+      </div>
+      <div class="p-commission">20% platform commission</div>
+      <ul class="p-features">
+        <li>10 projects</li>
+        <li>200 components / project</li>
+        <li>5 GB storage</li>
+        <li>3D board preview</li>
+        <li class="dim">No analytics</li>
+        <li class="dim">No team features</li>
+      </ul>
+      <button class="p-cta p-cta-primary">Start Creating</button>
+    </div>
+    <div class="pricing-card">
+      <div class="p-tier-name">Pro</div>
+      <div class="p-price">
+        <div class="p-amount"><sup>$</sup>29</div>
+        <span class="p-period">per month</span>
+      </div>
+      <div class="p-commission">17% platform commission</div>
+      <ul class="p-features">
+        <li>Unlimited projects</li>
+        <li>Unlimited components</li>
+        <li>25 GB storage</li>
+        <li>Analytics dashboard</li>
+        <li>Team collaboration</li>
+        <li class="dim">No priority support</li>
+      </ul>
+      <button class="p-cta p-cta-primary">Go Pro</button>
+    </div>
+    <div class="pricing-card gold-tier">
+      <div class="tier-pill gold">Best Value</div>
+      <div class="p-tier-name">Studio</div>
+      <div class="p-price">
+        <div class="p-amount" style="color:var(--royal-gold)"><sup style="color:var(--royal-gold-dark)">$</sup>79</div>
+        <span class="p-period">per month</span>
+      </div>
+      <div class="p-commission" style="color:var(--emerald-glow);border-color:rgba(124,92,255,0.15);background:rgba(124,92,255,0.04)">15% platform commission</div>
+      <ul class="p-features">
+        <li>Everything in Pro</li>
+        <li>100 GB storage</li>
+        <li>Custom domain</li>
+        <li>Advanced analytics</li>
+        <li>Priority support</li>
+        <li>White-label export</li>
+      </ul>
+      <button class="p-cta p-cta-gold">Go Studio</button>
+    </div>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Dashboard Stats</span>
+    <span class="section-sub">Creator dashboard analytics components</span>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card em">
+      <div class="stat-label-txt">Total Revenue</div>
+      <div class="stat-num em">$4,218</div>
+      <div class="stat-change">+18.4% this month</div>
+    </div>
+    <div class="stat-card go">
+      <div class="stat-label-txt">Total Sales</div>
+      <div class="stat-num go">1,047</div>
+      <div class="stat-change">+12 today</div>
+    </div>
+    <div class="stat-card cy">
+      <div class="stat-label-txt">Marketplace Views</div>
+      <div class="stat-num cy">32.1k</div>
+      <div class="stat-change">+5.2% this week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label-txt">Active Games</div>
+      <div class="stat-num pa">7</div>
+      <div class="stat-change down">2 in review</div>
+    </div>
+    <div class="stat-card em">
+      <div class="stat-label-txt">Avg. Rating</div>
+      <div class="stat-num em">4.7</div>
+      <div class="stat-change">across 342 reviews</div>
+    </div>
+    <div class="stat-card go">
+      <div class="stat-label-txt">Commission Tier</div>
+      <div class="stat-num go" style="font-size:1.4rem">Pro 17%</div>
+      <div class="stat-change">Upgrade saves $210/mo</div>
+    </div>
+  </div>
+</div>
+
+<!-- SHADOWS -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Shadow System</span>
+    <span class="section-sub">Glow shadows give depth — each accent color has its own shadow token</span>
+  </div>
+  <div class="shadow-grid">
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 4px 12px rgba(0,0,0,0.6)"></div><div class="shadow-name">shadow-md</div><div class="shadow-code">Default elevation</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 16px 48px rgba(0,0,0,0.8)"></div><div class="shadow-name">shadow-lg</div><div class="shadow-code">Modal, panel</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 20px rgba(124,92,255,0.35),0 0 8px rgba(124,92,255,0.2)"></div><div class="shadow-name">shadow-emerald</div><div class="shadow-code">Primary glow</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 20px rgba(245,196,81,0.4),0 0 8px rgba(245,196,81,0.2)"></div><div class="shadow-name">shadow-gold</div><div class="shadow-code">Premium glow</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 16px rgba(255,59,92,0.35)"></div><div class="shadow-name">shadow-crimson</div><div class="shadow-code">Danger glow</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 16px rgba(0,229,255,0.3)"></div><div class="shadow-name">shadow-cyan</div><div class="shadow-code">Interactive glow</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 0 3px rgba(124,92,255,0.3)"></div><div class="shadow-name">focus-ring</div><div class="shadow-code">Focus state</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:inset 0 2px 8px rgba(0,0,0,0.6)"></div><div class="shadow-name">shadow-inner</div><div class="shadow-code">Pressed/inset</div></div>
+  </div>
+</div>
+
+<!-- ANIMATIONS -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Animation Tokens</span>
+    <span class="section-sub">CSS keyframe animations defined in tailwind.config.ts</span>
+  </div>
+  <div class="anim-grid">
+    <div class="anim-demo">
+      <div class="float-demo">
+        <svg width="32" height="40" viewBox="0 0 32 40" fill="none"><rect x="3" y="3" width="26" height="34" rx="3" stroke="var(--emerald-glow)" stroke-width="1.5"/><circle cx="9" cy="9" r="3" fill="var(--emerald-glow)" opacity="0.7"/><path d="M5 22h22M5 28h16" stroke="var(--emerald-glow)" stroke-width="1" stroke-linecap="round" opacity="0.4"/></svg>
+      </div>
+      <div class="anim-label">animate-float</div>
+    </div>
+    <div class="anim-demo">
+      <div class="shimmer-box"></div>
+      <div class="anim-label">shimmer</div>
+    </div>
+    <div class="anim-demo">
+      <div class="pulse-dot"></div>
+      <div class="anim-label">pulse-emerald</div>
+    </div>
+    <div class="anim-demo">
+      <div class="glow-gem"></div>
+      <div class="anim-label">glow-pulse</div>
+    </div>
+    <div class="anim-demo">
+      <div class="orbit-ring"></div>
+      <div class="anim-label">spin-slow</div>
+    </div>
+    <div class="anim-demo">
+      <div class="card-flip-demo"></div>
+      <div class="anim-label">card-flip</div>
+    </div>
+  </div>
+</div>
+
+<!-- MONOREPO TREE -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Monorepo Structure</span>
+    <span class="section-sub">Turborepo + pnpm workspaces</span>
+  </div>
+  <div class="tree-block">
+<span class="tree-dir">velonix/</span>                           <span class="tree-comment"># Turborepo monorepo root</span>
+├── <span class="tree-file">package.json</span>                       <span class="tree-comment"># Root workspace config</span>
+├── <span class="tree-file">turbo.json</span>                         <span class="tree-comment"># Pipeline: build, dev, lint, test</span>
+├── <span class="tree-file">pnpm-workspace.yaml</span>
+├── <span class="tree-file">tsconfig.json</span>                      <span class="tree-comment"># Strict base TS config</span>
+├── <span class="tree-file">.env.example</span>                       <span class="tree-comment"># All env vars documented</span>
+│
+├── <span class="tree-dir">apps/</span>
+│   ├── <span class="tree-dir">web/</span>                             <span class="tree-comment"># @velonix/web — Next.js 15</span>
+│   │   ├── <span class="tree-file">next.config.ts</span>
+│   │   ├── <span class="tree-file">tailwind.config.ts</span>             <span class="tree-comment"># Full gaming theme</span>
+│   │   └── <span class="tree-dir">src/</span>
+│   │       ├── <span class="tree-dir">app/</span>                       <span class="tree-comment"># App Router pages</span>
+│   │       │   ├── <span class="tree-dir">(auth)/login + register</span>
+│   │       │   ├── <span class="tree-dir">dashboard/</span>
+│   │       │   ├── <span class="tree-dir">studio/[gameId]/</span>           <span class="tree-comment"># Designer Studio</span>
+│   │       │   ├── <span class="tree-dir">marketplace/</span>
+│   │       │   └── <span class="tree-dir">settings/</span>
+│   │       ├── <span class="tree-dir">components/</span>
+│   │       │   ├── <span class="tree-dir">atoms/</span>                     <span class="tree-comment"># Button, Input, Badge</span>
+│   │       │   ├── <span class="tree-dir">molecules/</span>                 <span class="tree-comment"># GameCard, StatBlock</span>
+│   │       │   ├── <span class="tree-dir">organisms/</span>                 <span class="tree-comment"># Navbar, Marketplace grid</span>
+│   │       │   ├── <span class="tree-dir">templates/</span>                 <span class="tree-comment"># Providers, layouts</span>
+│   │       │   └── <span class="tree-dir">three/</span>
+│   │       │       └── <span class="tree-key">BoardPreview.tsx</span>           <span class="tree-comment"># R3F 3D tabletop scene</span>
+│   │       ├── <span class="tree-dir">stores/</span>
+│   │       │   └── <span class="tree-key">studioStore.ts</span>             <span class="tree-comment"># Zustand + Immer, 50-step undo</span>
+│   │       └── <span class="tree-dir">styles/globals.css</span>
+│   │
+│   └── <span class="tree-dir">api/</span>                             <span class="tree-comment"># @velonix/api — NestJS</span>
+│       └── <span class="tree-dir">src/</span>
+│           ├── <span class="tree-file">main.ts</span>                    <span class="tree-comment"># Bootstrap, Swagger, CORS</span>
+│           ├── <span class="tree-file">app.module.ts</span>              <span class="tree-comment"># Root module</span>
+│           ├── <span class="tree-dir">auth/</span>                      <span class="tree-comment"># JWT + Passport strategies</span>
+│           ├── <span class="tree-dir">users/</span>                     <span class="tree-comment"># UserEntity, CRUD</span>
+│           ├── <span class="tree-dir">games/</span>                     <span class="tree-comment"># GameEntity, studio data</span>
+│           ├── <span class="tree-dir">marketplace/</span>               <span class="tree-comment"># Listings, search, reviews</span>
+│           ├── <span class="tree-dir">subscriptions/</span>             <span class="tree-comment"># Stripe subscription mgmt</span>
+│           ├── <span class="tree-dir">payments/</span>                  <span class="tree-comment"># Stripe Connect + webhooks</span>
+│           ├── <span class="tree-dir">config/</span>                    <span class="tree-comment"># app, jwt, stripe, storage</span>
+│           └── <span class="tree-dir">database/</span>                  <span class="tree-comment"># TypeORM config, migrations</span>
+│
+└── <span class="tree-dir">packages/</span>
+    ├── <span class="tree-pkg">@velonix/types</span>                   <span class="tree-comment"># Shared TS interfaces</span>
+    │   └── User, Game, Review, Purchase, Analytics...
+    ├── <span class="tree-pkg">@velonix/design-tokens</span>           <span class="tree-comment"># Colors, typography, CSS vars</span>
+    │   ├── <span class="tree-file">src/index.ts</span>               <span class="tree-comment"># Typed token constants</span>
+    │   └── <span class="tree-file">src/tokens.css</span>             <span class="tree-comment"># CSS custom properties</span>
+    ├── <span class="tree-pkg">@velonix/ui</span>                      <span class="tree-comment"># Shared ShadCN components</span>
+    └── <span class="tree-pkg">@velonix/game-engine</span>             <span class="tree-comment"># Validators, calculators, factories</span>
+        ├── validators.ts                  <span class="tree-comment"># Zod schemas (web + api)</span>
+        ├── calculators.ts                 <span class="tree-comment"># Commission math, grid layout</span>
+        └── factories.ts                   <span class="tree-comment"># Default game/component builders</span>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-logo">VELONIX</div>
+  <div class="footer-sub">Play. Think. Conquer. — Design System v0.1.0</div>
+</div>
+
+</div>
+</body>
+</html>

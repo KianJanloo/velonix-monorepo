@@ -6,3 +6,4 @@ export * from "./usePlan";
 export * from "./useBlog";
 export * from "./useAdmin";
 export * from "./useSubscriptions";
+export * from "./useNotifications";

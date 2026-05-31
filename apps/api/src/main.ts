@@ -15,6 +15,49 @@ import { AppModule } from "./app.module";
 import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
 import { ResponseWrapInterceptor } from "./common/interceptors/response-wrap.interceptor";
 
+// ── Velonix dark theme for Swagger UI ─────────────────────────────────────────
+const VELONIX_SWAGGER_DARK_CSS = `
+  body, .swagger-ui { background:#0a0a0a !important; color:#e8d5b8 !important; }
+  .swagger-ui .topbar { background:#1c140f; border-bottom:1px solid #3a2a1f; }
+  .swagger-ui .topbar .download-url-wrapper { display:none; }
+  .swagger-ui .info .title,
+  .swagger-ui .info h1, .swagger-ui .info h2, .swagger-ui .info h3,
+  .swagger-ui .info p, .swagger-ui .info li,
+  .swagger-ui .scheme-container { color:#e8d5b8 !important; }
+  .swagger-ui .scheme-container { background:#1c140f !important; box-shadow:none; border:1px solid #3a2a1f; }
+  .swagger-ui .opblock-tag { color:#f5c451 !important; border-bottom:1px solid #3a2a1f; }
+  .swagger-ui .opblock { background:#1c140f; border:1px solid #3a2a1f; box-shadow:none; }
+  .swagger-ui .opblock .opblock-summary-description,
+  .swagger-ui .opblock-description-wrapper p,
+  .swagger-ui table thead tr td, .swagger-ui table thead tr th,
+  .swagger-ui .parameter__name, .swagger-ui .parameter__type,
+  .swagger-ui .response-col_status, .swagger-ui .response-col_description,
+  .swagger-ui label, .swagger-ui .tab li, .swagger-ui .opblock-title_normal p { color:#c4b49a !important; }
+  .swagger-ui .opblock.opblock-post { border-color:#7c5cff; background:rgba(124,92,255,0.06); }
+  .swagger-ui .opblock.opblock-post .opblock-summary-method { background:#7c5cff; }
+  .swagger-ui .opblock.opblock-get { border-color:#00e5ff; background:rgba(0,229,255,0.05); }
+  .swagger-ui .opblock.opblock-get .opblock-summary-method { background:#00b8d4; }
+  .swagger-ui .opblock.opblock-patch { border-color:#f5c451; background:rgba(245,196,81,0.05); }
+  .swagger-ui .opblock.opblock-patch .opblock-summary-method { background:#d4a93a; }
+  .swagger-ui .opblock.opblock-delete { border-color:#ff3b5c; background:rgba(255,59,92,0.05); }
+  .swagger-ui .opblock.opblock-delete .opblock-summary-method { background:#ff3b5c; }
+  .swagger-ui .opblock-summary-path, .swagger-ui .opblock-summary-path__deprecated { color:#e8d5b8 !important; }
+  .swagger-ui input, .swagger-ui textarea, .swagger-ui select {
+    background:#241a12 !important; color:#e8d5b8 !important; border:1px solid #3a2a1f !important;
+  }
+  .swagger-ui .btn { color:#e8d5b8; border-color:#3a2a1f; background:#241a12; }
+  .swagger-ui .btn.authorize { color:#7c5cff; border-color:#7c5cff; }
+  .swagger-ui .btn.execute { background:#7c5cff; color:#0a0a0a; border-color:#7c5cff; }
+  .swagger-ui .model, .swagger-ui .model-title, .swagger-ui .models, .swagger-ui section.models { color:#c4b49a !important; }
+  .swagger-ui section.models { background:#1c140f; border:1px solid #3a2a1f; }
+  .swagger-ui .model-box { background:#241a12; }
+  .swagger-ui .highlight-code, .swagger-ui .microlight { background:#0a0a0a !important; }
+  .swagger-ui .responses-inner h4, .swagger-ui .responses-inner h5,
+  .swagger-ui .opblock-section-header { background:#241a12 !important; color:#e8d5b8 !important; }
+  .swagger-ui .opblock-section-header h4, .swagger-ui .opblock-section-header label { color:#e8d5b8 !important; }
+  .swagger-ui svg { fill:#c4b49a; }
+`;
+
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
     // Disable default logger in favour of Winston
@@ -103,6 +146,7 @@ async function bootstrap(): Promise<void> {
         persistAuthorization: true,
       },
       customSiteTitle: "Velonix API Docs",
+      customCss: VELONIX_SWAGGER_DARK_CSS,
     });
 
     console.log(`Swagger docs available at http://localhost:${port}/api/docs`);

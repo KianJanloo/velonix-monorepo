@@ -73,7 +73,7 @@ export function BoardPreview({
     rim.position.set(-2, 2, -4);
     scene.add(rim);
 
-    const emerald = new THREE.PointLight(0x00d4a5, 0.25, 4, 2);
+    const emerald = new THREE.PointLight(0x7c5cff, 0.25, 4, 2);
     emerald.position.set(0, 1.5, 0);
     scene.add(emerald);
 
@@ -102,7 +102,7 @@ export function BoardPreview({
 
     // ── Cards ──────────────────────────────────────────────────────────────
     const cardPositions: [number, number, number, number, string][] = [
-      [-0.9, 0.06, -0.4, 0.15, "#00d4a5"],
+      [-0.9, 0.06, -0.4, 0.15, "#7c5cff"],
       [-0.2, 0.065, 0.2, -0.08, "#f5c451"],
       [0.7, 0.06, -0.5, 0.22, "#00e5ff"],
       [0.9, 0.06, 0.3, -0.18, "#ff3b5c"],
@@ -147,7 +147,7 @@ export function BoardPreview({
     }
 
     const tokens = [
-      makeToken(-1.2, 0.7, 0x00d4a5),
+      makeToken(-1.2, 0.7, 0x7c5cff),
       makeToken(-0.5, -0.8, 0xf5c451),
       makeToken(0.3, 0.85, 0xff3b5c),
       makeToken(1.1, 0.6, 0x00e5ff),

@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Like } from "typeorm";
 import { UserEntity } from "../users/user.entity";
 import { GameEntity } from "../games/game.entity";
+import { NotificationsService } from "../notifications/notifications.service";
 import type { UserRole, GameStatus } from "@velonix/types";
 
 @Injectable()
@@ -12,6 +13,7 @@ export class AdminService {
     private readonly userRepo: Repository<UserEntity>,
     @InjectRepository(GameEntity)
     private readonly gameRepo: Repository<GameEntity>,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // ── Statistics ────────────────────────────────────────────────────────────
@@ -132,7 +134,15 @@ export class AdminService {
     if (!game) throw new NotFoundException("Game not found.");
     game.status = "published";
     game.publishedAt = new Date();
-    return this.gameRepo.save(game);
+    const saved = await this.gameRepo.save(game);
+    await this.notifications.create({
+      userId: game.creatorId,
+      type: "game_approved",
+      title: "Your game is live! 🎉",
+      body: `"${game.title}" has been approved and is now published on the marketplace.`,
+      linkUrl: `/marketplace/${game.id}`,
+    });
+    return saved;
   }
 
   async rejectGame(id: string, reason: string) {
@@ -140,7 +150,15 @@ export class AdminService {
     if (!game) throw new NotFoundException("Game not found.");
     game.status = "rejected";
     game.rejectionReason = reason;
-    return this.gameRepo.save(game);
+    const saved = await this.gameRepo.save(game);
+    await this.notifications.create({
+      userId: game.creatorId,
+      type: "game_rejected",
+      title: "Game submission needs changes",
+      body: `"${game.title}" was not approved. Reason: ${reason}`,
+      linkUrl: `/studio/${game.id}`,
+    });
+    return saved;
   }
 
   async deleteGame(id: string) {

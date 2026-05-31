@@ -77,7 +77,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     maxStorageGb: 1,
     commissionRate: 25,
     hasAnalytics: false,
-    has3DPreview: true,
+    has3DPreview: false,
     hasCustomDomain: false,
     hasTeamCollaboration: false,
     hasPrioritySupport: false,

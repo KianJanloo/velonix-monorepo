@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { VelonixLogo } from "@/components/atoms/VelonixLogo";
 import { Button } from "@/components/atoms/Button";
+import { ThemeToggle } from "@/components/atoms/ThemeToggle";
+import { NotificationBell } from "@/components/organisms/NotificationBell";
 import { cn } from "@/lib/utils";
 import { useCurrentUser, useLogout } from "@/hooks/useAuth";
 
@@ -47,9 +49,11 @@ export function Navbar() {
         </nav>
 
         {/* Right side */}
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <>
+              <NotificationBell />
               <Link
                 href={`/profile/${user.username}`}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-warm-wood transition-colors"
