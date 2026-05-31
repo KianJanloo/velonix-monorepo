@@ -318,6 +318,20 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   const { data: game } = useGame(isNew ? "" : gameId);
   const publish = usePublishGame(gameId);
 
+  // Hydrate canvas from saved studioData (once per game load)
+  const hydratedRef = useRef<string | null>(null);
+  const suppressDirtyRef = useRef(false);
+  useEffect(() => {
+    if (!game || hydratedRef.current === game.id) return;
+    hydratedRef.current = game.id;
+    const saved = (game.studioData as { components?: CanvasComp[] } | null)?.components;
+    if (Array.isArray(saved) && saved.length > 0) {
+      suppressDirtyRef.current = true;
+      setComponents(saved);
+      setSelectedId(saved[0]?.id ?? null);
+    }
+  }, [game]);
+
   // Drag state (ref to avoid re-renders during drag)
   const dragRef = useRef<{
     active: boolean;
@@ -470,6 +484,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   const mountedRef = useRef(false);
   useEffect(() => {
     if (!mountedRef.current) { mountedRef.current = true; return; }
+    if (suppressDirtyRef.current) { suppressDirtyRef.current = false; return; }
     markDirty();
   }, [components, markDirty]);
 

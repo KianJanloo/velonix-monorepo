@@ -2,11 +2,23 @@ import {
   Controller, Get, Patch, Delete, Param, Query, Body,
   UseGuards,
 } from "@nestjs/common";
-import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiProperty, ApiBody, ApiParam } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { AdminService } from "./admin.service";
 import type { UserRole, GameStatus } from "@velonix/types";
+
+// ── Swagger DTO shapes ────────────────────────────────────────────────────────
+
+class UpdateRoleBodyDto {
+  @ApiProperty({ enum: ["user", "creator", "admin"], example: "creator", description: "New role for the user" })
+  role!: UserRole;
+}
+
+class RejectGameBodyDto {
+  @ApiProperty({ example: "Contains copyrighted artwork.", description: "Reason shown to the creator" })
+  reason!: string;
+}
 
 @ApiTags("admin")
 @Controller({ path: "admin", version: "1" })
@@ -47,7 +59,9 @@ export class AdminController {
 
   @Patch("users/:id/role")
   @ApiOperation({ summary: "Change user role" })
-  updateRole(@Param("id") id: string, @Body() body: { role: UserRole }) {
+  @ApiParam({ name: "id", format: "uuid" })
+  @ApiBody({ type: UpdateRoleBodyDto })
+  updateRole(@Param("id") id: string, @Body() body: UpdateRoleBodyDto) {
     return this.adminService.updateUserRole(id, body.role);
   }
 
@@ -83,7 +97,9 @@ export class AdminController {
 
   @Patch("games/:id/reject")
   @ApiOperation({ summary: "Reject game submission" })
-  rejectGame(@Param("id") id: string, @Body() body: { reason: string }) {
+  @ApiParam({ name: "id", format: "uuid" })
+  @ApiBody({ type: RejectGameBodyDto })
+  rejectGame(@Param("id") id: string, @Body() body: RejectGameBodyDto) {
     return this.adminService.rejectGame(id, body.reason);
   }
 

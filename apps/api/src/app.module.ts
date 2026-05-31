@@ -15,6 +15,7 @@ import { DatabaseConfig } from "./config/database.config";
 import {
   appConfig,
   jwtConfig,
+  oauthConfig,
   stripeConfig,
   storageConfig,
 } from "./config/app.config";
@@ -34,7 +35,7 @@ import { BlogModule } from "./blog/blog.module";
 
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, jwtConfig, stripeConfig, storageConfig],
+      load: [appConfig, jwtConfig, oauthConfig, stripeConfig, storageConfig],
 
       envFilePath: [
         path.resolve(process.cwd(), "../../.env.local"),

@@ -7,6 +7,21 @@ import * as bcrypt from "bcryptjs";
 import { UserEntity } from "../users/user.entity";
 import type { RegisterDto, LoginDto } from "@velonix/game-engine";
 
+interface JwtPayload {
+  sub: string;
+  email: string;
+  username: string;
+  role: string;
+  tier: string;
+}
+
+export interface GoogleProfile {
+  email: string;
+  displayName: string;
+  avatarUrl?: string;
+  googleId: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -15,6 +30,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService
   ) {}
+
+  // ── Registration / Login ────────────────────────────────────────────────
 
   async register(dto: RegisterDto) {
     const exists = await this.userRepo.findOne({
@@ -46,17 +63,13 @@ export class AuthService {
     const user = await this.userRepo.findOne({
       where: { email: dto.email },
       select: {
-        id: true,
-        email: true,
-        username: true,
-        displayName: true,
-        role: true,
-        subscriptionTier: true,
-        passwordHash: true,
+        id: true, email: true, username: true, displayName: true,
+        avatarUrl: true, bio: true, role: true, subscriptionTier: true,
+        totalSales: true, createdAt: true, passwordHash: true,
       },
     });
 
-    if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) {
+    if (!user || !user.passwordHash || !(await bcrypt.compare(dto.password, user.passwordHash))) {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
@@ -64,8 +77,90 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
-  private issueTokens(user: UserEntity) {
-    const payload = {
+  // ── Google OAuth ──────────────────────────────────────────────────────────
+
+  /** Find or create a user from a verified Google profile, then issue tokens. */
+  async validateGoogleUser(profile: GoogleProfile) {
+    let user = await this.userRepo.findOne({ where: { email: profile.email } });
+
+    if (!user) {
+      const base = profile.email.split("@")[0]!.replace(/[^a-z0-9_-]/gi, "").toLowerCase().slice(0, 24) || "user";
+      let username = base;
+      let n = 0;
+      while (await this.userRepo.findOne({ where: { username } })) {
+        n += 1;
+        username = `${base}${n}`;
+      }
+
+      user = this.userRepo.create({
+        email: profile.email,
+        username,
+        displayName: profile.displayName || base,
+        avatarUrl: profile.avatarUrl ?? null,
+        // OAuth users have no usable local password
+        passwordHash: await bcrypt.hash(`oauth:${profile.googleId}:${Date.now()}`, 10),
+        isEmailVerified: true,
+      });
+      user = await this.userRepo.save(user);
+    } else if (!user.avatarUrl && profile.avatarUrl) {
+      user.avatarUrl = profile.avatarUrl;
+      await this.userRepo.save(user);
+    }
+
+    await this.userRepo.update(user.id, { lastLoginAt: new Date() });
+    return this.issueTokens(user);
+  }
+
+  // ── Refresh / Logout ────────────────────────────────────────────────────
+
+  async refresh(refreshToken: string) {
+    let payload: JwtPayload;
+    try {
+      payload = this.jwtService.verify<JwtPayload>(refreshToken, {
+        secret: this.config.get<string>("jwt.refreshSecret"),
+      });
+    } catch {
+      throw new UnauthorizedException("Invalid or expired refresh token.");
+    }
+
+    const user = await this.userRepo.findOne({
+      where: { id: payload.sub },
+      select: {
+        id: true, email: true, username: true, displayName: true,
+        avatarUrl: true, bio: true, role: true, subscriptionTier: true,
+        totalSales: true, createdAt: true, refreshTokenHash: true,
+      },
+    });
+
+    if (!user || !user.refreshTokenHash) {
+      throw new UnauthorizedException("Session expired. Please sign in again.");
+    }
+
+    const valid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    if (!valid) {
+      // Possible token reuse — revoke the session
+      await this.userRepo.update(user.id, { refreshTokenHash: null });
+      throw new UnauthorizedException("Session expired. Please sign in again.");
+    }
+
+    return this.issueTokens(user); // rotates the refresh token
+  }
+
+  async logout(userId: string) {
+    await this.userRepo.update(userId, { refreshTokenHash: null });
+    return { message: "Logged out." };
+  }
+
+  async getMe(userId: string) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+    return user.toPublicProfile();
+  }
+
+  // ── Token issuance ────────────────────────────────────────────────────────
+
+  private async issueTokens(user: UserEntity) {
+    const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       username: user.username,
@@ -73,8 +168,22 @@ export class AuthService {
       tier: user.subscriptionTier,
     };
 
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.config.get<string>("jwt.accessSecret"),
+      expiresIn: this.config.get<string>("jwt.accessExpiresIn") ?? "15m",
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.config.get<string>("jwt.refreshSecret"),
+      expiresIn: this.config.get<string>("jwt.refreshExpiresIn") ?? "30d",
+    });
+
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    await this.userRepo.update(user.id, { refreshTokenHash });
+
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken,
+      refreshToken,
       user: user.toPublicProfile(),
     };
   }

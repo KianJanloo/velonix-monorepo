@@ -89,7 +89,15 @@ export const CreateGameSchema = BaseCreateGameSchema.refine(
   }
 );
 
-export const UpdateGameSchema = BaseCreateGameSchema.partial();
+export const UpdateGameSchema = BaseCreateGameSchema.partial().extend({
+  // Studio editor state — arbitrary JSON snapshot of components/board design
+  studioData: z.record(z.string(), z.unknown()).optional(),
+  thumbnailUrl: z.string().url().nullable().optional(),
+  // Pricing (also editable from the studio / game settings)
+  isFree: z.boolean().optional(),
+  priceUsd: z.number().int().min(0).max(99999).nullable().optional(),
+  hasTrial: z.boolean().optional(),
+});
 
 export const SetGamePricingSchema = z.object({
   isFree: z.boolean(),

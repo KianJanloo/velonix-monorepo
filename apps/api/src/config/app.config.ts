@@ -28,6 +28,20 @@ export const jwtConfig = registerAs("jwt", () => ({
   refreshExpiresIn: process.env["JWT_REFRESH_EXPIRES"] ?? "30d",
 }));
 
+// ── OAuth (Google) ─────────────────────────────────────────────────────────
+
+export const oauthConfig = registerAs("oauth", () => ({
+  google: {
+    clientId: process.env["GOOGLE_CLIENT_ID"] ?? "",
+    clientSecret: process.env["GOOGLE_CLIENT_SECRET"] ?? "",
+    callbackUrl:
+      process.env["GOOGLE_CALLBACK_URL"] ??
+      `${process.env["API_URL"] ?? "http://localhost:3001"}/api/v1/auth/google/callback`,
+    enabled: !!process.env["GOOGLE_CLIENT_ID"] && !!process.env["GOOGLE_CLIENT_SECRET"],
+  },
+  webAppUrl: process.env["APP_URL"] ?? process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000",
+}));
+
 // ── Stripe ───────────────────────────────────────────────────────────────────
 
 export const stripeConfig = registerAs("stripe", () => ({
