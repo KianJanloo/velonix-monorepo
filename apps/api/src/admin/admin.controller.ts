@@ -3,6 +3,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiProperty, ApiBody, ApiParam } from "@nestjs/swagger";
+import { IsIn, IsString, MaxLength } from "class-validator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { AdminService } from "./admin.service";
@@ -11,12 +12,17 @@ import type { UserRole, GameStatus } from "@velonix/types";
 // ── Swagger DTO shapes ────────────────────────────────────────────────────────
 
 class UpdateRoleBodyDto {
+  // class-validator decorators are required — the global ValidationPipe runs
+  // with whitelist:true and strips any property without a validation decorator.
   @ApiProperty({ enum: ["user", "creator", "admin"], example: "creator", description: "New role for the user" })
+  @IsIn(["user", "creator", "admin"])
   role!: UserRole;
 }
 
 class RejectGameBodyDto {
   @ApiProperty({ example: "Contains copyrighted artwork.", description: "Reason shown to the creator" })
+  @IsString()
+  @MaxLength(500)
   reason!: string;
 }
 

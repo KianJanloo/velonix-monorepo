@@ -5,7 +5,9 @@
 
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, VersioningType } from "@nestjs/common";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { ConfigService } from "@nestjs/config";
+import { join } from "path";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import helmet from "helmet";
@@ -59,10 +61,13 @@ const VELONIX_SWAGGER_DARK_CSS = `
 `;
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     // Disable default logger in favour of Winston
     bufferLogs: true,
   });
+
+  // ── Serve uploaded images ──────────────────────────────────────────────────
+  app.useStaticAssets(join(process.cwd(), "uploads"), { prefix: "/uploads/" });
 
   // ── Winston logger ───────────────────────────────────────────────────────
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));

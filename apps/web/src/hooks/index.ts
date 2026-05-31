@@ -3,6 +3,8 @@ export * from "./useGames";
 export * from "./useProfile";
 export * from "./useStudio";
 export * from "./usePlan";
+export * from "./usePlans";
+export * from "./useUpload";
 export * from "./useBlog";
 export * from "./useAdmin";
 export * from "./useSubscriptions";

@@ -2,84 +2,25 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSubscriptionTiers, useSubscriptionCheckout } from "@/hooks/useSubscriptions";
+import { useSubscriptionCheckout } from "@/hooks/useSubscriptions";
+import { usePlans } from "@/hooks/usePlans";
 import { useCurrentUser } from "@/hooks/useAuth";
 
-const TIER_META: Record<string, {
-  label: string; tagline: string; color: string; highlighted: boolean;
-  features: string[];
-}> = {
-  free: {
-    label: "Free", tagline: "Start your journey",
-    color: "border-warm-wood bg-rich-wood-dark",
-    highlighted: false,
-    features: [
-      "3 game projects",
-      "Basic component library",
-      "2D preview & export",
-      "Marketplace publishing",
-      "Community support",
-      "25% commission rate",
-    ],
-  },
-  creator: {
-    label: "Creator", tagline: "For dedicated designers",
-    color: "border-emerald-glow/50 bg-emerald-ghost shadow-[0_0_40px_rgba(124,92,255,0.12)]",
-    highlighted: true,
-    features: [
-      "15 game projects",
-      "Full component library",
-      "3D preview mode",
-      "Analytics dashboard",
-      "Priority review queue",
-      "Email support",
-      "20% commission rate",
-    ],
-  },
-  pro: {
-    label: "Pro", tagline: "Scale your studio",
-    color: "border-royal-gold/40 bg-rich-wood-dark",
-    highlighted: false,
-    features: [
-      "Unlimited game projects",
-      "Custom domain",
-      "Advanced analytics",
-      "Team collaboration (2 seats)",
-      "Rule engine access",
-      "Priority support",
-      "17% commission rate",
-    ],
-  },
-  studio: {
-    label: "Studio", tagline: "For teams & agencies",
-    color: "border-warm-wood-light bg-rich-wood-dark",
-    highlighted: false,
-    features: [
-      "Everything in Pro",
-      "10 team seats",
-      "White-label export",
-      "API access",
-      "Dedicated account manager",
-      "SLA support",
-      "15% commission rate",
-    ],
-  },
-};
-
-const TIER_PRICES: Record<string, { monthly: number; yearly: number }> = {
-  free:    { monthly: 0,  yearly: 0 },
-  creator: { monthly: 12, yearly: 99 },
-  pro:     { monthly: 29, yearly: 249 },
-  studio:  { monthly: 79, yearly: 699 },
+// Presentation-only metadata (colors/highlight); pricing & features come from the API.
+const TIER_STYLE: Record<string, { tagline: string; color: string; highlighted: boolean }> = {
+  free:    { tagline: "Start your journey", color: "border-warm-wood bg-rich-wood-dark", highlighted: false },
+  creator: { tagline: "For dedicated designers", color: "border-emerald-glow/50 bg-emerald-ghost shadow-[0_0_40px_rgba(124,92,255,0.12)]", highlighted: true },
+  pro:     { tagline: "Scale your studio", color: "border-royal-gold/40 bg-rich-wood-dark", highlighted: false },
+  studio:  { tagline: "For teams & agencies", color: "border-warm-wood-light bg-rich-wood-dark", highlighted: false },
 };
 
 export default function PricingPage() {
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
-  const { isLoading } = useSubscriptionTiers();
+  const { data: plans, isLoading } = usePlans();
   const checkout = useSubscriptionCheckout();
   const user = useCurrentUser();
 
-  const tierOrder = ["free", "creator", "pro", "studio"];
+  const sortedPlans = [...(plans ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
 
   function handleUpgrade(tier: string) {
     if (tier === "free") return;
@@ -125,18 +66,16 @@ export default function PricingPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 items-start">
-            {tierOrder.map(tierKey => {
-              const meta = TIER_META[tierKey];
-              const prices = TIER_PRICES[tierKey];
-              if (!meta) return null;
-
-              const isCurrentPlan = user?.subscriptionTier === tierKey;
-              const price = interval === "monthly" ? prices?.monthly : prices?.yearly;
+            {sortedPlans.map(plan => {
+              const style = TIER_STYLE[plan.tier] ?? { tagline: "", color: "border-warm-wood bg-rich-wood-dark", highlighted: false };
+              const isCurrentPlan = user?.subscriptionTier === plan.tier;
+              const cents = interval === "monthly" ? plan.priceMonthly : plan.priceYearly;
+              const price = cents / 100;
               const perPeriod = interval === "monthly" ? "/mo" : "/yr";
 
               return (
-                <div key={tierKey} className={`relative flex flex-col rounded-2xl border p-6 transition-all ${meta.color}`}>
-                  {meta.highlighted && (
+                <div key={plan.tier} className={`relative flex flex-col rounded-2xl border p-6 transition-all ${style.color}`}>
+                  {style.highlighted && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-glow text-deep-void text-2xs font-ui font-bold px-3 py-1 rounded-full">
                       Most Popular
                     </span>
@@ -148,18 +87,19 @@ export default function PricingPage() {
                   )}
 
                   <div className="mb-5">
-                    <p className="font-display text-sm font-bold tracking-[0.1em] text-parchment-mid uppercase mb-1">{meta.label}</p>
-                    <p className="text-soft-gray-dark text-xs font-ui mb-3">{meta.tagline}</p>
+                    <p className="font-display text-sm font-bold tracking-[0.1em] text-parchment-mid uppercase mb-1">{plan.name}</p>
+                    <p className="text-soft-gray-dark text-xs font-ui mb-3">{plan.description || style.tagline}</p>
                     <div className="flex items-baseline gap-1">
                       <span className="font-display text-4xl font-black text-parchment-light">
                         {price === 0 ? "Free" : `$${price}`}
                       </span>
                       {price !== 0 && <span className="text-soft-gray text-sm font-ui">{perPeriod}</span>}
                     </div>
+                    <p className="text-2xs text-soft-gray-dark font-ui mt-1">{plan.commissionRate}% marketplace commission</p>
                   </div>
 
                   <ul className="flex flex-col gap-2.5 mb-6 flex-1">
-                    {meta.features.map(f => (
+                    {plan.features.map(f => (
                       <li key={f} className="flex items-start gap-2 text-sm font-ui text-parchment-mid">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-0.5 text-emerald-glow">
                           <path d="M2.5 7l3 3 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -169,21 +109,21 @@ export default function PricingPage() {
                     ))}
                   </ul>
 
-                  {tierKey === "free" ? (
+                  {plan.tier === "free" ? (
                     <Link href="/auth/register" className="w-full py-2.5 rounded-xl text-sm font-ui font-bold text-center border border-warm-wood-light text-parchment-light hover:border-parchment-mid transition-all">
                       {user ? "You're on Free" : "Get started free"}
                     </Link>
                   ) : (
                     <button
-                      onClick={() => handleUpgrade(tierKey)}
+                      onClick={() => handleUpgrade(plan.tier)}
                       disabled={isCurrentPlan || checkout.isPending}
                       className={`w-full py-2.5 rounded-xl text-sm font-ui font-bold transition-all disabled:opacity-60 ${
-                        meta.highlighted
+                        style.highlighted
                           ? "bg-emerald-glow text-deep-void hover:bg-emerald-bright"
                           : "bg-warm-wood text-parchment-light hover:bg-warm-wood-light"
                       }`}
                     >
-                      {isCurrentPlan ? "Current plan" : checkout.isPending ? "Redirecting…" : `Upgrade to ${meta.label}`}
+                      {isCurrentPlan ? "Current plan" : checkout.isPending ? "Redirecting…" : `Upgrade to ${plan.name}`}
                     </button>
                   )}
                 </div>

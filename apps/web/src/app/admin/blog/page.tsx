@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAdminBlogPosts, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost, type BlogPost } from "@/hooks/useBlog";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/atoms/Button";
+import { ImageUploadField } from "@/components/molecules/ImageUploadField";
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
@@ -89,11 +90,13 @@ export default function AdminBlogPage() {
             <textarea className="v-input resize-none h-20" value={editor.excerpt}
               onChange={e => setEditor({ ...editor, excerpt: e.target.value })} />
           </div>
-          <div>
-            <label className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider block mb-1.5">Cover Image URL</label>
-            <input className="v-input font-mono text-sm" value={editor.coverImageUrl} placeholder="https://…"
-              onChange={e => setEditor({ ...editor, coverImageUrl: e.target.value })} />
-          </div>
+          <ImageUploadField
+            label="Cover Image"
+            shape="cover"
+            value={editor.coverImageUrl || null}
+            onChange={(url) => setEditor({ ...editor, coverImageUrl: url ?? "" })}
+            hint="Recommended 1200×630. Max 5MB."
+          />
           <div>
             <label className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider block mb-1.5">Tags (comma separated)</label>
             <input className="v-input" value={editor.tags} placeholder="design, strategy, news"
@@ -133,7 +136,8 @@ export default function AdminBlogPage() {
       </div>
 
       <div className="v-card overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px]">
           <thead className="border-b border-warm-wood">
             <tr>
               {["Title", "Status", "Views", "Published", "Actions"].map(h => (
@@ -185,6 +189,7 @@ export default function AdminBlogPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {data && data.totalPages > 1 && (

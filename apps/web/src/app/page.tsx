@@ -329,7 +329,7 @@ function CTABanner() {
             <circle cx="40" cy="15" r="3.5" fill="url(#vg2)" />
           </svg>
         </div>
-        <h2 className="font-display text-4xl md:text-5xl font-bold tracking-display gradient-gold-parchment mb-4">
+        <h2 className="font-display text-4xl md:text-5xl font-bold tracking-display gradient-gold-parchment mb-4 leading-[1.2] pb-1">
           Your game deserves a stage
         </h2>
         <p className="font-body text-lg text-parchment-mid italic mb-10 max-w-xl mx-auto">

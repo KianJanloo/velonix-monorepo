@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
-import { useMyGames, useDeleteGame, usePublishGame } from "@/hooks/useGames";
+import { useMyGames, useDeleteGame } from "@/hooks/useGames";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { GameRecord } from "@/types/game";
 
@@ -84,8 +84,6 @@ function GameRow({
   onDelete: () => void;
   isDeleting: boolean;
 }) {
-  const publish = usePublishGame(game.id);
-
   return (
     <div className="v-card flex items-center gap-4 p-4 hover:border-warm-wood-light">
       {/* Thumbnail */}
@@ -129,15 +127,15 @@ function GameRow({
         <Link href={`/studio/${game.id}`}>
           <Button variant="ghost" size="sm">Edit</Button>
         </Link>
-        {game.status === "draft" && (
-          <Button
-            variant="primary"
-            size="sm"
-            isLoading={publish.isPending}
-            onClick={() => publish.mutate()}
-          >
-            Publish
-          </Button>
+        {(game.status === "draft" || game.status === "rejected") && (
+          <Link href={`/studio/${game.id}/publish`}>
+            <Button variant="primary" size="sm">Publish</Button>
+          </Link>
+        )}
+        {game.status === "published" && (
+          <Link href={`/marketplace/${game.id}`}>
+            <Button variant="ghost" size="sm">View</Button>
+          </Link>
         )}
         <ConfirmDialog
           title="Delete game?"

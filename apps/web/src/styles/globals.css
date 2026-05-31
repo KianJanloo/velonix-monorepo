@@ -58,6 +58,27 @@
   }
 }
 
+/* ── Gradient text must not clip descenders (g, y, p…) ──────────────────── */
+.gradient-gold-parchment {
+  padding-bottom: 0.08em;
+  line-height: 1.15;
+}
+
+/* ── Soften shadows in light mode (dark theme keeps deep shadows) ───────── */
+:root.light, [data-theme="light"] {
+  --tw-shadow-color: rgba(60, 48, 36, 0.12);
+}
+:root.light .shadow-md, [data-theme="light"] .shadow-md {
+  box-shadow: 0 1px 3px rgba(60,48,36,0.08), 0 1px 2px rgba(60,48,36,0.06) !important;
+}
+:root.light .shadow-lg, [data-theme="light"] .shadow-lg {
+  box-shadow: 0 4px 12px rgba(60,48,36,0.10) !important;
+}
+:root.light .shadow-xl, [data-theme="light"] .shadow-xl,
+:root.light .shadow-2xl, [data-theme="light"] .shadow-2xl {
+  box-shadow: 0 8px 24px rgba(60,48,36,0.12) !important;
+}
+
 /* ── Component-level styles ─────────────────────────────────────────────── */
 @layer components {
 

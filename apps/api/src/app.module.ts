@@ -14,6 +14,7 @@ import * as path from "path";
 import { DatabaseConfig } from "./config/database.config";
 import {
   appConfig,
+  adminConfig,
   jwtConfig,
   oauthConfig,
   stripeConfig,
@@ -29,6 +30,8 @@ import { PaymentsModule } from "./payments/payments.module";
 import { AdminModule } from "./admin/admin.module";
 import { BlogModule } from "./blog/blog.module";
 import { NotificationsModule } from "./notifications/notifications.module";
+import { UploadsModule } from "./uploads/uploads.module";
+import { PlansModule } from "./plans/plans.module";
 
 @Module({
   imports: [
@@ -36,7 +39,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
 
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, jwtConfig, oauthConfig, stripeConfig, storageConfig],
+      load: [appConfig, adminConfig, jwtConfig, oauthConfig, stripeConfig, storageConfig],
 
       envFilePath: [
         path.resolve(process.cwd(), "../../.env.local"),
@@ -117,6 +120,8 @@ import { NotificationsModule } from "./notifications/notifications.module";
     AdminModule,
     BlogModule,
     NotificationsModule,
+    UploadsModule,
+    PlansModule,
   ],
 })
 export class AppModule {}

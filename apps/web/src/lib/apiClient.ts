@@ -4,12 +4,49 @@
  * Uses native fetch — no extra runtime dependency.
  */
 
-import { getAccessToken } from "@/stores/authStore";
+import { getAccessToken, getRefreshToken, useAuthStore } from "@/stores/authStore";
 
 const API_BASE =
   typeof window === "undefined"
     ? (process.env["API_URL"] ?? "http://localhost:3001/api/v1")
     : (process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001") + "/api/v1";
+
+// ── Token refresh (single-flight) ─────────────────────────────────────────────
+let refreshPromise: Promise<string | null> | null = null;
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return null;
+  // De-duplicate concurrent refreshes
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+        if (!res.ok) {
+          useAuthStore.getState().clearAuth();
+          return null;
+        }
+        const json = await res.json() as { data?: { accessToken: string; refreshToken: string }; accessToken?: string; refreshToken?: string };
+        const payload = json.data ?? json;
+        if (payload.accessToken && payload.refreshToken) {
+          useAuthStore.getState().setTokens(payload.accessToken, payload.refreshToken);
+          return payload.accessToken;
+        }
+        return null;
+      } catch {
+        return null;
+      } finally {
+        // Allow the next refresh attempt after this settles
+        setTimeout(() => { refreshPromise = null; }, 0);
+      }
+    })();
+  }
+  return refreshPromise;
+}
 
 class ApiError extends Error {
   constructor(
@@ -47,21 +84,30 @@ async function request<T>(
     }
   }
 
-  const token = typeof window !== "undefined" ? getAccessToken() : null; // getAccessToken reads localStorage — server returns null
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const doFetch = (token: string | null) =>
+    fetch(url.toString(), {
+      method,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
+      },
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...rest,
+    });
 
-  const res = await fetch(url.toString(), {
-    method,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...authHeader,
-      ...headers,
-    },
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-    ...rest,
-  });
+  const initialToken = typeof window !== "undefined" ? getAccessToken() : null;
+  let res = await doFetch(initialToken);
+
+  // On 401, try a one-time silent token refresh, then retry the request.
+  if (res.status === 401 && typeof window !== "undefined" && getRefreshToken() && path !== "/auth/refresh") {
+    const newToken = await refreshAccessToken();
+    if (newToken) {
+      res = await doFetch(newToken);
+    }
+  }
 
   if (!res.ok) {
     let code = "UNKNOWN";

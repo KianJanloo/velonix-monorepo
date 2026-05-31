@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useAdminGames, useAdminApproveGame, useAdminRejectGame, useAdminDeleteGame } from "@/hooks/useAdmin";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
@@ -77,7 +78,8 @@ export default function AdminGamesPage() {
 
       {/* Table */}
       <div className="v-card overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           <thead className="border-b border-warm-wood">
             <tr>
               {["Title", "Creator", "Status", "Category", "Sales", "Rating", "Actions"].map(h => (
@@ -111,7 +113,10 @@ export default function AdminGamesPage() {
                   {game.averageRating ? game.averageRating.toFixed(1) : "—"}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
+                    <Link href={`/admin/games/${game.id}`} className="text-cyan-spark text-xs font-ui hover:opacity-80 transition-opacity">
+                      Review
+                    </Link>
                     {game.status === "reviewing" && (
                       <>
                         <button onClick={() => approve.mutate(game.id)}
@@ -143,6 +148,7 @@ export default function AdminGamesPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {data && data.totalPages > 1 && (

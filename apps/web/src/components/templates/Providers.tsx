@@ -13,8 +13,31 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
+
+/** Sonner toaster that follows the active Velonix theme. */
+function ThemedToaster() {
+  const { theme, resolvedTheme } = useTheme();
+  const active = (theme === "system" ? resolvedTheme : theme) === "light" ? "light" : "dark";
+  return (
+    <Toaster
+      position="bottom-right"
+      theme={active}
+      toastOptions={{
+        classNames: {
+          toast: "!bg-rich-wood-dark !border-warm-wood !text-parchment-light !font-ui",
+          title: "!text-parchment-light",
+          description: "!text-soft-gray",
+          success: "!border-[rgba(0,212,165,0.4)]",
+          error: "!border-[rgba(255,59,92,0.4)]",
+          warning: "!border-[rgba(245,196,81,0.4)]",
+          info: "!border-[rgba(0,229,255,0.3)]",
+        },
+      }}
+    />
+  );
+}
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -59,20 +82,8 @@ export function Providers({ children }: ProvidersProps) {
       >
         {children}
 
-        {/* Toast notifications */}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            classNames: {
-              toast: "!bg-rich-wood-dark !border-warm-wood !text-parchment-light !font-ui",
-              success: "!border-[rgba(124,92,255,0.4)] !shadow-emerald",
-              error:   "!border-[rgba(255,59,92,0.4)] !shadow-crimson",
-              warning: "!border-[rgba(245,196,81,0.4)] !shadow-gold",
-              info:    "!border-[rgba(0,229,255,0.3)] !shadow-cyan",
-            },
-          }}
-          richColors
-        />
+        {/* Toast notifications (theme-aware) */}
+        <ThemedToaster />
 
         {/* TanStack Query DevTools — development only */}
         {process.env.NODE_ENV === "development" && (

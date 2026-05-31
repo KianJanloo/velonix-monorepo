@@ -33,4 +33,21 @@ export interface GameRecord {
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  creator?: {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+  };
+}
+
+export interface GameReview {
+  id: string;
+  rating: number;
+  title: string | null;
+  body: string | null;
+  isVerifiedPurchase: boolean;
+  helpful: number;
+  createdAt: string;
+  author?: { id: string; username: string; displayName: string; avatarUrl: string | null };
 }

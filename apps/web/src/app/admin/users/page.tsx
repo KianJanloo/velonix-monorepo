@@ -45,7 +45,8 @@ export default function AdminUsersPage() {
 
       {/* Table */}
       <div className="v-card overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           <thead className="border-b border-warm-wood">
             <tr>
               {["User", "Email", "Role", "Plan", "Sales", "Joined", "Actions"].map(h => (
@@ -102,6 +103,7 @@ export default function AdminUsersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}

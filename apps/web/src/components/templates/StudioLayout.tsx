@@ -7,10 +7,12 @@ import {
 } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { useStudioStore, selectZoomPercent } from "@/stores/studioStore";
 import { useGame, usePublishGame } from "@/hooks/useGames";
 import { useStudio } from "@/hooks/useStudio";
 import { usePlan } from "@/hooks/usePlan";
+import { useImageUpload } from "@/hooks/useUpload";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -18,6 +20,18 @@ const MM_TO_PX = 2;
 const CANVAS_W_MM = 800;
 const CANVAS_H_MM = 600;
 const GRID_MM = 5;
+
+/** Guard against invalid CSS color values (prevents React setValueForStyle crashes). */
+function safeColor(v: string | undefined, fallback: string): string {
+  if (!v) return fallback;
+  const s = v.trim();
+  if (s.startsWith("#") || s.startsWith("rgb") || s.startsWith("hsl") || s === "transparent") return s;
+  return fallback;
+}
+/** Coerce a possibly-empty/NaN numeric input to a finite number. */
+function safeNum(v: number, fallback = 0): number {
+  return Number.isFinite(v) ? v : fallback;
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -41,7 +55,25 @@ export interface CanvasComp {
   text?: string;
   fontSize?: number;
   textColor?: string;
+  image?: string;
 }
+
+export type RuleTrigger = "turn_start" | "turn_end" | "card_played" | "token_moved" | "dice_rolled" | "game_end";
+
+export interface GameRule {
+  id: string;
+  trigger: RuleTrigger;
+  description: string;
+}
+
+const RULE_TRIGGERS: { value: RuleTrigger; label: string }[] = [
+  { value: "turn_start", label: "On turn start" },
+  { value: "turn_end", label: "On turn end" },
+  { value: "card_played", label: "When a card is played" },
+  { value: "token_moved", label: "When a token moves" },
+  { value: "dice_rolled", label: "When dice are rolled" },
+  { value: "game_end", label: "Win / end condition" },
+];
 
 const TYPE_DEFAULTS: Record<CompType, Partial<CanvasComp>> = {
   board:    { width: 320, height: 240, fill: "#1a2535", stroke: "#f5c451", strokeWidth: 2, cornerRadius: 8 },
@@ -203,14 +235,16 @@ function CompView({ comp, selected, editable, onPointerDown, onResizeStart, onRo
       {/* Body */}
       <div style={{
         position: "absolute", inset: 0,
-        backgroundColor: comp.type === "pawn" ? "transparent" : comp.fill,
-        border: comp.type === "pawn" || comp.type === "text" ? "none" : `${comp.strokeWidth}px solid ${comp.stroke}`,
+        backgroundColor: comp.type === "pawn" || comp.type === "text" ? "transparent" : safeColor(comp.fill, "#1a2535"),
+        backgroundImage: comp.image ? `url("${comp.image}")` : undefined,
+        backgroundSize: "cover", backgroundPosition: "center",
+        border: comp.type === "pawn" || comp.type === "text" ? "none" : `${comp.strokeWidth}px solid ${safeColor(comp.stroke, "transparent")}`,
         borderRadius: isCircle ? "50%" : comp.cornerRadius,
         boxShadow: comp.type === "text" ? "none" : "0 2px 8px rgba(0,0,0,0.45)",
         overflow: "hidden",
         boxSizing: "border-box",
       }}>
-        {comp.type === "pawn" ? <PawnShape comp={comp} /> : <ShapeInner comp={comp} />}
+        {comp.type === "pawn" ? <PawnShape comp={comp} /> : !comp.image ? <ShapeInner comp={comp} /> : null}
       </div>
 
       {/* Text content */}
@@ -277,8 +311,10 @@ function Preview2D({ components, scale }: { components: CanvasComp[]; scale: num
           <div key={c.id} style={{
             position: "absolute", left: px(c.x), top: px(c.y), width: px(c.width), height: px(c.height),
             transform: `rotate(${c.rotation}deg)`, opacity: c.opacity / 100,
-            backgroundColor: c.type === "pawn" || c.type === "text" ? "transparent" : c.fill,
-            border: c.type === "pawn" || c.type === "text" ? "none" : `${c.strokeWidth}px solid ${c.stroke}`,
+            backgroundColor: c.type === "pawn" || c.type === "text" ? "transparent" : safeColor(c.fill, "#1a2535"),
+            backgroundImage: c.image ? `url("${c.image}")` : undefined,
+            backgroundSize: "cover", backgroundPosition: "center",
+            border: c.type === "pawn" || c.type === "text" ? "none" : `${c.strokeWidth}px solid ${safeColor(c.stroke, "transparent")}`,
             borderRadius: isCircle ? "50%" : c.cornerRadius * scale,
             display: "flex", alignItems: "center", justifyContent: "center",
             color: c.textColor, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: px(c.fontSize ?? 18) / 1.6,
@@ -342,6 +378,7 @@ interface StudioLayoutProps { gameId: string; }
 
 export function StudioLayout({ gameId }: StudioLayoutProps) {
   const isNew = gameId === "new";
+  const router = useRouter();
 
   const {
     mode, setMode,
@@ -359,6 +396,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
 
   // History
   const [components, setComponentsRaw] = useState<CanvasComp[]>(INITIAL);
+  const [rules, setRules] = useState<GameRule[]>([]);
   const pastRef = useRef<CanvasComp[][]>([]);
   const futureRef = useRef<CanvasComp[][]>([]);
   const [, forceRerender] = useState(0);
@@ -380,6 +418,16 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
 
+  // Editing requires a desktop-sized screen
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const clipboardRef = useRef<CanvasComp | null>(null);
   const { data: game } = useGame(isNew ? "" : gameId);
   const publish = usePublishGame(gameId);
@@ -393,12 +441,14 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   useEffect(() => {
     if (!game || hydratedRef.current === game.id) return;
     hydratedRef.current = game.id;
-    const saved = (game.studioData as { components?: CanvasComp[] } | null)?.components;
+    const data = game.studioData as { components?: CanvasComp[]; rules?: GameRule[] } | null;
+    const saved = data?.components;
     if (Array.isArray(saved) && saved.length > 0) {
       suppressDirtyRef.current = true;
       setComponentsRaw(saved);
       setSelectedId(saved[0]?.id ?? null);
     }
+    if (Array.isArray(data?.rules)) setRules(data!.rules);
   }, [game]);
 
   // ── Dirty tracking ─────────────────────────────────────────────────────────
@@ -407,7 +457,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     if (!mountedRef.current) { mountedRef.current = true; return; }
     if (suppressDirtyRef.current) { suppressDirtyRef.current = false; return; }
     markDirty();
-  }, [components, markDirty]);
+  }, [components, rules, markDirty]);
 
   // ── Mutations ──────────────────────────────────────────────────────────────
   const updateComp = useCallback((id: string, patch: Partial<CanvasComp>, history = true) => {
@@ -589,13 +639,14 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   // ── Save / publish ──────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
     if (isNew) { toast.error("Create the game first."); return; }
-    await saveNow({ components } as unknown as Record<string, unknown>);
-  }, [isNew, saveNow, components]);
+    await saveNow({ components, rules } as unknown as Record<string, unknown>);
+  }, [isNew, saveNow, components, rules]);
 
   async function handlePublish() {
-    if (!isNew) await saveNow({ components } as unknown as Record<string, unknown>);
-    try { await publish.mutateAsync(); toast.success("Submitted for review!"); }
-    catch { toast.error("Publish failed. Try again."); }
+    if (isNew) { toast.error("Create the game first."); return; }
+    // Persist the design, then go to the publish settings page (price, details, submit)
+    await saveNow({ components, rules } as unknown as Record<string, unknown>);
+    router.push(`/studio/${gameId}/publish`);
   }
 
   // ── 3D gating ───────────────────────────────────────────────────────────────
@@ -609,6 +660,25 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
 
   const toolCursor = TOOLS.find(t => t.id === activeTool)?.cursor ?? "default";
   const reversed = [...components].reverse();
+
+  // ── Mobile: editing is desktop-only; offer preview ───────────────────────────
+  if (isMobile && !inPreview) {
+    return (
+      <div className="min-h-screen bg-deep-void flex flex-col items-center justify-center px-6 text-center gap-5">
+        <div className="w-14 h-14 rounded-2xl bg-warm-wood/40 border border-warm-wood flex items-center justify-center">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-royal-gold"><rect x="3" y="4" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M8 20h8M12 17v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        </div>
+        <div>
+          <h1 className="font-display text-xl font-bold text-parchment-light mb-2">Studio editing is desktop-only</h1>
+          <p className="text-soft-gray text-sm font-ui max-w-xs">The design canvas needs a larger screen. You can still preview your game here, or open the Studio on a desktop to edit.</p>
+        </div>
+        <div className="flex flex-col gap-2 w-full max-w-xs">
+          <button onClick={() => setMode("preview_2d")} className="w-full py-3 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm">Preview Game</button>
+          <Link href="/dashboard" className="w-full py-3 rounded-xl border border-warm-wood text-parchment-light font-ui font-semibold text-sm">Back to Dashboard</Link>
+        </div>
+      </div>
+    );
+  }
 
   // ── Preview overlay (fullscreen, no editor chrome) ───────────────────────────
   if (inPreview) {
@@ -727,8 +797,11 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
             )}
             {leftPanelTab === "assets" && <AssetsPanel onPick={(url) => {
               if (!selectedComp) { toast.error("Select a component first."); return; }
-              updateComp(selectedComp.id, { fill: `url(${url})` });
-              toast.success("Applied. (Image fills are illustrative in this build.)");
+              updateComp(selectedComp.id, { image: url });
+              toast.success("Image applied to component.");
+            }} onClear={() => {
+              if (!selectedComp) return;
+              updateComp(selectedComp.id, { image: "" });
             }} />}
           </div>
         </aside>
@@ -798,7 +871,15 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
             {rightPanelTab === "styling" && selectedComp && (
               <StylePanel comp={selectedComp} onChange={(p) => updateComp(selectedComp.id, p, false)} />
             )}
-            {rightPanelTab === "rules" && <RulesPanel hasEngine={plan.hasTeamCollaboration} />}
+            {rightPanelTab === "rules" && (
+              <RulesPanel
+                hasEngine={plan.hasTeamCollaboration}
+                rules={rules}
+                onAdd={(trigger, description) => setRules(rs => [...rs, { id: `rule-${Date.now()}`, trigger, description }])}
+                onUpdate={(id, description) => setRules(rs => rs.map(r => r.id === id ? { ...r, description } : r))}
+                onDelete={(id) => setRules(rs => rs.filter(r => r.id !== id))}
+              />
+            )}
           </div>
         </aside>
       </div>
@@ -838,7 +919,7 @@ function PropertiesPanel({ comp, onChange, onDup, onDel, onZ }: {
       <span className="text-2xs text-soft-gray-dark font-ui block mb-1">{label}</span>
       <input type="number" min={min} max={max} className="v-input text-xs font-mono"
         value={Math.round(Number(comp[key]) || 0)}
-        onChange={e => onChange({ [key]: Number(e.target.value) } as Partial<CanvasComp>)} />
+        onChange={e => onChange({ [key]: safeNum(Number(e.target.value)) } as Partial<CanvasComp>)} />
     </label>
   );
   return (
@@ -911,7 +992,7 @@ function StylePanel({ comp, onChange }: { comp: CanvasComp; onChange: (p: Partia
           <ColorField label="Text Color" value={comp.textColor ?? "#e8d5b8"} onChange={v => onChange({ textColor: v })} />
           <label className="block">
             <span className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider block mb-1.5">Font Size</span>
-            <input type="number" min={6} max={120} className="v-input text-xs" value={comp.fontSize ?? 18} onChange={e => onChange({ fontSize: Number(e.target.value) })} />
+            <input type="number" min={6} max={120} className="v-input text-xs" value={comp.fontSize ?? 18} onChange={e => onChange({ fontSize: safeNum(Number(e.target.value), 18) })} />
           </label>
         </>
       ) : (
@@ -921,12 +1002,12 @@ function StylePanel({ comp, onChange }: { comp: CanvasComp; onChange: (p: Partia
           <ColorField label="Stroke" value={comp.stroke} onChange={v => onChange({ stroke: v })} />
           <label className="block">
             <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Stroke width</span>
-            <input type="number" min={0} max={20} className="v-input text-xs" value={comp.strokeWidth} onChange={e => onChange({ strokeWidth: Number(e.target.value) })} />
+            <input type="number" min={0} max={20} className="v-input text-xs" value={comp.strokeWidth} onChange={e => onChange({ strokeWidth: safeNum(Number(e.target.value)) })} />
           </label>
           {comp.type !== "token" && (
             <label className="block">
               <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Corner radius</span>
-              <input type="number" min={0} max={100} className="v-input text-xs" value={comp.cornerRadius} onChange={e => onChange({ cornerRadius: Number(e.target.value) })} />
+              <input type="number" min={0} max={100} className="v-input text-xs" value={comp.cornerRadius} onChange={e => onChange({ cornerRadius: safeNum(Number(e.target.value)) })} />
             </label>
           )}
         </>
@@ -945,50 +1026,118 @@ function StylePanel({ comp, onChange }: { comp: CanvasComp; onChange: (p: Partia
 
 // ── Assets panel ──────────────────────────────────────────────────────────────
 
-function AssetsPanel({ onPick }: { onPick: (url: string) => void }) {
-  const [url, setUrl] = useState("");
+function AssetsPanel({ onPick, onClear }: { onPick: (url: string) => void; onClear: () => void }) {
+  const { upload, uploading } = useImageUpload();
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const uploaded = await upload(file);
+    if (uploaded) onPick(uploaded);
+    e.target.value = "";
+  }
+
   return (
     <div className="p-3">
-      <p className="text-2xs text-soft-gray-dark font-ui uppercase tracking-[0.1em] mb-3">Image Assets</p>
-      <div className="grid grid-cols-3 gap-1.5 mb-3">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <button key={i} onClick={() => onPick(`asset-${i}`)} className="aspect-square rounded-lg bg-warm-wood/30 border border-warm-wood flex items-center justify-center hover:border-emerald-glow/40 group">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-warm-wood-light group-hover:text-emerald-glow/60"><rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1"/><circle cx="5.5" cy="5.5" r="1" fill="currentColor" opacity="0.5"/><path d="M2 10.5l3-3 3 3 2-2 3 3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/></svg>
-          </button>
-        ))}
-      </div>
-      <div className="flex gap-1.5">
-        <input className="v-input text-2xs flex-1" placeholder="Paste image URL…" value={url} onChange={e => setUrl(e.target.value)} />
-        <button onClick={() => { if (url) onPick(url); }} className="px-2 rounded-lg bg-emerald-ghost border border-emerald-glow/20 text-emerald-glow text-2xs font-ui">Add</button>
-      </div>
+      <p className="text-2xs text-soft-gray-dark font-ui uppercase tracking-[0.1em] mb-3">Component Image</p>
+
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <button
+        onClick={() => fileRef.current?.click()}
+        disabled={uploading}
+        className="w-full py-6 rounded-lg border border-dashed border-warm-wood hover:border-emerald-glow/40 flex flex-col items-center gap-2 text-soft-gray hover:text-parchment-light transition-colors disabled:opacity-50 mb-3"
+      >
+        {uploading ? (
+          <div className="w-5 h-5 border-2 border-warm-wood border-t-emerald-glow rounded-full animate-spin" />
+        ) : (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        )}
+        <span className="text-2xs font-ui">{uploading ? "Uploading…" : "Upload image (max 5MB)"}</span>
+      </button>
+
+      <button onClick={onClear} className="w-full py-1.5 rounded-lg text-soft-gray-dark hover:text-crimson-flame text-2xs font-ui transition-colors">
+        Remove image from component
+      </button>
     </div>
   );
 }
 
 // ── Rules panel ───────────────────────────────────────────────────────────────
 
-function RulesPanel({ hasEngine }: { hasEngine: boolean }) {
-  return (
-    <div className="space-y-3">
-      <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider">Game Rules</p>
-      <div className="p-3 bg-warm-wood/20 rounded-lg border border-warm-wood/40">
-        <p className="text-2xs text-soft-gray font-ui leading-relaxed">Define win conditions, turn order, and component effects.</p>
-      </div>
-      {hasEngine ? (
-        <>
-          {["On turn start", "On card played", "On token moved", "Win condition"].map(r => (
-            <button key={r} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border border-warm-wood text-soft-gray text-2xs font-ui hover:border-emerald-glow/40 hover:text-parchment-light">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" strokeWidth="1"/><path d="M3.5 5h3M5 3.5v3" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>{r}
-            </button>
-          ))}
-        </>
-      ) : (
+function RulesPanel({ hasEngine, rules, onAdd, onUpdate, onDelete }: {
+  hasEngine: boolean;
+  rules: GameRule[];
+  onAdd: (trigger: RuleTrigger, description: string) => void;
+  onUpdate: (id: string, description: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [trigger, setTrigger] = useState<RuleTrigger>("turn_start");
+  const [desc, setDesc] = useState("");
+
+  const triggerLabel = (t: RuleTrigger) => RULE_TRIGGERS.find(x => x.value === t)?.label ?? t;
+
+  if (!hasEngine) {
+    return (
+      <div className="space-y-3">
+        <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider">Game Rules</p>
         <div className="flex flex-col items-center gap-3 py-6 text-center">
           <div className="w-10 h-10 rounded-full bg-[rgba(245,196,81,0.1)] border border-royal-gold/30 flex items-center justify-center">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-royal-gold"><rect x="3" y="8" width="12" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><path d="M6 8V5.5a3 3 0 016 0V8" stroke="currentColor" strokeWidth="1.5"/></svg>
           </div>
           <p className="text-2xs text-soft-gray font-ui leading-relaxed">The visual rule engine is available on <span className="text-royal-gold font-semibold">Pro</span> and <span className="text-royal-gold font-semibold">Studio</span>.</p>
           <Link href="/pricing" className="w-full py-2 rounded-lg bg-royal-gold/10 border border-royal-gold/30 text-royal-gold text-2xs font-ui font-semibold hover:bg-royal-gold/20">Upgrade →</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider">Game Rules</p>
+
+      {/* Add rule */}
+      <div className="p-3 bg-warm-wood/20 rounded-lg border border-warm-wood/40 space-y-2">
+        <label className="block">
+          <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Trigger</span>
+          <select className="v-input text-xs" value={trigger} onChange={e => setTrigger(e.target.value as RuleTrigger)}>
+            {RULE_TRIGGERS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-2xs text-soft-gray-dark font-ui block mb-1">What happens</span>
+          <textarea className="v-input text-xs resize-none h-16" placeholder="e.g. Each player draws 1 card."
+            value={desc} onChange={e => setDesc(e.target.value)} />
+        </label>
+        <button
+          onClick={() => { if (desc.trim()) { onAdd(trigger, desc.trim()); setDesc(""); } }}
+          disabled={!desc.trim()}
+          className="w-full py-2 rounded-lg bg-emerald-ghost border border-emerald-glow/20 text-emerald-glow text-2xs font-ui font-semibold hover:bg-emerald-glow hover:text-deep-void transition-all disabled:opacity-40">
+          + Add Rule
+        </button>
+      </div>
+
+      {/* Rules list */}
+      {rules.length === 0 ? (
+        <p className="text-2xs text-soft-gray-dark font-ui text-center py-4">No rules yet. Add your first above.</p>
+      ) : (
+        <div className="space-y-2">
+          {rules.map(rule => (
+            <div key={rule.id} className="p-2.5 rounded-lg border border-warm-wood group">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-2xs font-ui font-semibold text-emerald-glow">{triggerLabel(rule.trigger)}</span>
+                <button onClick={() => onDelete(rule.id)} className="text-soft-gray-dark hover:text-crimson-flame opacity-0 group-hover:opacity-100 transition-opacity" title="Delete rule">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M5 3V2h2v1M3 3l.5 7h5L9 3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+              </div>
+              <textarea
+                className="w-full bg-transparent text-2xs text-parchment-mid font-ui resize-none outline-none"
+                rows={2}
+                value={rule.description}
+                onChange={e => onUpdate(rule.id, e.target.value)}
+              />
+            </div>
+          ))}
         </div>
       )}
     </div>

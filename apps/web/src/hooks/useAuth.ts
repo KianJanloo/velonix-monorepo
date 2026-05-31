@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { apiClient, ApiError } from "@/lib/apiClient";
 import { useAuthStore, type AuthUser } from "@/stores/authStore";
@@ -19,13 +19,15 @@ const API_ROOT =
 export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
+  const params = useSearchParams();
 
   return useMutation({
     mutationFn: (dto: LoginDto) =>
       apiClient.post<AuthResponse>("/auth/login", dto),
     onSuccess: ({ accessToken, refreshToken, user }) => {
       setAuth(user, accessToken, refreshToken);
-      router.push("/dashboard");
+      const next = params.get("next");
+      router.push(next && next.startsWith("/") ? next : "/dashboard");
     },
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");

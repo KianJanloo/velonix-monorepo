@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ImageUploadField } from "@/components/molecules/ImageUploadField";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useUpdateProfile } from "@/hooks/useProfile";
 import { useSubscriptionPortal } from "@/hooks/useSubscriptions";
@@ -40,6 +41,7 @@ function ProfileTab() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isDirty, isSubmitting },
   } = useForm<UpdateProfileDto>({
     resolver: zodResolver(UpdateProfileSchema),
@@ -51,7 +53,6 @@ function ProfileTab() {
   });
 
   const avatarUrl = watch("avatarUrl");
-  const displayName = watch("displayName");
 
   return (
     <div className="space-y-6">
@@ -82,26 +83,17 @@ function ProfileTab() {
       <form onSubmit={handleSubmit((data) => updateProfile.mutate(data))} className="v-card p-6 flex flex-col gap-5">
         <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light">Public Profile</h2>
 
-        {/* Avatar */}
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-warm-wood border-2 border-royal-gold/30 flex items-center justify-center shrink-0 overflow-hidden">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-            ) : (
-              <span className="font-display text-xl text-royal-gold font-bold">{displayName?.[0]?.toUpperCase() ?? "V"}</span>
-            )}
-          </div>
-          <div className="flex-1">
-            <Input
-              {...register("avatarUrl")}
-              label="Avatar URL"
-              placeholder="https://…"
-              error={!!errors.avatarUrl}
-              errorMessage={errors.avatarUrl?.message}
-            />
-          </div>
-        </div>
+        {/* Avatar — persisted immediately on upload */}
+        <ImageUploadField
+          label="Profile picture"
+          shape="avatar"
+          value={avatarUrl || null}
+          onChange={(url) => {
+            setValue("avatarUrl", url ?? "", { shouldDirty: true });
+            updateProfile.mutate({ avatarUrl: url ?? null });
+          }}
+          hint="JPG, PNG, WEBP or GIF. Max 5MB."
+        />
 
         <Input
           {...register("displayName")}

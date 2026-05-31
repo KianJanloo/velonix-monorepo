@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
-import type { GameRecord } from "@/types/game";
+import { toast } from "sonner";
+import { apiClient, ApiError } from "@/lib/apiClient";
+import type { GameRecord, GameReview } from "@/types/game";
 import type { GameSummary, PaginatedResponse } from "@velonix/types";
 import type { CreateGameDto, UpdateGameDto, MarketplaceFiltersDto } from "@velonix/game-engine";
 
@@ -40,6 +41,39 @@ export function useGame(gameId: string) {
     queryKey: gameKeys.detail(gameId),
     queryFn: () => apiClient.get<GameRecord>(`/games/${gameId}`),
     enabled: !!gameId,
+  });
+}
+
+/** Reviews for a game */
+export function useGameReviews(gameId: string) {
+  return useQuery({
+    queryKey: [...gameKeys.detail(gameId), "reviews"],
+    queryFn: () => apiClient.get<GameReview[]>(`/marketplace/${gameId}/reviews`),
+    enabled: !!gameId,
+  });
+}
+
+/** Submit a review for a purchased game */
+export function useCreateReview(gameId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (dto: { gameId: string; rating: number; title?: string | undefined; body?: string | undefined }) =>
+      apiClient.post("/marketplace/reviews", dto),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: [...gameKeys.detail(gameId), "reviews"] });
+      void qc.invalidateQueries({ queryKey: gameKeys.detail(gameId) });
+      toast.success("Review posted!");
+    },
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Failed to post review."),
+  });
+}
+
+/** Create a Stripe payment intent / checkout for purchasing a game */
+export function usePurchaseGame() {
+  return useMutation({
+    mutationFn: (gameId: string) =>
+      apiClient.post<{ clientSecret?: string; url?: string }>(`/payments/game/${gameId}/intent`),
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Could not start checkout."),
   });
 }
 

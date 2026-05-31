@@ -18,6 +18,14 @@ export const appConfig = registerAs("app", () => ({
   bcryptRounds: parseInt(process.env["BCRYPT_ROUNDS"] ?? "12", 10),
 }));
 
+// ── Admin bootstrap ────────────────────────────────────────────────────────
+
+export const adminConfig = registerAs("admin", () => ({
+  email: process.env["ADMIN_EMAIL"] ?? "admin@velonix.gg",
+  password: process.env["ADMIN_PASSWORD"] ?? "ChangeMe!Admin1",
+  username: process.env["ADMIN_USERNAME"] ?? "admin",
+}));
+
 // ── JWT ──────────────────────────────────────────────────────────────────────
 
 export const jwtConfig = registerAs("jwt", () => ({
