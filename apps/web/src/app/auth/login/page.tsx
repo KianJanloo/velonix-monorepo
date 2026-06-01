@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { LoginForm } from "@/components/organisms/LoginForm";
 
 export const metadata: Metadata = { title: "Sign In" };
@@ -36,7 +37,9 @@ export default function LoginPage() {
           <h1 className="font-display text-xl font-bold tracking-display text-parchment-light mb-6 text-center">
             Sign In
           </h1>
-          <LoginForm />
+          <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-6 h-6 border-2 border-warm-wood border-t-emerald-glow rounded-full animate-spin" /></div>}>
+            <LoginForm />
+          </Suspense>
           <div className="mt-6 text-center">
             <p className="text-soft-gray text-sm font-ui">
               No account?{" "}

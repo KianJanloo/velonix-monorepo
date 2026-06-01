@@ -16,6 +16,7 @@ const TIER_STYLE: Record<string, { tagline: string; color: string; highlighted: 
 
 export default function PricingPage() {
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
+  const [pendingTier, setPendingTier] = useState<string | null>(null);
   const { data: plans, isLoading } = usePlans();
   const checkout = useSubscriptionCheckout();
   const user = useCurrentUser();
@@ -25,7 +26,8 @@ export default function PricingPage() {
   function handleUpgrade(tier: string) {
     if (tier === "free") return;
     if (!user) { window.location.href = `/auth/register?plan=${tier}`; return; }
-    checkout.mutate({ tier, interval });
+    setPendingTier(tier);
+    checkout.mutate({ tier, interval }, { onSettled: () => setPendingTier(null) });
   }
 
   return (
@@ -74,7 +76,7 @@ export default function PricingPage() {
               const perPeriod = interval === "monthly" ? "/mo" : "/yr";
 
               return (
-                <div key={plan.tier} className={`relative flex flex-col rounded-2xl border p-6 transition-all ${style.color}`}>
+                <div key={plan.tier} className={`relative flex flex-col rounded-2xl border p-6 transition-all h-full ${style.color}`}>
                   {style.highlighted && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-glow text-deep-void text-2xs font-ui font-bold px-3 py-1 rounded-full">
                       Most Popular
@@ -116,14 +118,14 @@ export default function PricingPage() {
                   ) : (
                     <button
                       onClick={() => handleUpgrade(plan.tier)}
-                      disabled={isCurrentPlan || checkout.isPending}
+                      disabled={isCurrentPlan || pendingTier === plan.tier}
                       className={`w-full py-2.5 rounded-xl text-sm font-ui font-bold transition-all disabled:opacity-60 ${
                         style.highlighted
                           ? "bg-emerald-glow text-deep-void hover:bg-emerald-bright"
                           : "bg-warm-wood text-parchment-light hover:bg-warm-wood-light"
                       }`}
                     >
-                      {isCurrentPlan ? "Current plan" : checkout.isPending ? "Redirecting…" : `Upgrade to ${plan.name}`}
+                      {isCurrentPlan ? "Current plan" : pendingTier === plan.tier ? "Redirecting…" : `Upgrade to ${plan.name}`}
                     </button>
                   )}
                 </div>

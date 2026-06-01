@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { toast } from "sonner";
 import { useGame, useGameReviews, useCreateReview, usePurchaseGame } from "@/hooks/useGames";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/atoms/Button";
-import type { GameRule } from "@/components/templates/StudioLayout";
+
+interface GameRule { id: string; trigger: string; description: string }
 
 function Stars({ rating, size = 14 }: { rating: number | null; size?: number }) {
   const r = rating ?? 0;
@@ -36,10 +36,12 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewBody, setReviewBody] = useState("");
+  // Auth + query state only exist on the client; render a stable skeleton until
+  // mounted to avoid hydration mismatches (server HTML has no user/cached data).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  if (error instanceof ApiError && error.statusCode === 404) notFound();
-
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
       <div className="min-h-screen bg-deep-void">
         <div className="max-w-5xl mx-auto px-6 py-12 animate-pulse">
@@ -50,7 +52,26 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
       </div>
     );
   }
-  if (!game) return null;
+
+  // Inline not-found / error state (avoids throwing notFound() where no boundary exists)
+  if (error || !game) {
+    const is404 = error instanceof ApiError && error.statusCode === 404;
+    return (
+      <div className="min-h-screen bg-deep-void flex items-center justify-center px-6 text-center">
+        <div>
+          <p className="font-display text-2xl font-bold text-parchment-light mb-2">
+            {is404 ? "Game not found" : "Couldn't load this game"}
+          </p>
+          <p className="text-soft-gray text-sm font-ui mb-6">
+            {is404 ? "This game may have been removed or unpublished." : "Please try again in a moment."}
+          </p>
+          <Link href="/marketplace" className="inline-flex px-5 py-2.5 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all">
+            Back to Marketplace
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const rules = (game.studioData as { rules?: GameRule[] } | null)?.rules ?? [];
   const owns = false; // ownership lookup could be added via library endpoint
@@ -115,7 +136,7 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
               )}
               <div className="flex items-center gap-2 mt-2">
                 <Stars rating={game.averageRating} />
-                <span className="text-2xs text-soft-gray font-ui">{game.averageRating?.toFixed(1) ?? "—"} ({game.totalRatings} reviews)</span>
+                <span className="text-2xs text-soft-gray font-ui">{game.averageRating ?? "—"} ({game.totalRatings} reviews)</span>
               </div>
             </div>
 

@@ -99,7 +99,7 @@ function Hero() {
       </p>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 animate-float">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 opacity-40 animate-float">
         <div className="w-px h-8 bg-gradient-to-b from-transparent to-soft-gray" />
         <div className="w-1 h-1 rounded-full bg-soft-gray" />
       </div>

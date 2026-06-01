@@ -114,27 +114,6 @@ export function Navbar() {
                 </Link>
                 <Link href="/auth/register">
                   <Button variant="primary" size="sm">
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        cx="6"
-                        cy="6"
-                        r="5"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                      <path
-                        d="M6 3.5v5M3.5 6h5"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
                     Get Started
                   </Button>
                 </Link>

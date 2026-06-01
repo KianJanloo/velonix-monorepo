@@ -96,12 +96,12 @@ export default function AdminGamesPage() {
                   ))}
                 </tr>
               ))
-            ) : data?.data.map(game => (
+            ) : (data?.data ?? []).map(game => (
               <tr key={game.id} className="border-b border-warm-wood/20 hover:bg-warm-wood/10 transition-colors">
                 <td className="px-4 py-3 max-w-[180px]">
                   <p className="text-sm font-ui text-parchment-light truncate">{game.title}</p>
                 </td>
-                <td className="px-4 py-3 text-sm text-soft-gray font-ui">@{game.creator.username}</td>
+                <td className="px-4 py-3 text-sm text-soft-gray font-ui">@{game.creator?.username ?? "unknown"}</td>
                 <td className="px-4 py-3">
                   <span className={`text-2xs px-2 py-0.5 rounded-full font-ui capitalize ${statusColor[game.status] ?? "bg-warm-wood text-soft-gray"}`}>
                     {game.status}
@@ -110,7 +110,7 @@ export default function AdminGamesPage() {
                 <td className="px-4 py-3 text-sm text-soft-gray font-ui capitalize">{game.category}</td>
                 <td className="px-4 py-3 text-sm font-mono text-soft-gray">{game.totalPurchases}</td>
                 <td className="px-4 py-3 text-sm font-mono text-soft-gray">
-                  {game.averageRating ? game.averageRating.toFixed(1) : "—"}
+                  {game.averageRating ? game.averageRating : "—"}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2 items-center">

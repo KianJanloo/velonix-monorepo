@@ -33,17 +33,22 @@
 /* Light theme — warm parchment surfaces, dark ink text */
 :root.light,
 [data-theme="light"] {
-  --c-deep-void:        245 241 232;
-  --c-void-elevated:    250 247 240;
-  --c-rich-wood-dark:   255 255 255;
-  --c-rich-wood-mid:    248 244 236;
-  --c-warm-wood:        222 213 197;
-  --c-warm-wood-light:  200 188 168;
-  --c-felt-dark:        236 230 219;
-  --c-parchment-light:  38 30 22;
-  --c-parchment-mid:    74 60 46;
-  --c-soft-gray:        110 100 90;
-  --c-soft-gray-dark:   150 140 128;
+  --c-deep-void:        244 240 231;   /* page background — warm parchment */
+  --c-void-elevated:    249 246 239;
+  --c-rich-wood-dark:   255 254 250;   /* cards/panels — warm white */
+  --c-rich-wood-mid:    247 243 235;
+  --c-warm-wood:        214 203 184;   /* borders — visible but soft */
+  --c-warm-wood-light:  188 174 152;   /* hover borders / dividers */
+  --c-felt-dark:        233 226 213;
+  --c-parchment-light:  33 26 18;      /* primary text — deep espresso ink */
+  --c-parchment-mid:    82 68 52;      /* secondary text */
+  --c-soft-gray:        92 83 72;      /* muted text — darkened for contrast */
+  --c-soft-gray-dark:   135 124 110;  /* faint labels */
+}
+
+/* Light-mode accent ghosts: stronger tint so chips read on warm white */
+:root.light, [data-theme="light"] {
+  color-scheme: light;
 }
 
 /* ── ShadCN/Radix theming ───────────────────────────────────────────────── */

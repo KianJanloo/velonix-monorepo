@@ -90,7 +90,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/studio",
-        destination: "/dashboard",
+        destination: "/studio/new",
         permanent: false,
       },
     ];
