@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useGame, useUpdateGame, usePublishGame } from "@/hooks/useGames";
+import { useGame, useUpdateGame, usePublishGame, usePriceSuggestion } from "@/hooks/useGames";
 import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
 import { ImageUploadField } from "@/components/molecules/ImageUploadField";
@@ -17,6 +17,7 @@ export function PublishSettings({ gameId }: { gameId: string }) {
   const { data: game, isLoading } = useGame(gameId);
   const updateGame = useUpdateGame(gameId);
   const publish = usePublishGame(gameId);
+  const priceSuggestion = usePriceSuggestion(gameId);
 
   const [form, setForm] = useState({
     title: "", shortDescription: "", description: "",
@@ -168,6 +169,44 @@ export function PublishSettings({ gameId }: { gameId: string }) {
                       onChange={e => set("priceUsd", Math.round(Number(e.target.value) * 100) || 0)} />
                   </div>
                 </label>
+
+                {/* Smart pricing suggestion */}
+                {priceSuggestion.data && (() => {
+                  const s = priceSuggestion.data;
+                  const isApplied = form.priceUsd === s.suggestedUsd;
+                  return (
+                    <div className="rounded-xl border border-cyan-spark/30 bg-[rgba(0,229,255,0.06)] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-ui font-semibold text-cyan-spark flex items-center gap-1.5">
+                            <span aria-hidden>✨</span> Smart pricing suggestion
+                          </p>
+                          <p className="font-display text-2xl font-bold text-parchment-light mt-1">
+                            ${(s.suggestedUsd / 100).toFixed(2)}
+                          </p>
+                          <p className="text-2xs text-soft-gray font-ui mt-0.5">
+                            Typical range ${(s.rangeUsd.min / 100).toFixed(2)}–${(s.rangeUsd.max / 100).toFixed(2)}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          className="shrink-0"
+                          disabled={isApplied}
+                          onClick={() => set("priceUsd", s.suggestedUsd)}
+                        >
+                          {isApplied ? "Applied" : "Apply"}
+                        </Button>
+                      </div>
+                      <ul className="mt-3 space-y-1">
+                        {s.rationale.map((line, i) => (
+                          <li key={i} className="text-2xs text-parchment-mid font-ui flex gap-1.5">
+                            <span className="text-soft-gray-dark" aria-hidden>•</span> {line}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })()}
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.hasTrial} onChange={e => set("hasTrial", e.target.checked)} className="w-4 h-4 rounded border-warm-wood bg-rich-wood-mid accent-emerald-glow" />
                   <span className="text-sm font-ui text-parchment-light">Offer a free trial</span>

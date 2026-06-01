@@ -85,6 +85,23 @@ export class GamesController {
     return this.gamesService.findOne(id);
   }
 
+  @Get(":id/price-suggestion")
+  @Version("1")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("JWT")
+  @ApiOperation({ summary: "Smart price suggestion based on complexity and similar published games" })
+  @ApiParam({ name: "id", format: "uuid" })
+  @ApiResponse({ status: 200, description: "Suggested price, range, and rationale" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Forbidden — not the game owner" })
+  @ApiResponse({ status: 404, description: "Game not found" })
+  getPriceSuggestion(
+    @Param("id") id: string,
+    @Request() req: { user: { id: string } }
+  ) {
+    return this.gamesService.getPriceSuggestion(id, req.user.id);
+  }
+
   @Patch(":id")
   @Version("1")
   @UseGuards(JwtAuthGuard)

@@ -32,6 +32,7 @@ import { BlogModule } from "./blog/blog.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { UploadsModule } from "./uploads/uploads.module";
 import { PlansModule } from "./plans/plans.module";
+import { EventsModule } from "./events/events.module";
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { PlansModule } from "./plans/plans.module";
     NotificationsModule,
     UploadsModule,
     PlansModule,
+    EventsModule,
   ],
 })
 export class AppModule {}

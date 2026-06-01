@@ -7,8 +7,15 @@ import { useGame, useGameReviews, useCreateReview, usePurchaseGame } from "@/hoo
 import { useCurrentUser } from "@/hooks/useAuth";
 import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/atoms/Button";
+import type { GameGuide } from "@/components/templates/StudioLayout";
 
 interface GameRule { id: string; trigger: string; description: string }
+
+const DIFFICULTY_STYLE: Record<string, string> = {
+  intro: "bg-emerald-ghost text-emerald-glow",
+  standard: "bg-[rgba(0,229,255,0.12)] text-cyan-spark",
+  advanced: "bg-crimson-ghost text-crimson-flame",
+};
 
 function Stars({ rating, size = 14 }: { rating: number | null; size?: number }) {
   const r = rating ?? 0;
@@ -73,16 +80,21 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
     );
   }
 
-  const rules = (game.studioData as { rules?: GameRule[] } | null)?.rules ?? [];
+  const studio = game.studioData as { rules?: GameRule[]; guide?: GameGuide } | null;
+  const rules = studio?.rules ?? [];
+  const guide = studio?.guide ?? null;
+  const hasGuide = !!guide && (
+    !!guide.objective?.trim() || (guide.setupSteps?.length ?? 0) > 0 ||
+    (guide.turnStructure?.length ?? 0) > 0 || (guide.scenarios?.length ?? 0) > 0
+  );
   const owns = false; // ownership lookup could be added via library endpoint
   const price = game.isFree ? "Free" : `$${((game.priceUsd ?? 0) / 100).toFixed(2)}`;
 
   function buy() {
     if (!user) { window.location.href = `/auth/login?next=/marketplace/${gameId}`; return; }
     if (game!.isFree) { toast.success("Added to your library!"); return; }
-    purchase.mutate(gameId, {
-      onSuccess: (res) => { if (res.url) window.location.href = res.url; else toast.success("Purchase started."); },
-    });
+    // Paid games go through the dedicated payment page (Stripe Elements).
+    window.location.href = `/checkout/${gameId}`;
   }
 
   return (
@@ -161,10 +173,72 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
               <p className="text-parchment-mid font-body text-base leading-relaxed whitespace-pre-line break-words">{game.description}</p>
             </section>
 
-            {/* How to play (rules) */}
+            {/* Rule guide */}
+            {hasGuide && guide && (
+              <section className="space-y-5">
+                <h2 className="font-display text-lg font-bold tracking-wide">How to play</h2>
+
+                {guide.objective?.trim() && (
+                  <div className="v-card p-4">
+                    <p className="text-2xs font-ui font-semibold text-emerald-glow uppercase tracking-wider mb-1">Objective</p>
+                    <p className="text-sm text-parchment-mid font-ui leading-relaxed whitespace-pre-line">{guide.objective}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {guide.setupSteps?.length > 0 && (
+                    <div>
+                      <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-2">Setup</p>
+                      <ol className="space-y-1.5">
+                        {guide.setupSteps.map((s, i) => (
+                          <li key={i} className="flex gap-2 text-sm text-parchment-mid font-ui">
+                            <span className="w-5 h-5 rounded-full bg-warm-wood/50 text-emerald-glow text-2xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                            <span>{s}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                  {guide.turnStructure?.length > 0 && (
+                    <div>
+                      <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-2">On your turn</p>
+                      <ol className="space-y-1.5">
+                        {guide.turnStructure.map((s, i) => (
+                          <li key={i} className="flex gap-2 text-sm text-parchment-mid font-ui">
+                            <span className="text-royal-gold font-mono text-2xs mt-0.5 shrink-0">{i + 1}.</span>
+                            <span>{s}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                </div>
+
+                {guide.scenarios?.length > 0 && (
+                  <div>
+                    <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-2">Scenarios & variants</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {guide.scenarios.map(s => (
+                        <div key={s.id} className="v-card p-3.5">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="font-ui font-semibold text-parchment-light text-sm truncate">{s.name}</span>
+                            <span className={`text-2xs px-2 py-0.5 rounded-full font-ui capitalize shrink-0 ${DIFFICULTY_STYLE[s.difficulty] ?? "bg-warm-wood text-soft-gray"}`}>{s.difficulty}</span>
+                          </div>
+                          {s.players && <p className="text-2xs text-soft-gray font-ui mb-1.5">{s.players} players</p>}
+                          {s.description && <p className="text-sm text-parchment-mid font-ui leading-relaxed mb-2">{s.description}</p>}
+                          {s.winCondition && <p className="text-2xs text-soft-gray font-ui"><span className="text-emerald-glow">Win:</span> {s.winCondition}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Rules (trigger → effect) */}
             {rules.length > 0 && (
               <section>
-                <h2 className="font-display text-lg font-bold tracking-wide mb-3">How to play</h2>
+                <h2 className="font-display text-lg font-bold tracking-wide mb-3">{hasGuide ? "Rules" : "How to play"}</h2>
                 <div className="space-y-2">
                   {rules.map(r => (
                     <div key={r.id} className="v-card p-3">

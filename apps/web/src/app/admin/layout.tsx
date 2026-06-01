@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/games", label: "Games", icon: <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="1" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.3"/><path d="M1 5.5h13M5.5 1v13" stroke="currentColor" strokeWidth="1" opacity="0.4"/></svg> },
   { href: "/admin/blog", label: "Blog", icon: <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="1" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><path d="M4 5h7M4 7.5h7M4 10h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg> },
   { href: "/admin/plans", label: "Plans", icon: <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1l2 4 4.5.5-3.3 3 .9 4.5-4.1-2.3L3.4 13l.9-4.5L1 5.5 5.5 5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg> },
+  { href: "/admin/events", label: "Events", icon: <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M1 5.5h13M3 2h9a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0112 13H3a1.5 1.5 0 01-1.5-1.5v-8A1.5 1.5 0 013 2z" stroke="currentColor" strokeWidth="1.3"/><path d="M4.5 8.5l1.5 1.5 3-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

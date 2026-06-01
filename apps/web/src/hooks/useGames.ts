@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { apiClient, ApiError } from "@/lib/apiClient";
 import type { GameRecord, GameReview } from "@/types/game";
 import type { GameSummary, PaginatedResponse } from "@velonix/types";
-import type { CreateGameDto, UpdateGameDto, MarketplaceFiltersDto } from "@velonix/game-engine";
+import type { CreateGameDto, UpdateGameDto, MarketplaceFiltersDto, PriceSuggestion } from "@velonix/game-engine";
 
 // ── Query Keys ────────────────────────────────────────────────────────────────
 
@@ -68,11 +68,18 @@ export function useCreateReview(gameId: string) {
   });
 }
 
-/** Create a Stripe payment intent / checkout for purchasing a game */
+export interface GamePurchaseIntent {
+  clientSecret: string | null;
+  amount: number;
+  platformFee: number;
+  creatorEarnings: number;
+}
+
+/** Create a Stripe PaymentIntent for purchasing a game (drives the payment page) */
 export function usePurchaseGame() {
   return useMutation({
     mutationFn: (gameId: string) =>
-      apiClient.post<{ clientSecret?: string; url?: string }>(`/payments/game/${gameId}/intent`),
+      apiClient.post<GamePurchaseIntent>(`/payments/game/${gameId}/intent`),
     onError: (err) => toast.error(err instanceof ApiError ? err.message : "Could not start checkout."),
   });
 }
@@ -96,6 +103,8 @@ export function useUpdateGame(gameId: string) {
     onSuccess: (updated) => {
       qc.setQueryData(gameKeys.detail(gameId), updated);
       void qc.invalidateQueries({ queryKey: gameKeys.myGames() });
+      // Complexity may have changed, which drives the price suggestion.
+      void qc.invalidateQueries({ queryKey: [...gameKeys.detail(gameId), "price-suggestion"] });
     },
   });
 }
@@ -109,6 +118,16 @@ export function usePublishGame(gameId: string) {
       void qc.invalidateQueries({ queryKey: gameKeys.detail(gameId) });
       void qc.invalidateQueries({ queryKey: gameKeys.myGames() });
     },
+  });
+}
+
+/** Smart price suggestion based on complexity and similar published games */
+export function usePriceSuggestion(gameId: string, enabled = true) {
+  return useQuery({
+    queryKey: [...gameKeys.detail(gameId), "price-suggestion"],
+    queryFn: () => apiClient.get<PriceSuggestion>(`/games/${gameId}/price-suggestion`),
+    enabled: !!gameId && enabled,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

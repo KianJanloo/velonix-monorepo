@@ -67,6 +67,8 @@ export interface SubscriptionLimits {
   has3DPreview: boolean;
   hasCustomDomain: boolean;
   hasTeamCollaboration: boolean;
+  /** Max collaborators a creator can invite *per game* (excludes the owner). 0 = none. */
+  maxCollaborators: number;
   hasPrioritySupport: boolean;
 }
 
@@ -80,6 +82,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     has3DPreview: false,
     hasCustomDomain: false,
     hasTeamCollaboration: false,
+    maxCollaborators: 0,
     hasPrioritySupport: false,
   },
   creator: {
@@ -91,6 +94,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     has3DPreview: true,
     hasCustomDomain: false,
     hasTeamCollaboration: false,
+    maxCollaborators: 0,
     hasPrioritySupport: false,
   },
   pro: {
@@ -102,6 +106,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     has3DPreview: true,
     hasCustomDomain: false,
     hasTeamCollaboration: true,
+    maxCollaborators: 3,
     hasPrioritySupport: false,
   },
   studio: {
@@ -113,6 +118,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     has3DPreview: true,
     hasCustomDomain: true,
     hasTeamCollaboration: true,
+    maxCollaborators: 10,
     hasPrioritySupport: true,
   },
 };
@@ -145,6 +151,46 @@ export interface UserPublicProfile {
   subscriptionTier: SubscriptionTier;
   totalSales: number;
   createdAt: ISODateString;
+}
+
+// ---------------------------------------------------------------------------
+// PROMOTIONAL EVENTS (admin-managed announcement banners / offers)
+// ---------------------------------------------------------------------------
+
+export type PromoEventVariant = "promo" | "sale" | "info" | "warning";
+export type PromoEventPlacement = "global" | "landing" | "marketplace";
+
+export interface PromoEvent {
+  id: ID;
+  title: string;
+  message: string;
+  ctaLabel: Nullable<string>;
+  ctaUrl: Nullable<string>;
+  variant: PromoEventVariant;
+  placement: PromoEventPlacement;
+  isActive: boolean;
+  dismissible: boolean;
+  priority: number;
+  startsAt: Nullable<ISODateString>;
+  endsAt: Nullable<ISODateString>;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}
+
+// ---------------------------------------------------------------------------
+// COLLABORATION
+// ---------------------------------------------------------------------------
+
+export type CollaboratorRole = "editor" | "viewer";
+
+export interface GameCollaborator {
+  id: ID;
+  gameId: ID;
+  userId: ID;
+  role: CollaboratorRole;
+  invitedById: ID;
+  createdAt: ISODateString;
+  user?: UserPublicProfile;
 }
 
 // ---------------------------------------------------------------------------
