@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Reveal } from "@/components/atoms/Reveal";
 
 export const metadata: Metadata = {
   title: "Velonix — Play. Think. Conquer.",
@@ -32,7 +33,7 @@ function Hero() {
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen px-6 text-center overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-spotlight" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_80%,rgba(58,42,31,0.4),transparent)]" />
+      <div className="pointer-events-none hidden dark:block absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_80%,rgba(58,42,31,0.4),transparent)]" />
 
       <div className="mb-8 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
         <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-hidden="true">
@@ -119,11 +120,11 @@ function StatsBar() {
   return (
     <section className="border-y border-warm-wood bg-rich-wood-dark/60 py-10">
       <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        {stats.map(({ value, label }) => (
-          <div key={label}>
+        {stats.map(({ value, label }, i) => (
+          <Reveal key={label} delay={i * 90}>
             <p className="font-display text-3xl font-bold gradient-gold-parchment mb-1">{value}</p>
             <p className="text-soft-gray text-sm font-ui">{label}</p>
-          </div>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -226,21 +227,20 @@ function Features() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map(({ icon, title, desc, accent }) => (
-            <div
-              key={title}
-              className="v-card p-6 flex flex-col gap-4 hover:border-warm-wood-light transition-colors"
-            >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${accentMap[accent]}`}>
-                {icon}
+          {FEATURES.map(({ icon, title, desc, accent }, i) => (
+            <Reveal key={title} delay={i * 80}>
+              <div className="v-card p-6 flex flex-col gap-4 hover:border-warm-wood-light hover:-translate-y-1 h-full">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${accentMap[accent]}`}>
+                  {icon}
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-bold tracking-wide text-parchment-light mb-2">
+                    {title}
+                  </h3>
+                  <p className="text-soft-gray text-sm font-ui leading-relaxed">{desc}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-display text-base font-bold tracking-wide text-parchment-light mb-2">
-                  {title}
-                </h3>
-                <p className="text-soft-gray text-sm font-ui leading-relaxed">{desc}</p>
-              </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -286,8 +286,8 @@ function HowItWorks() {
           {/* Connector line */}
           <div className="hidden md:block absolute top-10 left-[calc(33.33%+1rem)] right-[calc(33.33%+1rem)] h-px bg-gradient-to-r from-warm-wood-light/40 via-royal-gold/30 to-warm-wood-light/40" />
 
-          {STEPS.map(({ step, title, desc, cta }) => (
-            <div key={step} className="flex flex-col items-center text-center gap-4">
+          {STEPS.map(({ step, title, desc, cta }, i) => (
+            <Reveal key={step} delay={i * 120} className="flex flex-col items-center text-center gap-4">
               <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-rich-wood-dark border-2 border-royal-gold/40 flex items-center justify-center mb-1 shadow-gold/10 shadow-lg">
                   <span className="font-display text-2xl font-bold text-royal-gold">{step}</span>
@@ -301,7 +301,7 @@ function HowItWorks() {
               >
                 {cta.label} →
               </Link>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

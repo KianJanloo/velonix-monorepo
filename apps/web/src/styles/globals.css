@@ -63,6 +63,30 @@
   }
 }
 
+/* ── Scroll-reveal + life animations ────────────────────────────────────── */
+@keyframes v-reveal-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.v-reveal {
+  opacity: 0;
+}
+.v-reveal.is-visible {
+  animation: v-reveal-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v-reveal, .v-reveal.is-visible { opacity: 1; animation: none; transform: none; }
+}
+
+/* Subtle interactive lift for cards */
+.v-card { transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+
+/* Shimmer sweep for primary CTAs / accents */
+@keyframes v-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 /* ── Gradient text must not clip descenders (g, y, p…) ──────────────────── */
 .gradient-gold-parchment {
   padding-bottom: 0.08em;

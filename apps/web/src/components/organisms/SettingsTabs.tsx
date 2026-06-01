@@ -212,7 +212,7 @@ function BillingTab({ tier, currentTier }: { tier: { label: string; price: strin
       <h2 className="font-display text-lg font-semibold tracking-display text-parchment-light mb-5">
         Billing &amp; Subscription
       </h2>
-      <div className="flex items-center justify-between p-4 bg-emerald-ghost border border-emerald-glow/20 rounded-lg mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-emerald-ghost border border-emerald-glow/20 rounded-lg mb-6">
         <div>
           <p className="text-sm font-ui font-semibold text-emerald-glow">{tier.label}</p>
           <p className="text-xs text-soft-gray font-ui">{tier.price}</p>
@@ -227,13 +227,13 @@ function BillingTab({ tier, currentTier }: { tier: { label: string; price: strin
           </Link>
         )}
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <p className="text-soft-gray text-sm font-ui">
           {currentTier !== "free"
             ? "Manage payment methods and invoices through the Stripe customer portal."
             : "Unlock more projects, 3D preview, analytics, and lower commission rates."}
         </p>
-        <Link href="/pricing" className="text-emerald-glow text-sm font-ui font-semibold hover:text-emerald-bright transition-colors shrink-0 ml-4">
+        <Link href="/pricing" className="text-emerald-glow text-sm font-ui font-semibold hover:text-emerald-bright transition-colors shrink-0 sm:ml-4">
           View all plans →
         </Link>
       </div>
@@ -247,14 +247,14 @@ export function SettingsTabs() {
   const tier = TIER_LABELS[user?.subscriptionTier ?? "free"] ?? { label: "Free Plan", price: "Free forever" };
 
   return (
-    <div className="flex gap-8">
-      {/* Sidebar nav */}
-      <nav className="w-48 shrink-0 flex flex-col gap-1">
+    <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+      {/* Sidebar nav — horizontal scroll on mobile, vertical on desktop */}
+      <nav className="md:w-48 shrink-0 flex md:flex-col gap-1 overflow-x-auto md:overflow-visible -mx-1 px-1 pb-1 md:pb-0">
         {TABS.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`v-nav-item ${activeTab === id ? "active" : ""}`}
+            className={`v-nav-item shrink-0 whitespace-nowrap ${activeTab === id ? "active" : ""}`}
           >
             {label}
           </button>

@@ -530,6 +530,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
 
   const onCompPointerDown = useCallback((e: ReactPointerEvent, comp: CanvasComp) => {
     if (comp.locked || inPreview) return;
+    if (e.button === 1) return; // let middle-button pan bubble to the canvas
     e.stopPropagation();
     setSelectedId(comp.id);
     if (activeTool !== "select") return;
@@ -552,6 +553,12 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   }, [components, storeZoom, panX, panY]);
 
   const onCanvasPointerDown = useCallback((e: ReactPointerEvent) => {
+    // Middle mouse button → pan from anywhere on the canvas (like Figma)
+    if (e.button === 1) {
+      e.preventDefault();
+      dragRef.current = { kind: "pan", sx: e.clientX, sy: e.clientY, ox: panX, oy: panY, ow: 0, oh: 0, orot: 0, cxScreen: 0, cyScreen: 0 };
+      return;
+    }
     if (e.target !== e.currentTarget && !(e.target as HTMLElement).dataset.canvasbg) return;
     const tool = TOOLS.find(t => t.id === activeTool);
     if (tool?.creates) {

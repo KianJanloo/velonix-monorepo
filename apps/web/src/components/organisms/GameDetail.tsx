@@ -125,7 +125,7 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
             {/* Title + meta */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xs text-emerald-glow font-ui uppercase tracking-wider bg-emerald-ghost px-2 py-1 rounded-full capitalize">{game.category?.replace("_", " ")}</span>
+                <span className="text-2xs text-emerald-glow font-ui uppercase tracking-wider bg-emerald-ghost px-2 py-1 rounded-full">{game.category?.replace("_", " ")}</span>
                 <span className="text-2xs text-soft-gray font-ui capitalize">{game.complexity?.replace("_", " ")}</span>
               </div>
               <h1 className="font-display text-3xl sm:text-4xl font-black tracking-display mb-2">{game.title}</h1>
@@ -158,7 +158,7 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
             {/* Description */}
             <section>
               <h2 className="font-display text-lg font-bold tracking-wide mb-3">About this game</h2>
-              <p className="text-parchment-mid font-body text-base leading-relaxed whitespace-pre-line">{game.description}</p>
+              <p className="text-parchment-mid font-body text-base leading-relaxed whitespace-pre-line break-words">{game.description}</p>
             </section>
 
             {/* How to play (rules) */}
@@ -186,23 +186,33 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
             {/* Reviews */}
             <section>
               <h2 className="font-display text-lg font-bold tracking-wide mb-4">Reviews</h2>
-              {user && !adminPreview && (
-                <div className="v-card p-4 mb-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xs text-soft-gray font-ui uppercase tracking-wider">Your rating</span>
-                    {[1,2,3,4,5].map(n => (
-                      <button key={n} onClick={() => setReviewRating(n)} className={`text-lg ${n <= reviewRating ? "text-royal-gold" : "text-warm-wood-light"}`}>★</button>
-                    ))}
+              {!adminPreview && (
+                user ? (
+                  <div className="v-card p-4 mb-4 space-y-3">
+                    <p className="text-sm font-ui font-semibold text-parchment-light">Write a review</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xs text-soft-gray font-ui uppercase tracking-wider">Your rating</span>
+                      {[1,2,3,4,5].map(n => (
+                        <button key={n} type="button" onClick={() => setReviewRating(n)} className={`text-xl leading-none transition-colors ${n <= reviewRating ? "text-royal-gold" : "text-warm-wood-light hover:text-royal-gold/50"}`}>★</button>
+                      ))}
+                    </div>
+                    <input className="v-input text-sm" placeholder="Review title (optional)" value={reviewTitle} onChange={e => setReviewTitle(e.target.value)} />
+                    <textarea className="v-input text-sm resize-none h-20" placeholder="Share your thoughts…" value={reviewBody} onChange={e => setReviewBody(e.target.value)} />
+                    <Button variant="primary" size="sm" isLoading={createReview.isPending} disabled={!reviewBody.trim()}
+                      onClick={() => createReview.mutate({ gameId, rating: reviewRating, title: reviewTitle || undefined, body: reviewBody || undefined }, {
+                        onSuccess: () => { setReviewTitle(""); setReviewBody(""); setReviewRating(5); },
+                      })}>
+                      Post Review
+                    </Button>
                   </div>
-                  <input className="v-input text-sm" placeholder="Review title (optional)" value={reviewTitle} onChange={e => setReviewTitle(e.target.value)} />
-                  <textarea className="v-input text-sm resize-none h-20" placeholder="Share your thoughts…" value={reviewBody} onChange={e => setReviewBody(e.target.value)} />
-                  <Button variant="primary" size="sm" isLoading={createReview.isPending}
-                    onClick={() => createReview.mutate({ gameId, rating: reviewRating, title: reviewTitle || undefined, body: reviewBody || undefined }, {
-                      onSuccess: () => { setReviewTitle(""); setReviewBody(""); setReviewRating(5); },
-                    })}>
-                    Post Review
-                  </Button>
-                </div>
+                ) : (
+                  <div className="v-card p-4 mb-4 flex items-center justify-between gap-3 flex-wrap">
+                    <p className="text-sm text-soft-gray font-ui">Sign in to share your review of this game.</p>
+                    <Link href={`/auth/login?next=/marketplace/${gameId}`} className="px-4 py-2 rounded-lg bg-emerald-glow text-deep-void text-sm font-ui font-bold hover:bg-emerald-bright transition-all shrink-0">
+                      Sign in to review
+                    </Link>
+                  </div>
+                )
               )}
               <div className="space-y-3">
                 {reviews?.length ? reviews.map(rev => (
