@@ -60,6 +60,8 @@ export type SubscriptionTier =
 
 export interface SubscriptionLimits {
   maxProjects: number | null; // null = unlimited
+  /** Max design pages (canvases) per game project. null = unlimited. */
+  maxPagesPerProject: number | null;
   maxComponentsPerProject: number | null;
   maxStorageGb: number;
   commissionRate: Percentage; // Velonix's cut
@@ -75,6 +77,7 @@ export interface SubscriptionLimits {
 export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> = {
   free: {
     maxProjects: 3,
+    maxPagesPerProject: 2,
     maxComponentsPerProject: 50,
     maxStorageGb: 1,
     commissionRate: 25,
@@ -87,6 +90,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
   },
   creator: {
     maxProjects: 10,
+    maxPagesPerProject: 5,
     maxComponentsPerProject: 200,
     maxStorageGb: 5,
     commissionRate: 20,
@@ -99,6 +103,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
   },
   pro: {
     maxProjects: null,
+    maxPagesPerProject: 25,
     maxComponentsPerProject: null,
     maxStorageGb: 25,
     commissionRate: 17,
@@ -111,6 +116,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
   },
   studio: {
     maxProjects: null,
+    maxPagesPerProject: null,
     maxComponentsPerProject: null,
     maxStorageGb: 100,
     commissionRate: 15,

@@ -12,6 +12,7 @@ export interface PlanConfig {
   priceYearly: number;
   commissionRate: number;
   maxProjects: number | null;
+  maxPagesPerProject: number | null;
   has3DPreview: boolean;
   hasAnalytics: boolean;
   hasRuleEngine: boolean;

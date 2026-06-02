@@ -58,8 +58,14 @@ function PlanEditor({ plan }: { plan: PlanConfig }) {
             <input type="number" className="v-input text-xs font-mono" value={form.commissionRate} onChange={e => set("commissionRate", Number(e.target.value) || 0)} />
           </label>
           <label className="block">
-            <span className="text-2xs font-ui text-soft-gray uppercase tracking-wider block mb-1">Max projects (blank = ∞)</span>
+            <span className="text-2xs font-ui text-soft-gray uppercase tracking-wider block mb-1">Max projects</span>
             <input type="number" className="v-input text-xs font-mono" value={form.maxProjects ?? ""} onChange={e => set("maxProjects", e.target.value === "" ? null : Number(e.target.value))} />
+          </label>
+        </div>
+        <div className="grid grid-cols-1 gap-2">
+          <label className="block">
+            <span className="text-2xs font-ui text-soft-gray uppercase tracking-wider block mb-1">Max Pages</span>
+            <input type="number" className="v-input text-xs font-mono" value={form.maxPagesPerProject ?? ""} onChange={e => set("maxPagesPerProject", e.target.value === "" ? null : Number(e.target.value))} />
           </label>
         </div>
 

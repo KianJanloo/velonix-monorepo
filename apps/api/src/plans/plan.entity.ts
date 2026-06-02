@@ -30,6 +30,10 @@ export class PlanConfigEntity {
   @Column({ name: "max_projects", type: "int", nullable: true })
   maxProjects!: number | null;
 
+  /** Max design pages (canvases) per game. NULL = unlimited. */
+  @Column({ name: "max_pages_per_project", type: "int", nullable: true })
+  maxPagesPerProject!: number | null;
+
   @Column({ name: "has_3d_preview", default: false })
   has3DPreview!: boolean;
 

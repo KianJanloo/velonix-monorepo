@@ -20,14 +20,16 @@ import { Toaster } from "sonner";
 /** Sonner toaster that follows the active Velonix theme. */
 function ThemedToaster() {
   const { theme, resolvedTheme } = useTheme();
-  const active = (theme === "system" ? resolvedTheme : theme) === "light" ? "light" : "dark";
+  const active =
+    (theme === "system" ? resolvedTheme : theme) === "light" ? "light" : "dark";
   return (
     <Toaster
       position="bottom-right"
       theme={active}
       toastOptions={{
         classNames: {
-          toast: "!bg-rich-wood-dark !border-warm-wood !text-parchment-light !font-ui",
+          toast:
+            "!bg-rich-wood-dark !border-warm-wood !text-parchment-light !font-ui",
           title: "!text-parchment-light",
           description: "!text-soft-gray",
           success: "!border-[rgba(0,212,165,0.4)]",
@@ -69,7 +71,7 @@ export function Providers({ children }: ProvidersProps) {
             retry: 0,
           },
         },
-      })
+      }),
   );
 
   return (

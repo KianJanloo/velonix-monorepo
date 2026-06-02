@@ -49,5 +49,10 @@ export interface GameReview {
   isVerifiedPurchase: boolean;
   helpful: number;
   createdAt: string;
-  author?: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  author?: {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+  };
 }

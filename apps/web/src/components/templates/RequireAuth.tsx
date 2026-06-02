@@ -29,7 +29,9 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-deep-void flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-warm-wood border-t-emerald-glow rounded-full animate-spin" />
-          <p className="text-soft-gray text-sm font-ui">Checking your session…</p>
+          <p className="text-soft-gray text-sm font-ui">
+            Checking your session…
+          </p>
         </div>
       </div>
     );

@@ -16,6 +16,7 @@ class UpdatePlanDto {
   @ApiProperty({ required: false }) @IsOptional() @IsInt() @Min(0) priceYearly?: number;
   @ApiProperty({ required: false }) @IsOptional() @IsInt() @Min(0) commissionRate?: number;
   @ApiProperty({ required: false, nullable: true }) @IsOptional() @IsInt() maxProjects?: number | null;
+  @ApiProperty({ required: false, nullable: true }) @IsOptional() @IsInt() maxPagesPerProject?: number | null;
   @ApiProperty({ required: false }) @IsOptional() @IsBoolean() has3DPreview?: boolean;
   @ApiProperty({ required: false }) @IsOptional() @IsBoolean() hasAnalytics?: boolean;
   @ApiProperty({ required: false }) @IsOptional() @IsBoolean() hasRuleEngine?: boolean;

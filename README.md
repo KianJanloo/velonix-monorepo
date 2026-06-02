@@ -39,12 +39,19 @@ velonix/                          # Turborepo monorepo root
 │   │
 │   └── api/                      # NestJS — Backend API
 │       └── src/
-│           ├── auth/             # JWT auth, guards, strategies
+│           ├── auth/             # JWT auth, guards, strategies, refresh
 │           ├── users/            # User CRUD, profile
-│           ├── games/            # Game creation, studio data
-│           ├── marketplace/      # Listings, search, filters
+│           ├── games/            # Game creation, studio data, collaborators + StudioGateway (WS)
+│           ├── assets/           # Component marketplace (buy/sell reusable assets)
+│           ├── marketplace/      # Game listings, search, filters, reviews, purchases
+│           ├── events/           # Admin-managed promotional banners / offers
 │           ├── subscriptions/    # Stripe subscription management
-│           ├── payments/         # Stripe Connect, webhooks
+│           ├── payments/         # Stripe Connect, game + asset purchase intents, webhooks
+│           ├── notifications/    # In-app notifications
+│           ├── uploads/          # Image uploads
+│           ├── blog/             # Marketing blog
+│           ├── admin/            # Admin panel APIs (users, games, plans, events)
+│           ├── plans/            # Subscription plan metadata
 │           ├── config/           # Configuration factories
 │           └── database/         # TypeORM migrations + seeds
 │
@@ -230,25 +237,39 @@ pnpm dev:api          # NestJS only
 
 ### Board Game Designer Studio
 The core feature. A professional-grade design tool with:
-- Drag-and-drop component editor
-- Layer system (Photoshop-like)
-- 50-entry undo/redo history
-- Real-time autosave
-- 2D canvas + 3D tabletop preview toggle
-- Grid snap + alignment guides
-- Custom board, card, token, tile design
-- Rule scripting with syntax highlighting
+- Drag-and-drop component editor with 15 component types (board, card, deck, tile, hex, token, marker, cube, coin, die, pawn, meeple, note, rulebook, text)
+- **Multiple resizable pages** — design a main board, player boards, card sheets, etc.; each page has its own changeable dimensions
+- Layer system (Photoshop-like) with **nested groups** — group components into a single managed block, shown as a collapsible parent with its members nested underneath
+- **Marquee (box) selection** + shift-click multi-select; ⌘G / ⌘⇧G to group / ungroup
+- Right-click **context menu** (duplicate, copy/paste, z-order, group, lock/hide, delete)
+- Rich **Properties** (steppers, alignment, size presets, aspect lock) and **Style** panels (fill/stroke/corner/opacity, transparent support, live preview)
+- Asset library — upload images and apply them to components
+- 50-entry undo/redo history + real-time autosave
+- 2D canvas + 3D tabletop preview toggle; grid snap + alignment
+- **Smart pricing suggestions** at publish time (based on complexity + comparable published games)
+- Built-in interactive **tutorial** and a quick-access **More** menu (kept the toolbar uncluttered)
+
+### Visual Rule Engine
+- Structured **When → Then** rule builder (draw cards, gain/lose points, move, roll dice, extra/skip turn, end game, custom) with a live human-readable preview
+- **Rule guide & scenarios** — objective, setup steps, turn structure and named variants, surfaced on the marketplace "How to play" page
+
+### Real-time Collaboration
+- Invite **editors / viewers** to a studio (plan-gated: Pro & Studio), with per-seat limits
+- Live presence + snapshot sync over a NestJS **WebSocket gateway** (socket.io); viewers are read-only
+
+### Component Marketplace
+- Buy/sell **reusable components** (tokens, boards, card templates) inside the studio
+- Free assets acquire in one click; paid assets use Stripe with **revenue share** to the author
+- Browse / library / publish-your-selection, then insert purchased components onto the canvas
 
 ### Marketplace
-- Browse and purchase games
-- Advanced filtering (category, players, complexity, price)
-- Full-text search
-- Verified purchase reviews
-- Creator pages with portfolio
+- Browse and purchase games with advanced filtering (category, players, complexity, price)
+- Full-text search (PostgreSQL GIN tsvector index)
+- Verified purchase reviews + creator portfolio pages
+- Admin-managed **promotional event banners** (dynamic, scheduleable offers)
 
 ### Monetization
-- Free game publishing
-- Paid games with Stripe Connect direct payouts
+- Free game publishing; paid games & components with Stripe Connect direct payouts
 - Tiered commission (15-25% based on subscription)
 - Analytics dashboard for Pro/Studio
 

@@ -4,7 +4,12 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
-import { useAuthStore, getAccessToken, getRefreshToken, type AuthUser } from "@/stores/authStore";
+import {
+  useAuthStore,
+  getAccessToken,
+  getRefreshToken,
+  type AuthUser,
+} from "@/stores/authStore";
 
 /** Routes where an expired session should bounce the user to login. */
 const PROTECTED_PREFIXES = ["/studio", "/dashboard", "/settings", "/admin"];
@@ -34,7 +39,10 @@ export function SessionGuard() {
       .get<AuthUser>("/auth/me")
       .then((user) => {
         const at = getAccessToken();
-        if (at) useAuthStore.getState().setAuth(user, at, getRefreshToken() ?? undefined);
+        if (at)
+          useAuthStore
+            .getState()
+            .setAuth(user, at, getRefreshToken() ?? undefined);
       })
       .catch(() => {
         // apiClient already clears auth + emits auth-expired on a hard 401.
