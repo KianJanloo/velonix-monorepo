@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useAuth";
+import { useAuthStore } from "@/stores/authStore";
 
 /**
  * Client-side auth guard for protected pages.
@@ -11,21 +12,19 @@ import { useCurrentUser } from "@/hooks/useAuth";
  */
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const user = useCurrentUser();
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const router = useRouter();
   const pathname = usePathname();
-  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // Wait a tick for the persisted store to hydrate
-    if (!user) {
-      const next = encodeURIComponent(pathname);
-      router.replace(`/auth/login?next=${next}`);
-    } else {
-      setChecked(true);
+    // Only decide once the persisted store has hydrated, so we don't bounce a
+    // logged-in user to login on a hard refresh before localStorage is read.
+    if (hasHydrated && !user) {
+      router.replace(`/auth/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [user, router, pathname]);
+  }, [hasHydrated, user, router, pathname]);
 
-  if (!user || !checked) {
+  if (!hasHydrated || !user) {
     return (
       <div className="min-h-screen bg-deep-void flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">

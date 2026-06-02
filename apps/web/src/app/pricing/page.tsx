@@ -142,8 +142,11 @@ export default function PricingPage() {
           <div className="space-y-4">
             {[
               { q: "Can I switch plans at any time?", a: "Yes. You can upgrade or downgrade your plan at any time. Changes take effect immediately for upgrades and at the end of your billing cycle for downgrades." },
-              { q: "What is the commission rate?", a: "Commission is Velonix's platform cut from each marketplace sale. Free tier is 25%, Creator 20%, Pro 17%, Studio 15%. You always keep the rest." },
-              { q: "Do you offer refunds?", a: "We offer a 14-day money-back guarantee on all paid plans. Contact support within 14 days of your purchase and we'll refund in full, no questions asked." },
+              { q: "What is the commission rate?", a: "Commission is Velonix's platform cut from each marketplace sale. Free tier is 22%, Creator 17%, Pro 12%, Studio 8%. You always keep the rest." },
+              { q: "Do you offer refunds?", 
+                // a: "We offer a 14-day money-back guarantee on all paid plans. Contact support within 14 days of your purchase and we'll refund in full, no questions asked."
+                   a: "At this time, we do not offer refunds for paid plans. We are considering adding a refund option in the future and will share any updates with our customers as they become available.",
+              },
               { q: "What happens when I hit my project limit?", a: "You'll be notified and asked to upgrade. Existing projects remain fully accessible — you just can't create new ones until you upgrade or delete some." },
               { q: "Is my payment data secure?", a: "All payments are processed by Stripe, a PCI-DSS Level 1 certified provider. Velonix never stores your card details." },
             ].map(({ q, a }) => (

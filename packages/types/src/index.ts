@@ -154,6 +154,39 @@ export interface UserPublicProfile {
 }
 
 // ---------------------------------------------------------------------------
+// COMPONENT MARKETPLACE (buy/sell reusable studio assets)
+// ---------------------------------------------------------------------------
+
+export type AssetKind = "token" | "board" | "card" | "tile" | "piece" | "pack" | "other";
+
+export const ASSET_KINDS: AssetKind[] = ["token", "board", "card", "tile", "piece", "pack", "other"];
+
+/** Public listing shape (no payload — the buyable component data is gated). */
+export interface ComponentAssetSummary {
+  id: ID;
+  authorId: ID;
+  authorUsername: string;
+  title: string;
+  description: string;
+  kind: AssetKind;
+  thumbnailUrl: Nullable<string>;
+  isFree: boolean;
+  priceUsd: Nullable<CurrencyAmount>;
+  componentCount: number;
+  totalPurchases: number;
+  averageRating: Nullable<number>;
+  createdAt: ISODateString;
+  /** Whether the requesting user already owns / authored it (when authenticated). */
+  owned?: boolean;
+}
+
+/** Full asset incl. the component payload — only returned when free/owned/author. */
+export interface ComponentAsset extends ComponentAssetSummary {
+  /** Array of studio component definitions (CanvasComp-shaped). */
+  payload: unknown[];
+}
+
+// ---------------------------------------------------------------------------
 // PROMOTIONAL EVENTS (admin-managed announcement banners / offers)
 // ---------------------------------------------------------------------------
 

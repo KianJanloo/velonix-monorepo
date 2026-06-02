@@ -14,6 +14,7 @@ import { useGame, usePublishGame } from "@/hooks/useGames";
 import { useMyMembership, useCollaborators, useInviteCollaborator, useUpdateCollaboratorRole, useRemoveCollaborator } from "@/hooks/useCollaborators";
 import { useStudioCollab, type PresenceMember } from "@/hooks/useStudioCollab";
 import { StudioTutorial, STUDIO_TUTORIAL_KEY } from "@/components/templates/StudioTutorial";
+import { StudioMarketplace } from "@/components/templates/StudioMarketplace";
 import type { CollaboratorRole } from "@velonix/types";
 import { useStudio } from "@/hooks/useStudio";
 import { usePlan } from "@/hooks/usePlan";
@@ -710,6 +711,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   const collabEnabled = !isNew && !!membership && membership.kind !== "none";
   const [shareOpen, setShareOpen] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [marketOpen, setMarketOpen] = useState(false);
   const [menu, setMenu] = useState<{ x: number; y: number; targetId: string | null; mx?: number; my?: number } | null>(null);
 
   // Refs used to coordinate remote (peer) snapshot application with local edits.
@@ -878,6 +880,33 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     else if (dir === "down" && idx > 0) [next[idx], next[idx - 1]] = [next[idx - 1]!, next[idx]!];
     commit(next);
   }, [components, commit]);
+
+  // ── Component marketplace (insert / publish) ───────────────────────────────
+  // Drop a bought/acquired asset's components onto the active page.
+  const insertAssetComponents = useCallback((payload: unknown[]) => {
+    const incoming = (Array.isArray(payload) ? payload : []) as CanvasComp[];
+    if (incoming.length === 0) return;
+    const stamp = Date.now();
+    const groupRemap = new Map<string, string>();
+    const placed = incoming.map((c, i) => {
+      const copy: CanvasComp = { ...c, id: `${c.type ?? "comp"}-${stamp}-${i}`, x: (c.x ?? 60) + 16, y: (c.y ?? 60) + 16 };
+      if (c.groupId) {
+        if (!groupRemap.has(c.groupId)) groupRemap.set(c.groupId, `group-${stamp}`);
+        copy.groupId = groupRemap.get(c.groupId)!;
+      }
+      return copy;
+    });
+    setComponentsRaw(prev => { pastRef.current.push(prev); futureRef.current = []; return [...prev, ...placed]; });
+    setSelectedId(placed[0]!.id);
+    setMultiIds(placed.length > 1 ? placed.map(c => c.id) : []);
+    toast.success(`Inserted ${placed.length} component${placed.length === 1 ? "" : "s"}.`);
+  }, [setComponentsRaw]);
+
+  // Deep-copy the currently selected components as a publishable payload.
+  const getSelectionPayload = useCallback((): unknown[] => {
+    const ids = new Set(selectionRef.current);
+    return components.filter(c => ids.has(c.id)).map(c => { const { id: _id, ...rest } = c; void _id; return rest; });
+  }, [components]);
 
   const reorderZ = useCallback((id: string, where: "front" | "back") => {
     const c = components.find(x => x.id === id);
@@ -1265,21 +1294,21 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   if (inPreview) {
     return (
       <div className="fixed inset-0 z-50 bg-deep-void flex flex-col">
-        {/* minimal preview bar */}
-        <div className="h-12 bg-rich-wood-dark border-b border-warm-wood flex items-center px-4 gap-3 shrink-0">
-          <span className="font-display text-sm font-bold text-royal-gold">{game?.title ?? "Preview"}</span>
-          <span className="text-2xs text-soft-gray font-ui">{mode === "preview_3d" ? "3D Preview" : "2D Preview"}</span>
-          <div className="ml-auto flex items-center gap-1 bg-warm-wood rounded-lg p-0.5">
-            <button onClick={() => handleMode("preview_2d")} className={`px-3 py-1 rounded-md text-2xs font-ui font-semibold ${mode === "preview_2d" ? "bg-emerald-glow text-deep-void" : "text-soft-gray hover:text-parchment-light"}`}>2D</button>
-            <button onClick={() => handleMode("preview_3d")} className={`px-3 py-1 rounded-md text-2xs font-ui font-semibold ${mode === "preview_3d" ? "bg-emerald-glow text-deep-void" : "text-soft-gray hover:text-parchment-light"}`}>3D</button>
+        {/* minimal preview bar — responsive down to small phones */}
+        <div className="h-12 bg-rich-wood-dark border-b border-warm-wood flex items-center px-3 sm:px-4 gap-2 sm:gap-3 shrink-0">
+          <span className="font-display text-sm font-bold text-royal-gold truncate min-w-0 flex-1">{game?.title ?? "Preview"}</span>
+          <span className="text-2xs text-soft-gray font-ui hidden md:inline shrink-0">{mode === "preview_3d" ? "3D Preview" : "2D Preview"}</span>
+          <div className="flex items-center gap-1 bg-warm-wood rounded-lg p-0.5 shrink-0">
+            <button onClick={() => handleMode("preview_2d")} className={`px-2.5 sm:px-3 py-1 rounded-md text-2xs font-ui font-semibold ${mode === "preview_2d" ? "bg-emerald-glow text-deep-void" : "text-soft-gray hover:text-parchment-light"}`}>2D</button>
+            <button onClick={() => handleMode("preview_3d")} className={`px-2.5 sm:px-3 py-1 rounded-md text-2xs font-ui font-semibold ${mode === "preview_3d" ? "bg-emerald-glow text-deep-void" : "text-soft-gray hover:text-parchment-light"}`}>3D</button>
           </div>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0.5 shrink-0">
             <button onClick={zoomOut} className="v-tool-btn font-mono text-xs">−</button>
-            <button onClick={resetZoom} className="font-mono text-2xs text-soft-gray bg-warm-wood px-1.5 py-1 rounded min-w-[40px]">{zoomPercent}%</button>
+            <button onClick={resetZoom} className="font-mono text-2xs text-soft-gray bg-warm-wood px-1.5 py-1 rounded min-w-[40px] hidden sm:inline-block">{zoomPercent}%</button>
             <button onClick={zoomIn} className="v-tool-btn font-mono text-xs">+</button>
           </div>
-          <button onClick={() => setMode("design")} className="px-3 py-1.5 rounded-md bg-warm-wood text-parchment-light text-xs font-ui font-semibold hover:bg-warm-wood-light transition-colors">
-            ✕ Exit Preview
+          <button onClick={() => setMode("design")} title="Exit preview" className="px-2.5 sm:px-3 py-1.5 rounded-md bg-warm-wood text-parchment-light text-xs font-ui font-semibold hover:bg-warm-wood-light transition-colors shrink-0">
+            <span className="hidden sm:inline">✕ Exit Preview</span><span className="sm:hidden">✕</span>
           </button>
         </div>
         {/* preview canvas with pan */}
@@ -1354,6 +1383,11 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
               <button onClick={() => void handleSave()} className="v-tool-btn text-2xs font-ui px-2" title="Save (⌘S)">Save</button>
             </>
           )}
+          {/* Component marketplace */}
+          <button onClick={() => setMarketOpen(true)} className="v-tool-btn text-2xs font-ui px-2 flex items-center gap-1 shrink-0" title="Component marketplace — buy & sell reusable assets">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5h10l-.8 6a1 1 0 01-1 .9H3.8a1 1 0 01-1-.9L2 4.5z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/><path d="M4.7 4.5a2.3 2.3 0 014.6 0" stroke="currentColor" strokeWidth="1.1"/></svg>
+            Market
+          </button>
           {/* Help / tutorial */}
           <button onClick={() => setTutorialOpen(true)} className="v-tool-btn shrink-0" title="How the studio works">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/><path d="M5.4 5.3a1.7 1.7 0 013.2.6c0 1.1-1.6 1.4-1.6 2.4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><circle cx="7" cy="10.3" r="0.7" fill="currentColor"/></svg>
@@ -1384,6 +1418,14 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
       {guideOpen && <GuideDialog guide={guide} readOnly={effectiveReadOnly} onChange={setGuide} onClose={() => setGuideOpen(false)} />}
       {menu && <ContextMenu x={menu.x} y={menu.y} items={buildMenuItems()} onClose={closeMenu} />}
       {tutorialOpen && <StudioTutorial onClose={closeTutorial} />}
+      {marketOpen && (
+        <StudioMarketplace
+          selection={selectionIds.map(id => ({ id }))}
+          onInsert={insertAssetComponents}
+          getSelectionPayload={getSelectionPayload}
+          onClose={() => setMarketOpen(false)}
+        />
+      )}
 
       {/* Pages bar — switch / add / rename / resize canvases */}
       <div className="h-9 bg-rich-wood-dark border-b border-warm-wood flex items-center px-2 gap-1 shrink-0 overflow-x-auto z-30">

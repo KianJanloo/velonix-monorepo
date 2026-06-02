@@ -32,6 +32,21 @@ export class PaymentsController {
     return this.paymentsService.createGamePurchaseIntent(req.user.id, gameId);
   }
 
+  @Post("asset/:assetId/intent")
+  @Version("1")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("JWT")
+  @ApiOperation({ summary: "Create a PaymentIntent for purchasing a marketplace component asset" })
+  @ApiParam({ name: "assetId", format: "uuid", description: "ID of the asset to purchase" })
+  @ApiResponse({ status: 201, description: "PaymentIntent client secret returned" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  createAssetPurchaseIntent(
+    @Param("assetId") assetId: string,
+    @Request() req: { user: { id: string } }
+  ) {
+    return this.paymentsService.createAssetPurchaseIntent(req.user.id, assetId);
+  }
+
   @Post("connect/onboard")
   @Version("1")
   @UseGuards(JwtAuthGuard)

@@ -17,10 +17,13 @@ interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
   refreshToken: string | null;
+  /** True once the persisted store has rehydrated from localStorage (client only). */
+  hasHydrated: boolean;
   setAuth: (user: AuthUser, accessToken: string, refreshToken?: string) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   updateUser: (patch: Partial<AuthUser>) => void;
   clearAuth: () => void;
+  setHasHydrated: (v: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -29,14 +32,21 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       refreshToken: null,
+      hasHydrated: false,
       setAuth: (user, accessToken, refreshToken) =>
         set((s) => ({ user, accessToken, refreshToken: refreshToken ?? s.refreshToken })),
       setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
       updateUser: (patch) =>
         set((s) => ({ user: s.user ? { ...s.user, ...patch } : s.user })),
       clearAuth: () => set({ user: null, accessToken: null, refreshToken: null }),
+      setHasHydrated: (v) => set({ hasHydrated: v }),
     }),
-    { name: "velonix-auth" }
+    {
+      name: "velonix-auth",
+      // Don't persist the transient hydration flag.
+      partialize: (s) => ({ user: s.user, accessToken: s.accessToken, refreshToken: s.refreshToken }),
+      onRehydrateStorage: () => (state) => { state?.setHasHydrated(true); },
+    }
   )
 );
 

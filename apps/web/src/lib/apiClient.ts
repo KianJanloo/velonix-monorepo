@@ -28,6 +28,8 @@ async function refreshAccessToken(): Promise<string | null> {
         });
         if (!res.ok) {
           useAuthStore.getState().clearAuth();
+          // Notify the app the session is no longer valid (refresh token expired/revoked).
+          if (typeof window !== "undefined") window.dispatchEvent(new Event("velonix:auth-expired"));
           return null;
         }
         const json = await res.json() as { data?: { accessToken: string; refreshToken: string }; accessToken?: string; refreshToken?: string };

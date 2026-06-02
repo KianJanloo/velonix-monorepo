@@ -5,10 +5,12 @@ import { PaymentsService } from "./payments.service";
 import { PurchaseEntity } from "../marketplace/purchase.entity";
 import { GameEntity } from "../games/game.entity";
 import { UserEntity } from "../users/user.entity";
+import { AssetEntity } from "../assets/asset.entity";
+import { AssetPurchaseEntity } from "../assets/asset-purchase.entity";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PurchaseEntity, GameEntity, UserEntity])],
+  imports: [TypeOrmModule.forFeature([PurchaseEntity, GameEntity, UserEntity, AssetEntity, AssetPurchaseEntity])],
   controllers: [PaymentsController],
   providers: [PaymentsService, SubscriptionsService],
   exports: [PaymentsService],

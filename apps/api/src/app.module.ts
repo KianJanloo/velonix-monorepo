@@ -33,6 +33,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
 import { UploadsModule } from "./uploads/uploads.module";
 import { PlansModule } from "./plans/plans.module";
 import { EventsModule } from "./events/events.module";
+import { AssetsModule } from "./assets/assets.module";
 
 @Module({
   imports: [
@@ -124,6 +125,7 @@ import { EventsModule } from "./events/events.module";
     UploadsModule,
     PlansModule,
     EventsModule,
+    AssetsModule,
   ],
 })
 export class AppModule {}

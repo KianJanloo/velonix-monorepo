@@ -85,45 +85,47 @@ function GameRow({
   isDeleting: boolean;
 }) {
   return (
-    <div className="v-card flex items-center gap-4 p-4 hover:border-warm-wood-light">
-      {/* Thumbnail */}
-      <div className="w-14 h-14 rounded-lg bg-felt-dark border border-warm-wood shrink-0 flex items-center justify-center overflow-hidden">
-        {game.thumbnailUrl ? (
-          <img src={game.thumbnailUrl} alt={game.title} className="w-full h-full object-cover" />
-        ) : (
-          <span className="font-display text-royal-gold text-xl font-bold opacity-40">
-            {game.title[0]}
-          </span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-display text-sm font-bold tracking-wide text-parchment-light truncate">
-            {game.title}
-          </span>
-          {statusBadge(game.status)}
-        </div>
-        <div className="flex items-center gap-3 text-2xs text-soft-gray font-ui">
-          <span className="capitalize">{game.category}</span>
-          <span className="text-warm-wood-light">|</span>
-          <span>
-            {game.isFree ? "Free" : `$${((game.priceUsd ?? 0) / 100).toFixed(2)}`}
-          </span>
-          {game.totalPurchases > 0 && (
-            <>
-              <span className="text-warm-wood-light">|</span>
-              <span className="text-emerald-glow">{game.totalPurchases} sales</span>
-            </>
+    <div className="v-card flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 hover:border-warm-wood-light">
+      {/* Thumbnail + info */}
+      <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-felt-dark border border-warm-wood shrink-0 flex items-center justify-center overflow-hidden">
+          {game.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={game.thumbnailUrl} alt={game.title} className="w-full h-full object-cover" />
+          ) : (
+            <span className="font-display text-royal-gold text-xl font-bold opacity-40">
+              {game.title[0]}
+            </span>
           )}
-          <span className="text-warm-wood-light">|</span>
-          <span>Updated {new Date(game.updatedAt).toLocaleDateString()}</span>
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-display text-sm font-bold tracking-wide text-parchment-light truncate min-w-0">
+              {game.title}
+            </span>
+            <span className="shrink-0">{statusBadge(game.status)}</span>
+          </div>
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-2xs text-soft-gray font-ui">
+            <span className="capitalize">{game.category}</span>
+            <span className="text-warm-wood-light">|</span>
+            <span>
+              {game.isFree ? "Free" : `$${((game.priceUsd ?? 0) / 100).toFixed(2)}`}
+            </span>
+            {game.totalPurchases > 0 && (
+              <>
+                <span className="text-warm-wood-light">|</span>
+                <span className="text-emerald-glow">{game.totalPurchases} sales</span>
+              </>
+            )}
+            <span className="text-warm-wood-light hidden sm:inline">|</span>
+            <span className="hidden sm:inline">Updated {new Date(game.updatedAt).toLocaleDateString()}</span>
+          </div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
         <Link href={`/studio/${game.id}`}>
           <Button variant="ghost" size="sm">Edit</Button>
         </Link>
