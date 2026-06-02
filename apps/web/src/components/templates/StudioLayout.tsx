@@ -4,6 +4,7 @@ import {
   useRef, useState, useCallback, useEffect,
   type PointerEvent as ReactPointerEvent,
   type WheelEvent as ReactWheelEvent,
+  type MouseEvent as ReactMouseEvent,
 } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ import { useStudioStore, selectZoomPercent } from "@/stores/studioStore";
 import { useGame, usePublishGame } from "@/hooks/useGames";
 import { useMyMembership, useCollaborators, useInviteCollaborator, useUpdateCollaboratorRole, useRemoveCollaborator } from "@/hooks/useCollaborators";
 import { useStudioCollab, type PresenceMember } from "@/hooks/useStudioCollab";
+import { StudioTutorial, STUDIO_TUTORIAL_KEY } from "@/components/templates/StudioTutorial";
 import type { CollaboratorRole } from "@velonix/types";
 import { useStudio } from "@/hooks/useStudio";
 import { usePlan } from "@/hooks/usePlan";
@@ -38,7 +40,9 @@ function safeNum(v: number, fallback = 0): number {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type CompType = "board" | "card" | "token" | "tile" | "die" | "pawn" | "rulebook" | "text";
+type CompType =
+  | "board" | "card" | "token" | "tile" | "die" | "pawn" | "rulebook" | "text"
+  | "meeple" | "cube" | "coin" | "hex" | "marker" | "deck" | "note";
 
 export interface CanvasComp {
   id: string;
@@ -59,7 +63,36 @@ export interface CanvasComp {
   fontSize?: number;
   textColor?: string;
   image?: string;
+  /** When set, this component belongs to a group and moves with its siblings. */
+  groupId?: string;
 }
+
+// Rendering predicates shared by the editor canvas and previews.
+const CIRCLE_TYPES: CompType[] = ["token", "coin", "marker"];
+const SILHOUETTE_TYPES: CompType[] = ["pawn", "meeple", "hex"];
+const isCircleType = (t: CompType) => CIRCLE_TYPES.includes(t);
+const isSilhouetteType = (t: CompType) => SILHOUETTE_TYPES.includes(t);
+/** Types whose body has no fill/border box (drawn as SVG silhouette or plain text). */
+const isChromeless = (t: CompType) => isSilhouetteType(t) || t === "text";
+
+/** A page is one editable canvas (board, player board, card sheet, …). */
+export interface StudioPage {
+  id: string;
+  name: string;
+  width: number;   // mm
+  height: number;  // mm
+  components: CanvasComp[];
+}
+
+const PAGE_MIN = 100;
+const PAGE_MAX = 3000;
+const PAGE_SIZE_PRESETS: { label: string; w: number; h: number }[] = [
+  { label: "Board", w: 800, h: 600 },
+  { label: "Large board", w: 1200, h: 900 },
+  { label: "Player board", w: 420, h: 260 },
+  { label: "Card sheet", w: 630, h: 880 },
+  { label: "Square", w: 700, h: 700 },
+];
 
 export type RuleTrigger = "turn_start" | "turn_end" | "card_played" | "token_moved" | "dice_rolled" | "game_end";
 
@@ -188,6 +221,13 @@ const TYPE_DEFAULTS: Record<CompType, Partial<CanvasComp>> = {
   pawn:     { width: 26,  height: 40,  fill: "#ff3b5c", stroke: "#0a0a0a", strokeWidth: 1, cornerRadius: 0 },
   rulebook: { width: 148, height: 105, fill: "#2a251a", stroke: "#f5c451", strokeWidth: 1, cornerRadius: 3 },
   text:     { width: 120, height: 28,  fill: "transparent", stroke: "transparent", strokeWidth: 0, cornerRadius: 0, fontSize: 18, textColor: "#e8d5b8" },
+  meeple:   { width: 30,  height: 30,  fill: "#7c5cff", stroke: "#0a0a0a", strokeWidth: 1, cornerRadius: 0 },
+  cube:     { width: 16,  height: 16,  fill: "#3ddc97", stroke: "#0a0a0a", strokeWidth: 1, cornerRadius: 2 },
+  coin:     { width: 24,  height: 24,  fill: "#f5c451", stroke: "#a8801f", strokeWidth: 2, cornerRadius: 0 },
+  hex:      { width: 52,  height: 60,  fill: "#1e2a1c", stroke: "#7c5cff", strokeWidth: 2, cornerRadius: 0 },
+  marker:   { width: 18,  height: 18,  fill: "#ff3b5c", stroke: "#0a0a0a", strokeWidth: 1, cornerRadius: 0 },
+  deck:     { width: 63,  height: 88,  fill: "#1c1a2e", stroke: "#7c5cff", strokeWidth: 1, cornerRadius: 6 },
+  note:     { width: 64,  height: 64,  fill: "#f5e3a1", stroke: "#cbb56a", strokeWidth: 1, cornerRadius: 2, textColor: "#3a2f12" },
 };
 
 function makeComp(type: CompType, x: number, y: number): CanvasComp {
@@ -195,6 +235,8 @@ function makeComp(type: CompType, x: number, y: number): CanvasComp {
   const labels: Record<CompType, string> = {
     board: "Board", card: "Card", token: "Token", tile: "Tile",
     die: "Die", pawn: "Pawn", rulebook: "Rulebook", text: "Title",
+    meeple: "Meeple", cube: "Cube", coin: "Coin", hex: "Hex Tile",
+    marker: "Marker", deck: "Deck", note: "Note",
   };
   return {
     id: `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -205,6 +247,7 @@ function makeComp(type: CompType, x: number, y: number): CanvasComp {
     fill: "#1a2535", stroke: "#f5c451", strokeWidth: 1, cornerRadius: 4,
     width: 60, height: 60,
     ...(type === "text" ? { text: "New Title" } : {}),
+    ...(type === "note" ? { text: "Note" } : {}),
     ...d,
   } as CanvasComp;
 }
@@ -227,6 +270,13 @@ const COMP_ICONS: Record<CompType, React.ReactNode> = {
   pawn: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="3.5" r="2" stroke="currentColor" strokeWidth="1.2"/><path d="M3.5 11c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>,
   rulebook: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="0.5" width="10" height="11" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M3.5 4h5M3.5 6.5h5M3.5 9h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.6"/></svg>,
   text: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M6 3v7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>,
+  meeple: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5a1.5 1.5 0 011.3 2.2L9.5 5 9 6.5 6.5 6 6 7l1 3.5H5L6 7l-.5-1L3 6.5 2.5 5l2.2-1.3A1.5 1.5 0 016 1.5z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/></svg>,
+  cube: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2.5" y="2.5" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.2"/></svg>,
+  coin: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 3.8v4.4M4.8 5h2a1 1 0 010 2H5" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>,
+  hex: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l4.3 2.5v5L6 11 1.7 8.5v-5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>,
+  marker: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" stroke="currentColor" strokeWidth="1.2"/><circle cx="6" cy="6" r="1" fill="currentColor"/></svg>,
+  deck: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="3" y="2" width="7" height="9" rx="1" stroke="currentColor" strokeWidth="1.1"/><path d="M1.5 3.5v6A1 1 0 002.5 10.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg>,
+  note: <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5h9v6L7.5 10.5h-6z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/><path d="M10.5 7.5h-3v3" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/></svg>,
 };
 
 // ── Tools ─────────────────────────────────────────────────────────────────────
@@ -278,19 +328,46 @@ function ShapeInner({ comp }: { comp: CanvasComp }) {
   if (comp.type === "card" || comp.type === "tile") {
     return <div className="absolute inset-[8%] rounded" style={{ border: "1px dashed rgba(255,255,255,0.12)" }} />;
   }
+  if (comp.type === "coin") {
+    return (
+      <div className="absolute inset-[14%] rounded-full flex items-center justify-center" style={{ border: "1px solid rgba(0,0,0,0.25)" }}>
+        <span style={{ color: "rgba(0,0,0,0.55)", fontWeight: 800, fontSize: "60%", lineHeight: 1 }}>$</span>
+      </div>
+    );
+  }
+  if (comp.type === "deck") {
+    // Stacked-card edges along the bottom-right to read as a deck.
+    return (
+      <>
+        <div className="absolute" style={{ inset: 0, transform: "translate(3px,3px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "inherit" }} />
+        <div className="absolute" style={{ inset: 0, transform: "translate(1.5px,1.5px)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "inherit" }} />
+        <div className="absolute inset-[18%] rounded" style={{ border: "1px dashed rgba(255,255,255,0.18)" }} />
+      </>
+    );
+  }
+  if (comp.type === "note") {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center text-center px-[8%]"
+        style={{ color: comp.textColor ?? "#3a2f12", fontSize: 10, fontFamily: "var(--font-ui)", lineHeight: 1.2, overflow: "hidden" }}>
+        {comp.text}
+      </div>
+    );
+  }
   return null;
 }
 
-/** Pawn is rendered as an SVG silhouette so it actually looks like a pawn. */
-function PawnShape({ comp }: { comp: CanvasComp }) {
+const SILHOUETTE_PATHS: Partial<Record<CompType, { viewBox: string; d: string }>> = {
+  pawn: { viewBox: "0 0 26 40", d: "M13 2c3 0 5.2 2.3 5.2 5.2 0 1.9-1 3.5-2.4 4.5 2.6 1.2 3.6 3.6 3.9 6.3.2 1.6-.9 2.6-2.4 2.6h-1l1.4 12c.2 1.6-1 3-2.6 3h-3.8c-1.6 0-2.8-1.4-2.6-3l1.4-12h-1c-1.5 0-2.6-1-2.4-2.6.3-2.7 1.3-5.1 3.9-6.3-1.4-1-2.4-2.6-2.4-4.5C7.8 4.3 10 2 13 2z" },
+  meeple: { viewBox: "0 0 40 40", d: "M20 3a6 6 0 015.4 8.6c3 .8 5 2.3 8.1 4.2 2 1.2 2 4.2-.3 4.9l-7.8 2.4 3 11.1c.5 1.9-.9 3.8-2.9 3.8h-11c-2 0-3.4-1.9-2.9-3.8l3-11.1-7.8-2.4c-2.3-.7-2.3-3.7-.3-4.9 3.1-1.9 5.1-3.4 8.1-4.2A6 6 0 0120 3z" },
+  hex: { viewBox: "0 0 52 60", d: "M26 1L51 15.5v29L26 59 1 44.5v-29z" },
+};
+
+/** Pieces (pawn, meeple, hex) rendered as SVG silhouettes so they read as real shapes. */
+function SilhouetteShape({ comp }: { comp: CanvasComp }) {
+  const s = SILHOUETTE_PATHS[comp.type] ?? SILHOUETTE_PATHS.pawn!;
   return (
-    <svg viewBox="0 0 26 40" width="100%" height="100%" preserveAspectRatio="none" style={{ display: "block" }}>
-      <path
-        d="M13 2c3 0 5.2 2.3 5.2 5.2 0 1.9-1 3.5-2.4 4.5 2.6 1.2 3.6 3.6 3.9 6.3.2 1.6-.9 2.6-2.4 2.6h-1l1.4 12c.2 1.6-1 3-2.6 3h-3.8c-1.6 0-2.8-1.4-2.6-3l1.4-12h-1c-1.5 0-2.6-1-2.4-2.6.3-2.7 1.3-5.1 3.9-6.3-1.4-1-2.4-2.6-2.4-4.5C7.8 4.3 10 2 13 2z"
-        fill={comp.fill}
-        stroke={comp.stroke}
-        strokeWidth={comp.strokeWidth}
-      />
+    <svg viewBox={s.viewBox} width="100%" height="100%" preserveAspectRatio="none" style={{ display: "block" }}>
+      <path d={s.d} fill={comp.fill} stroke={comp.stroke} strokeWidth={comp.strokeWidth} strokeLinejoin="round" />
     </svg>
   );
 }
@@ -300,11 +377,13 @@ function PawnShape({ comp }: { comp: CanvasComp }) {
 interface CompViewProps {
   comp: CanvasComp;
   selected: boolean;
+  primary: boolean;
   editable: boolean;
   onPointerDown: (e: ReactPointerEvent, comp: CanvasComp) => void;
   onResizeStart: (e: ReactPointerEvent, comp: CanvasComp, handle: ResizeHandle) => void;
   onRotateStart: (e: ReactPointerEvent, comp: CanvasComp) => void;
   onTextChange: (id: string, text: string) => void;
+  onContextMenu?: (e: ReactMouseEvent, comp: CanvasComp) => void;
 }
 
 type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
@@ -319,14 +398,15 @@ const HANDLES: { id: ResizeHandle; cx: number; cy: number; cursor: string }[] = 
   { id: "w", cx: 0, cy: 0.5, cursor: "ew-resize" },
 ];
 
-function CompView({ comp, selected, editable, onPointerDown, onResizeStart, onRotateStart, onTextChange }: CompViewProps) {
+function CompView({ comp, selected, primary, editable, onPointerDown, onResizeStart, onRotateStart, onTextChange, onContextMenu }: CompViewProps) {
   const px = (mm: number) => mm * MM_TO_PX;
-  const isCircle = comp.type === "token";
+  const isCircle = isCircleType(comp.type);
   const w = px(comp.width), h = px(comp.height);
 
   return (
     <div
       onPointerDown={(e) => editable && onPointerDown(e, comp)}
+      onContextMenu={(e) => onContextMenu?.(e, comp)}
       style={{
         position: "absolute",
         left: px(comp.x), top: px(comp.y), width: w, height: h,
@@ -339,21 +419,21 @@ function CompView({ comp, selected, editable, onPointerDown, onResizeStart, onRo
       {/* Body */}
       <div style={{
         position: "absolute", inset: 0,
-        backgroundColor: comp.type === "pawn" || comp.type === "text" ? "transparent" : safeColor(comp.fill, "#1a2535"),
+        backgroundColor: isChromeless(comp.type) ? "transparent" : safeColor(comp.fill, "#1a2535"),
         backgroundImage: comp.image ? `url("${comp.image}")` : undefined,
         backgroundSize: "cover", backgroundPosition: "center",
-        border: comp.type === "pawn" || comp.type === "text" ? "none" : `${comp.strokeWidth}px solid ${safeColor(comp.stroke, "transparent")}`,
+        border: isChromeless(comp.type) ? "none" : `${comp.strokeWidth}px solid ${safeColor(comp.stroke, "transparent")}`,
         borderRadius: isCircle ? "50%" : comp.cornerRadius,
-        boxShadow: comp.type === "text" ? "none" : "0 2px 8px rgba(0,0,0,0.45)",
-        overflow: "hidden",
+        boxShadow: comp.type === "text" || isSilhouetteType(comp.type) ? "none" : "0 2px 8px rgba(0,0,0,0.45)",
+        overflow: comp.type === "deck" ? "visible" : "hidden",
         boxSizing: "border-box",
       }}>
-        {comp.type === "pawn" ? <PawnShape comp={comp} /> : !comp.image ? <ShapeInner comp={comp} /> : null}
+        {isSilhouetteType(comp.type) ? <SilhouetteShape comp={comp} /> : !comp.image ? <ShapeInner comp={comp} /> : null}
       </div>
 
       {/* Text content */}
       {comp.type === "text" && (
-        selected && editable ? (
+        selected && editable && primary ? (
           <input
             value={comp.text ?? ""}
             onChange={(e) => onTextChange(comp.id, e.target.value)}
@@ -369,10 +449,14 @@ function CompView({ comp, selected, editable, onPointerDown, onResizeStart, onRo
         )
       )}
 
-      {/* Selection outline + handles */}
-      {selected && editable && (
+      {/* Selection outline (all selected, incl. group members) */}
+      {selected && (
+        <div className="absolute inset-0 pointer-events-none" style={{ outline: `1.5px ${primary ? "solid" : "dashed"} #7c5cff`, outlineOffset: 1 }} />
+      )}
+
+      {/* Resize / rotate handles — only on the primary selection */}
+      {selected && editable && primary && (
         <>
-          <div className="absolute inset-0 pointer-events-none" style={{ outline: "1.5px solid #7c5cff", outlineOffset: 1 }} />
           {/* Resize handles */}
           {HANDLES.map(hd => (
             <div
@@ -405,26 +489,26 @@ function CompView({ comp, selected, editable, onPointerDown, onResizeStart, onRo
 
 // ── Previews ──────────────────────────────────────────────────────────────────
 
-function Preview2D({ components, scale }: { components: CanvasComp[]; scale: number }) {
+function Preview2D({ components, scale, width = CANVAS_W_MM, height = CANVAS_H_MM }: { components: CanvasComp[]; scale: number; width?: number; height?: number }) {
   const px = (mm: number) => mm * MM_TO_PX * scale;
   return (
-    <div style={{ position: "relative", width: px(CANVAS_W_MM), height: px(CANVAS_H_MM), backgroundColor: "#0f1012", border: "1px solid rgba(58,42,31,0.6)", borderRadius: 4 }}>
+    <div style={{ position: "relative", width: px(width), height: px(height), backgroundColor: "#0f1012", border: "1px solid rgba(58,42,31,0.6)", borderRadius: 4 }}>
       {components.filter(c => c.visible).map(c => {
-        const isCircle = c.type === "token";
+        const isCircle = isCircleType(c.type);
         return (
           <div key={c.id} style={{
             position: "absolute", left: px(c.x), top: px(c.y), width: px(c.width), height: px(c.height),
             transform: `rotate(${c.rotation}deg)`, opacity: c.opacity / 100,
-            backgroundColor: c.type === "pawn" || c.type === "text" ? "transparent" : safeColor(c.fill, "#1a2535"),
+            backgroundColor: isChromeless(c.type) ? "transparent" : safeColor(c.fill, "#1a2535"),
             backgroundImage: c.image ? `url("${c.image}")` : undefined,
             backgroundSize: "cover", backgroundPosition: "center",
-            border: c.type === "pawn" || c.type === "text" ? "none" : `${c.strokeWidth}px solid ${safeColor(c.stroke, "transparent")}`,
+            border: isChromeless(c.type) ? "none" : `${c.strokeWidth}px solid ${safeColor(c.stroke, "transparent")}`,
             borderRadius: isCircle ? "50%" : c.cornerRadius * scale,
             display: "flex", alignItems: "center", justifyContent: "center",
             color: c.textColor, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: px(c.fontSize ?? 18) / 1.6,
             overflow: "hidden",
           }}>
-            {c.type === "pawn" ? <PawnShape comp={c} /> : c.type === "text" ? c.text : null}
+            {isSilhouetteType(c.type) ? <SilhouetteShape comp={c} /> : c.type === "text" ? c.text : !c.image ? <ShapeInner comp={c} /> : null}
           </div>
         );
       })}
@@ -433,37 +517,40 @@ function Preview2D({ components, scale }: { components: CanvasComp[]; scale: num
 }
 
 /** CSS 3D preview — each component gets real depth/extrusion. */
-function Preview3D({ components }: { components: CanvasComp[] }) {
+function Preview3D({ components, width = CANVAS_W_MM, height = CANVAS_H_MM }: { components: CanvasComp[]; width?: number; height?: number }) {
   const s = 0.7;
   const px = (mm: number) => mm * MM_TO_PX * s;
-  const depthFor = (t: CompType) => t === "token" ? 10 : t === "die" ? 16 : t === "pawn" ? 22 : t === "card" ? 4 : t === "board" ? 3 : 6;
+  const depthFor = (t: CompType) =>
+    t === "token" || t === "coin" || t === "marker" ? 10 : t === "die" || t === "cube" ? 16 :
+    t === "pawn" || t === "meeple" ? 22 : t === "card" ? 4 : t === "deck" ? 14 :
+    t === "board" ? 3 : t === "hex" ? 8 : 6;
   return (
     <div className="w-full h-full flex items-center justify-center" style={{ perspective: "1400px" }}>
-      <div style={{ position: "relative", width: px(CANVAS_W_MM), height: px(CANVAS_H_MM), transform: "rotateX(55deg) rotateZ(0deg)", transformStyle: "preserve-3d" }}>
+      <div style={{ position: "relative", width: px(width), height: px(height), transform: "rotateX(55deg) rotateZ(0deg)", transformStyle: "preserve-3d" }}>
         {/* table */}
         <div style={{ position: "absolute", inset: -60, background: "radial-gradient(ellipse at center,#241a12,#140e09)", transform: "translateZ(-6px)", borderRadius: 8, boxShadow: "0 40px 80px rgba(0,0,0,0.7)" }} />
         {components.filter(c => c.visible).map(c => {
           const depth = depthFor(c.type) * s;
-          const isCircle = c.type === "token";
+          const isCircle = isCircleType(c.type);
           const w = px(c.width), h = px(c.height);
           return (
             <div key={c.id} style={{ position: "absolute", left: px(c.x), top: px(c.y), width: w, height: h, transformStyle: "preserve-3d", transform: `rotate(${c.rotation}deg)`, opacity: c.opacity / 100 }}>
               {/* top face */}
               <div style={{
                 position: "absolute", inset: 0, transform: `translateZ(${depth}px)`,
-                backgroundColor: c.type === "pawn" || c.type === "text" ? "transparent" : c.fill,
-                border: c.type === "pawn" || c.type === "text" ? "none" : `${c.strokeWidth}px solid ${c.stroke}`,
+                backgroundColor: isChromeless(c.type) ? "transparent" : c.fill,
+                border: isChromeless(c.type) ? "none" : `${c.strokeWidth}px solid ${c.stroke}`,
                 borderRadius: isCircle ? "50%" : c.cornerRadius,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 color: c.textColor, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: (c.fontSize ?? 18) * s,
                 overflow: "hidden",
               }}>
-                {c.type === "pawn" ? <PawnShape comp={c} /> : c.type === "die" ? <ShapeInner comp={c} /> : c.type === "text" ? c.text : c.type === "board" ? <ShapeInner comp={c} /> : null}
+                {isSilhouetteType(c.type) ? <SilhouetteShape comp={c} /> : c.type === "text" ? c.text : !c.image ? <ShapeInner comp={c} /> : null}
               </div>
               {/* side walls (extrusion) — simple shadow box */}
               <div style={{
                 position: "absolute", inset: 0, transform: `translateZ(${depth / 2}px)`,
-                backgroundColor: c.type === "pawn" || c.type === "text" ? "transparent" : c.fill,
+                backgroundColor: isChromeless(c.type) ? "transparent" : c.fill,
                 filter: "brightness(0.6)",
                 borderRadius: isCircle ? "50%" : c.cornerRadius,
                 boxShadow: `0 ${depth}px ${depth}px rgba(0,0,0,0.5)`,
@@ -477,6 +564,48 @@ function Preview3D({ components }: { components: CanvasComp[] }) {
 }
 
 // ── StudioLayout ──────────────────────────────────────────────────────────────
+
+// ── Context menu ──────────────────────────────────────────────────────────────
+
+type MenuItem =
+  | { type: "sep" }
+  | { type: "item"; label: string; shortcut?: string; danger?: boolean; disabled?: boolean; onClick: () => void };
+
+function ContextMenu({ x, y, items, onClose }: { x: number; y: number; items: MenuItem[]; onClose: () => void }) {
+  const W = 184;
+  const approxH = items.reduce((h, it) => h + (it.type === "sep" ? 9 : 28), 8);
+  const vw = typeof window !== "undefined" ? window.innerWidth : 9999;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 9999;
+  const left = Math.min(x, vw - W - 8);
+  const top = Math.min(y, Math.max(8, vh - approxH - 8));
+  return (
+    <div className="fixed inset-0 z-[55]" onPointerDown={onClose} onWheel={onClose}
+      onContextMenu={(e) => { e.preventDefault(); onClose(); }}>
+      <div
+        className="fixed z-[56] bg-rich-wood-dark border border-warm-wood rounded-lg shadow-2xl py-1"
+        style={{ left, top, width: W }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        {items.map((it, i) =>
+          it.type === "sep" ? (
+            <div key={i} className="h-px bg-warm-wood my-1" />
+          ) : (
+            <button
+              key={i}
+              disabled={it.disabled}
+              onClick={() => { it.onClick(); onClose(); }}
+              className={`w-full flex items-center justify-between gap-6 px-3 py-1.5 text-2xs font-ui text-left transition-colors disabled:opacity-30 disabled:cursor-default ${it.danger ? "text-crimson-flame hover:bg-crimson-flame/10" : "text-parchment-light hover:bg-warm-wood"}`}
+            >
+              <span>{it.label}</span>
+              {it.shortcut && <span className="text-soft-gray-dark font-mono">{it.shortcut}</span>}
+            </button>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
 
 interface StudioLayoutProps { gameId: string; }
 
@@ -498,13 +627,35 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
 
   const [activeTool, setActiveTool] = useState<ToolId>("select");
 
-  // History
-  const [components, setComponentsRaw] = useState<CanvasComp[]>(INITIAL);
+  // ── Pages (multiple canvases) ──────────────────────────────────────────────
+  const firstPageId = useRef(`page-${Date.now()}`).current;
+  const [pages, setPages] = useState<StudioPage[]>(() => [
+    { id: firstPageId, name: "Main Board", width: 800, height: 600, components: INITIAL },
+  ]);
+  const [activePageId, setActivePageId] = useState<string>(firstPageId);
+  const activePageIdRef = useRef(activePageId);
+  activePageIdRef.current = activePageId;
+
+  const activePage = pages.find(p => p.id === activePageId) ?? pages[0]!;
+  const components = activePage.components;
+  const canvasW = activePage.width;
+  const canvasH = activePage.height;
+  const canvasSizeRef = useRef({ w: canvasW, h: canvasH });
+  canvasSizeRef.current = { w: canvasW, h: canvasH };
+
+  // Stable setter that always targets the *current* active page (read via ref).
+  const setComponentsRaw = useCallback((updater: CanvasComp[] | ((prev: CanvasComp[]) => CanvasComp[])) => {
+    setPages(prev => prev.map(p => p.id === activePageIdRef.current
+      ? { ...p, components: typeof updater === "function" ? (updater as (c: CanvasComp[]) => CanvasComp[])(p.components) : updater }
+      : p));
+  }, []);
+
   const [rules, setRules] = useState<GameRule[]>([]);
   const [assets, setAssets] = useState<string[]>([]);
   const [guide, setGuide] = useState<GameGuide>(EMPTY_GUIDE);
   const [guideOpen, setGuideOpen] = useState(false);
   const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renamingPageId, setRenamingPageId] = useState<string | null>(null);
   const pastRef = useRef<CanvasComp[][]>([]);
   const futureRef = useRef<CanvasComp[][]>([]);
   const [, forceRerender] = useState(0);
@@ -536,6 +687,18 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     return () => mq.removeEventListener("change", update);
   }, []);
 
+  // First-visit studio walkthrough (desktop only).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 1023px)").matches) return;
+    if (!localStorage.getItem(STUDIO_TUTORIAL_KEY)) setTutorialOpen(true);
+  }, []);
+
+  const closeTutorial = useCallback(() => {
+    setTutorialOpen(false);
+    try { localStorage.setItem(STUDIO_TUTORIAL_KEY, "1"); } catch { /* ignore */ }
+  }, []);
+
   const clipboardRef = useRef<CanvasComp | null>(null);
   const { data: game } = useGame(isNew ? "" : gameId);
   const publish = usePublishGame(gameId);
@@ -546,6 +709,8 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   const readOnly = myRole === "viewer";
   const collabEnabled = !isNew && !!membership && membership.kind !== "none";
   const [shareOpen, setShareOpen] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [menu, setMenu] = useState<{ x: number; y: number; targetId: string | null; mx?: number; my?: number } | null>(null);
 
   // Refs used to coordinate remote (peer) snapshot application with local edits.
   const applyingRemoteRef = useRef(false);
@@ -557,23 +722,53 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   const selectedComp = components.find(c => c.id === selectedId) ?? null;
   const inPreview = mode !== "design";
 
+  // ── Selection set (supports groups + shift multi-select) ─────────────────────
+  // `selectedId` is the primary (drives Props/Style); `multiIds` is an explicit
+  // shift-selection. The effective set expands to a component's group siblings.
+  const [multiIds, setMultiIds] = useState<string[]>([]);
+  const selectionIds: string[] = (() => {
+    if (multiIds.length) return multiIds;
+    if (!selectedId) return [];
+    const g = selectedComp?.groupId;
+    if (g) return components.filter(c => c.groupId === g).map(c => c.id);
+    return [selectedId];
+  })();
+  const selectionRef = useRef<string[]>([]);
+  selectionRef.current = selectionIds;
+  const selectedGroupIds = Array.from(new Set(
+    selectionIds.map(id => components.find(c => c.id === id)?.groupId).filter(Boolean) as string[]
+  ));
+  const canGroup = selectionIds.length >= 2;
+  const canUngroup = selectedGroupIds.length > 0;
+
   // ── Hydration ──────────────────────────────────────────────────────────────
   const hydratedRef = useRef<string | null>(null);
   const suppressDirtyRef = useRef(false);
   useEffect(() => {
     if (!game || hydratedRef.current === game.id) return;
     hydratedRef.current = game.id;
-    const data = game.studioData as { components?: CanvasComp[]; rules?: GameRule[]; assets?: string[]; guide?: GameGuide } | null;
-    const saved = data?.components;
-    if (Array.isArray(saved) && saved.length > 0) {
+    const data = game.studioData as { components?: CanvasComp[]; pages?: StudioPage[]; rules?: GameRule[]; assets?: string[]; guide?: GameGuide } | null;
+    if (Array.isArray(data?.pages) && data!.pages.length > 0) {
       suppressDirtyRef.current = true;
-      setComponentsRaw(saved);
-      setSelectedId(saved[0]?.id ?? null);
+      const loaded = data!.pages.map(p => ({
+        id: p.id, name: p.name, width: p.width || 800, height: p.height || 600,
+        components: Array.isArray(p.components) ? p.components : [],
+      }));
+      setPages(loaded);
+      setActivePageId(loaded[0]!.id);
+      setSelectedId(loaded[0]!.components[0]?.id ?? null);
+    } else if (Array.isArray(data?.components) && data!.components.length > 0) {
+      // Legacy single-canvas project → migrate to one page.
+      suppressDirtyRef.current = true;
+      const page: StudioPage = { id: firstPageId, name: "Main Board", width: 800, height: 600, components: data!.components };
+      setPages([page]);
+      setActivePageId(firstPageId);
+      setSelectedId(page.components[0]?.id ?? null);
     }
     if (Array.isArray(data?.rules)) setRules(data!.rules);
     if (Array.isArray(data?.assets)) setAssets(data!.assets);
     if (data?.guide) setGuide({ ...EMPTY_GUIDE, ...data.guide });
-  }, [game]);
+  }, [game, firstPageId]);
 
   // ── Dirty tracking ─────────────────────────────────────────────────────────
   const mountedRef = useRef(false);
@@ -587,10 +782,10 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     if (collabBroadcastRef.current) {
       if (broadcastTimerRef.current) clearTimeout(broadcastTimerRef.current);
       broadcastTimerRef.current = setTimeout(() => {
-        collabBroadcastRef.current?.({ components, rules, assets, guide });
+        collabBroadcastRef.current?.({ pages, rules, assets, guide });
       }, 250);
     }
-  }, [components, rules, assets, guide, markDirty]);
+  }, [pages, rules, assets, guide, markDirty]);
 
   // ── Mutations ──────────────────────────────────────────────────────────────
   const updateComp = useCallback((id: string, patch: Partial<CanvasComp>, history = true) => {
@@ -604,26 +799,76 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     const c = makeComp(type, x, y);
     commit([...components, c]);
     setSelectedId(c.id);
+    setMultiIds([]);
     return c;
   }, [components, commit]);
 
   const deleteSelected = useCallback(() => {
-    if (!selectedId) return;
-    commit(components.filter(c => c.id !== selectedId));
+    const ids = selectionRef.current;
+    if (ids.length === 0) return;
+    const set = new Set(ids);
+    commit(components.filter(c => !set.has(c.id)));
     setSelectedId(null);
-  }, [selectedId, components, commit]);
+    setMultiIds([]);
+  }, [components, commit]);
 
   const deleteComp = useCallback((id: string) => {
     commit(components.filter(c => c.id !== id));
     setSelectedId(prev => (prev === id ? null : prev));
+    setMultiIds(prev => prev.filter(x => x !== id));
   }, [components, commit]);
 
   const duplicateSelected = useCallback(() => {
-    if (!selectedComp) return;
-    const copy = { ...selectedComp, id: `${selectedComp.type}-${Date.now()}`, x: selectedComp.x + 10, y: selectedComp.y + 10 };
-    commit([...components, copy]);
-    setSelectedId(copy.id);
-  }, [selectedComp, components, commit]);
+    const ids = selectionRef.current;
+    if (ids.length === 0) return;
+    const set = new Set(ids);
+    const stamp = Date.now();
+    // Preserve grouping in the copy by remapping group ids.
+    const groupRemap = new Map<string, string>();
+    const copies = components.filter(c => set.has(c.id)).map((c, i) => {
+      const copy: CanvasComp = { ...c, id: `${c.type}-${stamp}-${i}`, x: c.x + 10, y: c.y + 10 };
+      if (c.groupId) {
+        if (!groupRemap.has(c.groupId)) groupRemap.set(c.groupId, `group-${stamp}`);
+        copy.groupId = groupRemap.get(c.groupId)!;
+      }
+      return copy;
+    });
+    commit([...components, ...copies]);
+    setSelectedId(copies[0]?.id ?? null);
+    setMultiIds(copies.length > 1 ? copies.map(c => c.id) : []);
+  }, [components, commit]);
+
+  // ── Grouping ────────────────────────────────────────────────────────────────
+  // These read the live selection (selectionRef) and operate on the live
+  // component list via a functional update, so they stay correct regardless of
+  // when they were bound (e.g. from the keyboard handler).
+  const groupSelection = useCallback(() => {
+    const ids = selectionRef.current;
+    if (ids.length < 2) {
+      toast.info("Select 2+ components to group (shift-click to add to the selection).");
+      return;
+    }
+    const gid = `group-${Date.now()}`;
+    const set = new Set(ids);
+    setComponentsRaw(prev => {
+      pastRef.current.push(prev); futureRef.current = [];
+      return prev.map(c => set.has(c.id) ? { ...c, groupId: gid } : c);
+    });
+    setMultiIds([]); // selection now derives from the group
+  }, [setComponentsRaw]);
+
+  const ungroupSelection = useCallback(() => {
+    const ids = selectionRef.current;
+    setComponentsRaw(prev => {
+      const groups = new Set(ids.map(id => prev.find(c => c.id === id)?.groupId).filter(Boolean) as string[]);
+      if (groups.size === 0) return prev;
+      pastRef.current.push(prev); futureRef.current = [];
+      return prev.map(c => {
+        if (c.groupId && groups.has(c.groupId)) { const copy = { ...c }; delete copy.groupId; return copy; }
+        return c;
+      });
+    });
+  }, [setComponentsRaw]);
 
   const moveZ = useCallback((id: string, dir: "up" | "down") => {
     const idx = components.findIndex(c => c.id === id);
@@ -633,6 +878,56 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     else if (dir === "down" && idx > 0) [next[idx], next[idx - 1]] = [next[idx - 1]!, next[idx]!];
     commit(next);
   }, [components, commit]);
+
+  const reorderZ = useCallback((id: string, where: "front" | "back") => {
+    const c = components.find(x => x.id === id);
+    if (!c) return;
+    const rest = components.filter(x => x.id !== id);
+    commit(where === "front" ? [...rest, c] : [c, ...rest]);
+  }, [components, commit]);
+
+  // ── Pages ──────────────────────────────────────────────────────────────────
+  const switchPage = useCallback((id: string) => {
+    if (id === activePageIdRef.current) return;
+    pastRef.current = []; futureRef.current = []; // history is per-active-canvas
+    setActivePageId(id);
+    setSelectedId(null);
+    setMultiIds([]);
+  }, []);
+
+  const addPage = useCallback(() => {
+    const id = `page-${Date.now()}`;
+    setPages(prev => [...prev, { id, name: `Page ${prev.length + 1}`, width: 800, height: 600, components: [] }]);
+    pastRef.current = []; futureRef.current = [];
+    setActivePageId(id);
+    setSelectedId(null);
+    setMultiIds([]);
+  }, []);
+
+  const deletePage = useCallback((id: string) => {
+    if (pages.length <= 1) return;
+    const next = pages.filter(p => p.id !== id);
+    setPages(next);
+    if (activePageId === id) {
+      setActivePageId(next[0]!.id);
+      setSelectedId(null);
+      setMultiIds([]);
+      pastRef.current = []; futureRef.current = [];
+    }
+  }, [pages, activePageId]);
+
+  const renamePage = useCallback((id: string, name: string) => {
+    setPages(prev => prev.map(p => p.id === id ? { ...p, name: name.trim() || p.name } : p));
+  }, []);
+
+  const resizePage = useCallback((id: string, dim: "width" | "height", value: number) => {
+    const v = Math.max(PAGE_MIN, Math.min(PAGE_MAX, Math.round(value) || PAGE_MIN));
+    setPages(prev => prev.map(p => p.id === id ? { ...p, [dim]: v } : p));
+  }, []);
+
+  const setPageSize = useCallback((id: string, w: number, h: number) => {
+    setPages(prev => prev.map(p => p.id === id ? { ...p, width: w, height: h } : p));
+  }, []);
 
   const undo = useCallback(() => {
     const prev = pastRef.current.pop();
@@ -664,17 +959,43 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     kind: "move" | "pan" | "resize" | "rotate"; compId?: string; handle?: ResizeHandle;
     sx: number; sy: number; ox: number; oy: number; ow: number; oh: number; orot: number;
     cxScreen: number; cyScreen: number;
+    /** For group moves: original positions of every component being dragged. */
+    multi?: { id: string; ox: number; oy: number }[];
   } | null>(null);
 
   const onCompPointerDown = useCallback((e: ReactPointerEvent, comp: CanvasComp) => {
     if (comp.locked || inPreview) return;
     if (e.button === 1) return; // let middle-button pan bubble to the canvas
     e.stopPropagation();
-    setSelectedId(comp.id);
+
+    // Selection: shift toggles into a multi-selection; clicking a grouped piece
+    // selects its whole group; otherwise select just this component.
+    if (e.shiftKey) {
+      setMultiIds(prev => {
+        const base = prev.length ? prev : selectionRef.current;
+        return base.includes(comp.id) ? base.filter(id => id !== comp.id) : [...base, comp.id];
+      });
+      setSelectedId(comp.id);
+    } else {
+      const alreadyInSel = selectionRef.current.includes(comp.id);
+      if (!alreadyInSel) setMultiIds([]);
+      setSelectedId(comp.id);
+    }
+
     if (readOnlyRef.current) return; // viewers may select but not move
     if (activeTool !== "select") return;
     pastRef.current.push(components); futureRef.current = [];
-    dragRef.current = { kind: "move", compId: comp.id, sx: e.clientX, sy: e.clientY, ox: comp.x, oy: comp.y, ow: comp.width, oh: comp.height, orot: comp.rotation, cxScreen: 0, cyScreen: 0 };
+
+    // If the pressed component is part of the current selection (group or multi),
+    // drag the whole set together.
+    const moveIds = selectionRef.current.includes(comp.id) && selectionRef.current.length > 1
+      ? selectionRef.current
+      : [comp.id];
+    const multi = moveIds.length > 1
+      ? components.filter(c => moveIds.includes(c.id)).map(c => ({ id: c.id, ox: c.x, oy: c.y }))
+      : undefined;
+
+    dragRef.current = { kind: "move", compId: comp.id, sx: e.clientX, sy: e.clientY, ox: comp.x, oy: comp.y, ow: comp.width, oh: comp.height, orot: comp.rotation, cxScreen: 0, cyScreen: 0, ...(multi ? { multi } : {}) };
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
   }, [activeTool, inPreview, components]);
 
@@ -711,6 +1032,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
       return;
     }
     setSelectedId(null);
+    setMultiIds([]);
     if (activeTool === "hand") {
       dragRef.current = { kind: "pan", sx: e.clientX, sy: e.clientY, ox: panX, oy: panY, ow: 0, oh: 0, orot: 0, cxScreen: 0, cyScreen: 0 };
     }
@@ -727,8 +1049,19 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
       let nx = dr.ox + (e.clientX - dr.sx) / (z * MM_TO_PX);
       let ny = dr.oy + (e.clientY - dr.sy) / (z * MM_TO_PX);
       if (snapToGrid) { nx = Math.round(nx / GRID_MM) * GRID_MM; ny = Math.round(ny / GRID_MM) * GRID_MM; }
-      nx = Math.max(-50, Math.min(nx, CANVAS_W_MM)); ny = Math.max(-50, Math.min(ny, CANVAS_H_MM));
-      setComponentsRaw(prev => prev.map(c => c.id === dr.compId ? { ...c, x: Math.round(nx), y: Math.round(ny) } : c));
+      nx = Math.max(-50, Math.min(nx, canvasSizeRef.current.w)); ny = Math.max(-50, Math.min(ny, canvasSizeRef.current.h));
+      if (dr.multi) {
+        // Move the whole group/selection by the same delta as the primary.
+        const dxmm = Math.round(nx) - dr.ox;
+        const dymm = Math.round(ny) - dr.oy;
+        const orig = new Map(dr.multi.map(m => [m.id, m]));
+        setComponentsRaw(prev => prev.map(c => {
+          const o = orig.get(c.id);
+          return o ? { ...c, x: o.ox + dxmm, y: o.oy + dymm } : c;
+        }));
+      } else {
+        setComponentsRaw(prev => prev.map(c => c.id === dr.compId ? { ...c, x: Math.round(nx), y: Math.round(ny) } : c));
+      }
     } else if (dr.kind === "resize" && dr.compId) {
       const dx = (e.clientX - dr.sx) / (z * MM_TO_PX);
       const dy = (e.clientY - dr.sy) / (z * MM_TO_PX);
@@ -751,14 +1084,15 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   // we don't yank a component out from under them; flush on pointer up.
   const applyRemoteSnapshot = useCallback((snap: unknown) => {
     if (dragRef.current) { pendingRemoteRef.current = snap; return; }
-    const data = snap as { components?: CanvasComp[]; rules?: GameRule[]; assets?: string[]; guide?: GameGuide } | null;
+    const data = snap as { components?: CanvasComp[]; pages?: StudioPage[]; rules?: GameRule[]; assets?: string[]; guide?: GameGuide } | null;
     if (!data) return;
     applyingRemoteRef.current = true;
-    if (Array.isArray(data.components)) setComponentsRaw(data.components);
+    if (Array.isArray(data.pages)) setPages(data.pages);
+    else if (Array.isArray(data.components)) setComponentsRaw(data.components);
     if (Array.isArray(data.rules)) setRules(data.rules);
     if (Array.isArray(data.assets)) setAssets(data.assets);
     if (data.guide) setGuide({ ...EMPTY_GUIDE, ...data.guide });
-  }, []);
+  }, [setComponentsRaw]);
 
   const onPointerUp = useCallback(() => {
     dragRef.current = null;
@@ -774,7 +1108,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     gameId,
     enabled: collabEnabled,
     onRemoteUpdate: applyRemoteSnapshot,
-    getSnapshot: () => ({ components, rules, assets, guide }),
+    getSnapshot: () => ({ pages, rules, assets, guide }),
   });
   collabBroadcastRef.current = collabEnabled ? broadcast : null;
   const effectiveReadOnly = readOnly || liveRole === "viewer";
@@ -783,6 +1117,70 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
   const onWheel = useCallback((e: ReactWheelEvent) => {
     if (e.deltaY < 0) zoomIn(); else zoomOut();
   }, [zoomIn, zoomOut]);
+
+  // ── Context menu (right-click) ────────────────────────────────────────────
+  const openCompMenu = useCallback((e: ReactMouseEvent, comp: CanvasComp) => {
+    e.preventDefault(); e.stopPropagation();
+    if (readOnlyRef.current) return;
+    if (!selectionRef.current.includes(comp.id)) { setSelectedId(comp.id); setMultiIds([]); }
+    setMenu({ x: e.clientX, y: e.clientY, targetId: comp.id });
+  }, []);
+
+  const openCanvasMenu = useCallback((e: ReactMouseEvent) => {
+    // Only when the empty canvas (not a component) is right-clicked.
+    if (e.target !== e.currentTarget && !(e.target as HTMLElement).dataset.canvasbg) return;
+    e.preventDefault();
+    if (readOnlyRef.current) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const mx = (e.clientX - rect.left - panX) / (MM_TO_PX * storeZoom);
+    const my = (e.clientY - rect.top - panY) / (MM_TO_PX * storeZoom);
+    setSelectedId(null); setMultiIds([]);
+    setMenu({ x: e.clientX, y: e.clientY, targetId: null, mx, my });
+  }, [panX, panY, storeZoom]);
+
+  const closeMenu = useCallback(() => setMenu(null), []);
+
+  // Close the context menu on Escape.
+  useEffect(() => {
+    if (!menu) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menu]);
+
+  function buildMenuItems(): MenuItem[] {
+    if (!menu) return [];
+    if (menu.targetId) {
+      const c = components.find(x => x.id === menu.targetId);
+      if (!c) return [];
+      const multi = selectionIds.length > 1;
+      return [
+        { type: "item", label: multi ? `Duplicate (${selectionIds.length})` : "Duplicate", shortcut: "⌘D", onClick: duplicateSelected },
+        { type: "item", label: "Copy", shortcut: "⌘C", onClick: copy },
+        { type: "sep" },
+        { type: "item", label: "Bring to front", onClick: () => reorderZ(c.id, "front") },
+        { type: "item", label: "Bring forward", shortcut: "]", onClick: () => moveZ(c.id, "up") },
+        { type: "item", label: "Send backward", shortcut: "[", onClick: () => moveZ(c.id, "down") },
+        { type: "item", label: "Send to back", onClick: () => reorderZ(c.id, "back") },
+        { type: "sep" },
+        ...(canGroup ? [{ type: "item", label: "Group", shortcut: "⌘G", onClick: groupSelection } as MenuItem] : []),
+        ...(canUngroup ? [{ type: "item", label: "Ungroup", shortcut: "⌘⇧G", onClick: ungroupSelection } as MenuItem] : []),
+        { type: "item", label: c.locked ? "Unlock" : "Lock", onClick: () => updateComp(c.id, { locked: !c.locked }) },
+        { type: "item", label: c.visible ? "Hide" : "Show", onClick: () => updateComp(c.id, { visible: !c.visible }) },
+        { type: "sep" },
+        { type: "item", label: multi ? `Delete (${selectionIds.length})` : "Delete", shortcut: "⌫", danger: true, onClick: deleteSelected },
+      ];
+    }
+    // Empty-canvas menu
+    return [
+      { type: "item", label: "Paste", shortcut: "⌘V", disabled: !clipboardRef.current, onClick: paste },
+      { type: "sep" },
+      { type: "item", label: "Add card", onClick: () => addComp("card", menu.mx, menu.my) },
+      { type: "item", label: "Add token", onClick: () => addComp("token", menu.mx, menu.my) },
+      { type: "item", label: "Add board", onClick: () => addComp("board", menu.mx, menu.my) },
+      { type: "item", label: "Add note", onClick: () => addComp("note", menu.mx, menu.my) },
+    ];
+  }
 
   // ── Keyboard ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -795,9 +1193,11 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
       if (mod && e.key.toLowerCase() === "c") { e.preventDefault(); copy(); return; }
       if (mod && e.key.toLowerCase() === "v") { e.preventDefault(); paste(); return; }
       if (mod && e.key.toLowerCase() === "d") { e.preventDefault(); duplicateSelected(); return; }
+      if (mod && e.key.toLowerCase() === "g" && e.shiftKey) { e.preventDefault(); ungroupSelection(); return; }
+      if (mod && e.key.toLowerCase() === "g") { e.preventDefault(); groupSelection(); return; }
       if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); void handleSave(); return; }
       if (e.key === "Delete" || e.key === "Backspace") { deleteSelected(); return; }
-      if (e.key === "Escape") { setSelectedId(null); return; }
+      if (e.key === "Escape") { setSelectedId(null); setMultiIds([]); return; }
       if (e.key === "v" || e.key === "V") setActiveTool("select");
       if (e.key === "h" || e.key === "H") setActiveTool("hand");
       if (e.key === "t" || e.key === "T") setActiveTool("text");
@@ -813,19 +1213,20 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [undo, redo, copy, paste, duplicateSelected, deleteSelected, selectedComp, updateComp]);
+  }, [undo, redo, copy, paste, duplicateSelected, deleteSelected, groupSelection, ungroupSelection, selectedComp, updateComp]);
 
   // ── Save / publish ──────────────────────────────────────────────────────────
+  // `components` mirrors the first page for any legacy consumer of studioData.
   const handleSave = useCallback(async () => {
     if (isNew) { toast.error("Create the game first."); return; }
     if (readOnlyRef.current) { toast.error("You have view-only access to this studio."); return; }
-    await saveNow({ components, rules, assets, guide } as unknown as Record<string, unknown>);
-  }, [isNew, saveNow, components, rules, assets, guide]);
+    await saveNow({ pages, components: pages[0]?.components ?? [], rules, assets, guide } as unknown as Record<string, unknown>);
+  }, [isNew, saveNow, pages, rules, assets, guide]);
 
   async function handlePublish() {
     if (isNew) { toast.error("Create the game first."); return; }
     // Persist the design, then go to the publish settings page (price, details, submit)
-    await saveNow({ components, rules, assets, guide } as unknown as Record<string, unknown>);
+    await saveNow({ pages, components: pages[0]?.components ?? [], rules, assets, guide } as unknown as Record<string, unknown>);
     router.push(`/studio/${gameId}/publish`);
   }
 
@@ -882,7 +1283,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
           </button>
         </div>
         {/* preview canvas with pan */}
-        <PreviewStage mode={mode} components={components} zoom={storeZoom} />
+        <PreviewStage mode={mode} components={components} zoom={storeZoom} width={canvasW} height={canvasH} />
       </div>
     );
   }
@@ -915,6 +1316,13 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
         <button title="Layers" onClick={() => setLeftOpen(v => !v)} className={`v-tool-btn shrink-0 lg:hidden ${leftOpen ? "active" : ""}`}>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="4" height="11" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M7 1h5M7 5h5M7 9h5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
         </button>
+        <div className="w-px h-5 bg-warm-wood mx-0.5 shrink-0" />
+        <button title="Group (⌘G) — select 2+ first" disabled={!canGroup || effectiveReadOnly} onClick={groupSelection} className="v-tool-btn shrink-0 disabled:opacity-30">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="6.5" y="6.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M6.5 4h2.5a1 1 0 011 1V6.5" stroke="currentColor" strokeWidth="1" opacity="0.6"/></svg>
+        </button>
+        <button title="Ungroup (⌘⇧G)" disabled={!canUngroup || effectiveReadOnly} onClick={ungroupSelection} className="v-tool-btn shrink-0 disabled:opacity-30">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="7" y="7" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.2" strokeDasharray="1.6 1.4"/></svg>
+        </button>
 
         {/* Mode */}
         <div className="ml-auto flex items-center gap-0.5 bg-warm-wood rounded-lg p-0.5 shrink-0">
@@ -946,6 +1354,10 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
               <button onClick={() => void handleSave()} className="v-tool-btn text-2xs font-ui px-2" title="Save (⌘S)">Save</button>
             </>
           )}
+          {/* Help / tutorial */}
+          <button onClick={() => setTutorialOpen(true)} className="v-tool-btn shrink-0" title="How the studio works">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/><path d="M5.4 5.3a1.7 1.7 0 013.2.6c0 1.1-1.6 1.4-1.6 2.4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><circle cx="7" cy="10.3" r="0.7" fill="currentColor"/></svg>
+          </button>
           {/* Rule guide & scenarios */}
           {!isNew && (
             <button onClick={() => setGuideOpen(true)} className="v-tool-btn text-2xs font-ui px-2 flex items-center gap-1" title="Rule guide & scenarios">
@@ -970,6 +1382,55 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
 
       {shareOpen && <ShareDialog gameId={gameId} onClose={() => setShareOpen(false)} />}
       {guideOpen && <GuideDialog guide={guide} readOnly={effectiveReadOnly} onChange={setGuide} onClose={() => setGuideOpen(false)} />}
+      {menu && <ContextMenu x={menu.x} y={menu.y} items={buildMenuItems()} onClose={closeMenu} />}
+      {tutorialOpen && <StudioTutorial onClose={closeTutorial} />}
+
+      {/* Pages bar — switch / add / rename / resize canvases */}
+      <div className="h-9 bg-rich-wood-dark border-b border-warm-wood flex items-center px-2 gap-1 shrink-0 overflow-x-auto z-30">
+        <span className="text-[10px] text-soft-gray-dark font-ui uppercase tracking-wider mr-1 shrink-0">Pages</span>
+        {pages.map(p => {
+          const active = p.id === activePageId;
+          return (
+            <div key={p.id} onClick={() => switchPage(p.id)}
+              className={`group flex items-center gap-1 pl-2 pr-1 h-6 rounded-md shrink-0 cursor-pointer transition-colors ${active ? "bg-emerald-ghost text-emerald-glow ring-1 ring-emerald-glow/30" : "text-soft-gray hover:bg-warm-wood hover:text-parchment-light"}`}>
+              {renamingPageId === p.id ? (
+                <input autoFocus defaultValue={p.name} onClick={e => e.stopPropagation()}
+                  onBlur={e => { renamePage(p.id, e.target.value); setRenamingPageId(null); }}
+                  onKeyDown={e => { if (e.key === "Enter" || e.key === "Escape") (e.target as HTMLInputElement).blur(); }}
+                  className="w-24 bg-deep-void/60 border border-emerald-glow/40 rounded px-1 text-2xs text-parchment-light outline-none" />
+              ) : (
+                <span className="text-2xs font-ui whitespace-nowrap" onDoubleClick={e => { e.stopPropagation(); if (!effectiveReadOnly) setRenamingPageId(p.id); }}>{p.name}</span>
+              )}
+              {pages.length > 1 && !effectiveReadOnly && (
+                <button title="Delete page" onClick={e => { e.stopPropagation(); if (confirm(`Delete page "${p.name}"? Its components will be removed.`)) deletePage(p.id); }}
+                  className="opacity-0 group-hover:opacity-100 text-soft-gray-dark hover:text-crimson-flame p-0.5 transition-opacity">
+                  <svg width="9" height="9" viewBox="0 0 8 8" fill="none"><path d="M1 1l6 6M7 1L1 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                </button>
+              )}
+            </div>
+          );
+        })}
+        {!effectiveReadOnly && (
+          <button onClick={addPage} title="Add page" className="h-6 px-2 rounded-md text-2xs font-ui text-soft-gray hover:text-parchment-light hover:bg-warm-wood shrink-0">+ Page</button>
+        )}
+
+        {/* Active page size */}
+        {!effectiveReadOnly && (
+          <div className="ml-auto flex items-center gap-1 shrink-0">
+            <select value="" title="Size preset" onChange={e => { const pre = PAGE_SIZE_PRESETS[Number(e.target.value)]; if (pre) setPageSize(activePageId, pre.w, pre.h); }}
+              className="bg-rich-wood-mid border border-warm-wood rounded px-1 py-0.5 text-2xs text-parchment-light outline-none">
+              <option value="" disabled>Size…</option>
+              {PAGE_SIZE_PRESETS.map((pre, i) => <option key={pre.label} value={i}>{pre.label} ({pre.w}×{pre.h})</option>)}
+            </select>
+            <input type="number" value={canvasW} min={PAGE_MIN} max={PAGE_MAX} onChange={e => resizePage(activePageId, "width", Number(e.target.value))}
+              className="bg-rich-wood-mid border border-warm-wood rounded px-1 py-0.5 w-14 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow" />
+            <span className="text-soft-gray-dark text-2xs">×</span>
+            <input type="number" value={canvasH} min={PAGE_MIN} max={PAGE_MAX} onChange={e => resizePage(activePageId, "height", Number(e.target.value))}
+              className="bg-rich-wood-mid border border-warm-wood rounded px-1 py-0.5 w-14 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow" />
+            <span className="text-soft-gray-dark text-[10px]">mm</span>
+          </div>
+        )}
+      </div>
 
       {/* Body */}
       <div className="flex flex-1 overflow-hidden relative">
@@ -1025,6 +1486,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
           onPointerUp={onPointerUp}
           onPointerLeave={onPointerUp}
           onWheel={onWheel}
+          onContextMenu={openCanvasMenu}
         >
           {showGrid && <div data-canvasbg className="absolute inset-0 pointer-events-none" style={{
             backgroundImage: "linear-gradient(rgba(58,42,31,0.4) 1px,transparent 1px),linear-gradient(90deg,rgba(58,42,31,0.4) 1px,transparent 1px)",
@@ -1032,20 +1494,21 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
             backgroundPosition: `${panX}px ${panY}px`,
           }} />}
           <div style={{ position: "absolute", transformOrigin: "0 0", transform: `translate(${panX}px,${panY}px) scale(${storeZoom})` }}>
-            <div data-canvasbg style={{ position: "relative", width: CANVAS_W_MM * MM_TO_PX, height: CANVAS_H_MM * MM_TO_PX, backgroundColor: "#111214", border: "1px solid rgba(58,42,31,0.6)", boxShadow: "0 8px 40px rgba(0,0,0,0.8)" }}>
-              <div style={{ position: "absolute", top: -20, left: 0, color: "rgba(168,162,158,0.4)", fontSize: 10, fontFamily: "monospace" }}>{CANVAS_W_MM} × {CANVAS_H_MM} mm</div>
+            <div data-canvasbg style={{ position: "relative", width: canvasW * MM_TO_PX, height: canvasH * MM_TO_PX, backgroundColor: "#111214", border: "1px solid rgba(58,42,31,0.6)", boxShadow: "0 8px 40px rgba(0,0,0,0.8)" }}>
+              <div style={{ position: "absolute", top: -20, left: 0, color: "rgba(168,162,158,0.4)", fontSize: 10, fontFamily: "monospace" }}>{activePage.name} · {canvasW} × {canvasH} mm</div>
               {components.map(c => (
-                <CompView key={c.id} comp={c} selected={selectedId === c.id} editable={!effectiveReadOnly}
+                <CompView key={c.id} comp={c} selected={selectionIds.includes(c.id)} primary={selectedId === c.id} editable={!effectiveReadOnly}
                   onPointerDown={onCompPointerDown} onResizeStart={onResizeStart} onRotateStart={onRotateStart}
+                  onContextMenu={openCompMenu}
                   onTextChange={(id, text) => updateComp(id, { text }, false)} />
               ))}
             </div>
           </div>
           <div className="absolute bottom-3 left-3 text-2xs text-soft-gray-dark font-mono bg-rich-wood-dark/80 rounded px-2 py-1 pointer-events-none">
-            {selectedComp ? `${selectedComp.name} · ${Math.round(selectedComp.x)},${Math.round(selectedComp.y)} · ${selectedComp.width}×${selectedComp.height}mm` : `${CANVAS_W_MM}×${CANVAS_H_MM}mm`}
+            {selectedComp ? `${selectedComp.name} · ${Math.round(selectedComp.x)},${Math.round(selectedComp.y)} · ${selectedComp.width}×${selectedComp.height}mm` : `${canvasW}×${canvasH}mm`}
           </div>
           <div className="absolute bottom-3 right-3 text-2xs text-soft-gray-dark font-ui bg-rich-wood-dark/70 rounded px-2 py-1 pointer-events-none hidden lg:block">
-            ⌘Z undo · ⌘C/⌘V copy · drag handles to resize · gold dot to rotate
+            shift-click to multi-select · ⌘G group / ⌘⇧G ungroup · right-click for menu
           </div>
 
           {/* Panel collapse toggles (desktop) */}
@@ -1074,8 +1537,14 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
               </div>
             )}
             {rightPanelTab === "properties" && selectedComp && (
-              <PropertiesPanel comp={selectedComp} onChange={(p) => updateComp(selectedComp.id, p, false)}
-                onDup={duplicateSelected} onDel={deleteSelected} onZ={(d) => moveZ(selectedComp.id, d)} />
+              <div className="space-y-3">
+                {(canGroup || canUngroup) && !effectiveReadOnly && (
+                  <GroupBar count={selectionIds.length} canGroup={canGroup} canUngroup={canUngroup}
+                    onGroup={groupSelection} onUngroup={ungroupSelection} />
+                )}
+                <PropertiesPanel comp={selectedComp} multiCount={selectionIds.length} canvasW={canvasW} canvasH={canvasH} onChange={(p) => updateComp(selectedComp.id, p, false)}
+                  onDup={duplicateSelected} onDel={deleteSelected} onZ={(d) => moveZ(selectedComp.id, d)} />
+              </div>
             )}
             {rightPanelTab === "styling" && selectedComp && (
               <StylePanel comp={selectedComp} onChange={(p) => updateComp(selectedComp.id, p, false)} />
@@ -1098,7 +1567,7 @@ export function StudioLayout({ gameId }: StudioLayoutProps) {
 
 // ── Preview stage with pan ────────────────────────────────────────────────────
 
-function PreviewStage({ mode, components, zoom }: { mode: string; components: CanvasComp[]; zoom: number }) {
+function PreviewStage({ mode, components, zoom, width, height }: { mode: string; components: CanvasComp[]; zoom: number; width: number; height: number }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   return (
@@ -1111,7 +1580,7 @@ function PreviewStage({ mode, components, zoom }: { mode: string; components: Ca
       onPointerLeave={() => { drag.current = null; }}
     >
       <div style={{ transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})`, transition: drag.current ? "none" : "transform 0.1s" }}>
-        {mode === "preview_3d" ? <Preview3D components={components} /> : <Preview2D components={components} scale={0.8} />}
+        {mode === "preview_3d" ? <Preview3D components={components} width={width} height={height} /> : <Preview2D components={components} scale={0.8} width={width} height={height} />}
       </div>
     </div>
   );
@@ -1196,9 +1665,33 @@ const SIZE_PRESETS: Partial<Record<CompType, { label: string; w: number; h: numb
   ],
 };
 
-function PropertiesPanel({ comp, onChange, onDup, onDel, onZ }: {
+function GroupBar({ count, canGroup, canUngroup, onGroup, onUngroup }: {
+  count: number; canGroup: boolean; canUngroup: boolean; onGroup: () => void; onUngroup: () => void;
+}) {
+  return (
+    <div className="rounded-lg border border-[rgba(124,92,255,0.3)] bg-[rgba(124,92,255,0.08)] p-2.5">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-2xs font-ui font-semibold text-[#a78bff]">{count > 1 ? `${count} selected` : "Group"}</span>
+        <span className="text-[10px] text-soft-gray-dark font-ui">⌘G / ⌘⇧G</span>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={onGroup} disabled={!canGroup}
+          className="flex-1 py-1.5 rounded-lg bg-[rgba(124,92,255,0.15)] text-[#a78bff] text-2xs font-ui font-semibold hover:bg-[rgba(124,92,255,0.25)] disabled:opacity-30">
+          Group
+        </button>
+        <button onClick={onUngroup} disabled={!canUngroup}
+          className="flex-1 py-1.5 rounded-lg bg-warm-wood/50 text-soft-gray text-2xs font-ui font-semibold hover:text-parchment-light hover:bg-warm-wood disabled:opacity-30">
+          Ungroup
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PropertiesPanel({ comp, onChange, onDup, onDel, onZ, multiCount = 1, canvasW = CANVAS_W_MM, canvasH = CANVAS_H_MM }: {
   comp: CanvasComp; onChange: (p: Partial<CanvasComp>) => void;
-  onDup: () => void; onDel: () => void; onZ: (d: "up" | "down") => void;
+  onDup: () => void; onDel: () => void; onZ: (d: "up" | "down") => void; multiCount?: number;
+  canvasW?: number; canvasH?: number;
 }) {
   const [lockAspect, setLockAspect] = useState(false);
   const ratio = comp.width / Math.max(1, comp.height);
@@ -1207,7 +1700,8 @@ function PropertiesPanel({ comp, onChange, onDup, onDel, onZ }: {
   const setHeight = (h: number) => onChange(lockAspect ? { height: h, width: Math.max(1, Math.round(h * ratio)) } : { height: h });
 
   const sizePresets = SIZE_PRESETS[comp.type];
-  const isSquareType = comp.type === "token" || comp.type === "die";
+  const isSquareType = isCircleType(comp.type) || comp.type === "die" || comp.type === "cube" || comp.type === "tile";
+  const hasText = comp.type === "text" || comp.type === "note";
 
   return (
     <div className="space-y-4">
@@ -1222,13 +1716,17 @@ function PropertiesPanel({ comp, onChange, onDup, onDel, onZ }: {
         <button title={comp.locked ? "Unlock" : "Lock"} onClick={() => onChange({ locked: !comp.locked })} className={`p-1.5 rounded-lg hover:bg-warm-wood ${comp.locked ? "text-royal-gold" : "text-soft-gray hover:text-parchment-light"}`}>{comp.locked ? LockClosed : LockOpen}</button>
       </div>
 
+      {multiCount > 1 && (
+        <p className="text-[10px] text-soft-gray-dark font-ui -mt-1">Editing primary of {multiCount}. Move, duplicate &amp; delete affect all selected.</p>
+      )}
+
       <label className="block">
         <span className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider block mb-1.5">Name</span>
         <input className="v-input text-xs" value={comp.name} onChange={e => onChange({ name: e.target.value })} />
       </label>
-      {comp.type === "text" && (
+      {hasText && (
         <label className="block">
-          <span className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider block mb-1.5">Text</span>
+          <span className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider block mb-1.5">{comp.type === "note" ? "Note text" : "Text"}</span>
           <input className="v-input text-xs" value={comp.text ?? ""} onChange={e => onChange({ text: e.target.value })} />
         </label>
       )}
@@ -1243,8 +1741,8 @@ function PropertiesPanel({ comp, onChange, onDup, onDel, onZ }: {
           <Stepper label="Y" value={comp.y} onChange={y => onChange({ y })} />
         </div>
         <div className="flex gap-1 mt-2">
-          <button title="Center horizontally" onClick={() => onChange({ x: Math.round((CANVAS_W_MM - comp.width) / 2) })} className="flex-1 py-1.5 rounded-lg bg-warm-wood/40 text-soft-gray text-[10px] font-ui hover:text-parchment-light hover:bg-warm-wood">Center H</button>
-          <button title="Center vertically" onClick={() => onChange({ y: Math.round((CANVAS_H_MM - comp.height) / 2) })} className="flex-1 py-1.5 rounded-lg bg-warm-wood/40 text-soft-gray text-[10px] font-ui hover:text-parchment-light hover:bg-warm-wood">Center V</button>
+          <button title="Center horizontally" onClick={() => onChange({ x: Math.round((canvasW - comp.width) / 2) })} className="flex-1 py-1.5 rounded-lg bg-warm-wood/40 text-soft-gray text-[10px] font-ui hover:text-parchment-light hover:bg-warm-wood">Center H</button>
+          <button title="Center vertically" onClick={() => onChange({ y: Math.round((canvasH - comp.height) / 2) })} className="flex-1 py-1.5 rounded-lg bg-warm-wood/40 text-soft-gray text-[10px] font-ui hover:text-parchment-light hover:bg-warm-wood">Center V</button>
         </div>
       </div>
 
@@ -1352,7 +1850,7 @@ function ColorField({ label, value, onChange, allowTransparent = false }: {
 
 /** Live preview of the component's current style. */
 function StylePreview({ comp }: { comp: CanvasComp }) {
-  const isCircle = comp.type === "token";
+  const isCircle = isCircleType(comp.type);
   return (
     <div className="rounded-lg bg-deep-void border border-warm-wood/60 h-20 flex items-center justify-center overflow-hidden">
       {comp.type === "text" ? (
@@ -1361,13 +1859,14 @@ function StylePreview({ comp }: { comp: CanvasComp }) {
         </span>
       ) : (
         <div style={{
-          width: 48, height: comp.type === "card" || comp.type === "pawn" ? 60 : 48,
-          backgroundColor: comp.type === "pawn" ? "transparent" : safeColor(comp.fill, "#1a2535"),
+          position: "relative",
+          width: 48, height: comp.type === "card" || comp.type === "deck" || isSilhouetteType(comp.type) ? 60 : 48,
+          backgroundColor: isChromeless(comp.type) ? "transparent" : safeColor(comp.fill, "#1a2535"),
           backgroundImage: comp.image ? `url("${comp.image}")` : undefined, backgroundSize: "cover", backgroundPosition: "center",
-          border: comp.type === "pawn" ? "none" : `${comp.strokeWidth}px solid ${safeColor(comp.stroke, "transparent")}`,
+          border: isChromeless(comp.type) ? "none" : `${comp.strokeWidth}px solid ${safeColor(comp.stroke, "transparent")}`,
           borderRadius: isCircle ? "50%" : comp.cornerRadius, opacity: comp.opacity / 100,
         }}>
-          {comp.type === "pawn" && !comp.image ? <PawnShape comp={comp} /> : null}
+          {isSilhouetteType(comp.type) ? <SilhouetteShape comp={comp} /> : !comp.image ? <ShapeInner comp={comp} /> : null}
         </div>
       )}
     </div>
@@ -1481,6 +1980,7 @@ function LayersPanel({ components, total, selectedId, renamingId, onSelect, onSt
                   onDoubleClick={e => { e.stopPropagation(); onStartRename(c.id); }}
                   title="Double-click to rename"
                 >
+                  {c.groupId && <span title="Grouped" className="text-[#a78bff] mr-1 align-middle">⛓</span>}
                   {c.name}
                   {c.quantity > 1 && <span className="ml-1 text-[10px] text-soft-gray-dark">×{c.quantity}</span>}
                 </span>
@@ -1515,10 +2015,17 @@ function LayersPanel({ components, total, selectedId, renamingId, onSelect, onSt
 const PART_META: { type: CompType; label: string; hint: string }[] = [
   { type: "board",    label: "Board",      hint: "Play surface" },
   { type: "card",     label: "Card",       hint: "63 × 88 mm" },
+  { type: "deck",     label: "Deck",       hint: "Card stack" },
   { type: "tile",     label: "Tile",       hint: "Square tile" },
+  { type: "hex",      label: "Hex Tile",   hint: "Hexagon" },
   { type: "token",    label: "Token",      hint: "Round marker" },
+  { type: "marker",   label: "Marker",     hint: "Status disc" },
+  { type: "cube",     label: "Cube",       hint: "Resource" },
+  { type: "coin",     label: "Coin",       hint: "Currency" },
   { type: "die",      label: "Die",        hint: "Dice" },
   { type: "pawn",     label: "Pawn",       hint: "Player piece" },
+  { type: "meeple",   label: "Meeple",     hint: "Worker" },
+  { type: "note",     label: "Note",       hint: "Sticky note" },
   { type: "rulebook", label: "Rulebook",   hint: "Reference" },
   { type: "text",     label: "Title / Text", hint: "Label" },
 ];
@@ -1526,9 +2033,9 @@ const PART_META: { type: CompType; label: string; hint: string }[] = [
 /** Tiny visual preview of a part type, rendered from its TYPE_DEFAULTS. */
 function PartThumb({ type }: { type: CompType }) {
   const d = TYPE_DEFAULTS[type];
-  const isCircle = type === "token";
-  if (type === "pawn") {
-    return <div className="w-7 h-7 flex items-center justify-center"><PawnShape comp={makeComp("pawn", 0, 0)} /></div>;
+  const isCircle = isCircleType(type);
+  if (isSilhouetteType(type)) {
+    return <div className="w-7 h-7 flex items-center justify-center"><SilhouetteShape comp={makeComp(type, 0, 0)} /></div>;
   }
   if (type === "text") {
     return <span style={{ color: d.textColor, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13 }}>Aa</span>;
@@ -1798,19 +2305,21 @@ function RulesPanel({ hasEngine, rules, onAdd, onUpdate, onDelete }: {
             return (
               <div key={rule.id} className={`rounded-lg border group transition-colors ${enabled ? "border-warm-wood" : "border-warm-wood/40 opacity-55"}`}>
                 <div className="flex items-center gap-1.5 px-2.5 pt-2">
-                  <span className="text-[10px] font-ui font-bold text-cyan-spark bg-[rgba(0,229,255,0.1)] px-1.5 py-0.5 rounded">{triggerLabel(rule.trigger)}</span>
-                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" className="text-soft-gray-dark shrink-0"><path d="M2 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  {rule.action && <span className="text-[10px] font-ui font-semibold text-emerald-glow bg-emerald-ghost px-1.5 py-0.5 rounded truncate">{ruleActionDef(rule.action)?.label ?? rule.action}</span>}
-                  <div className="ml-auto flex items-center gap-0.5 shrink-0">
+                  <div className="flex items-center gap-1 min-w-0 flex-1">
+                    <span className="text-[10px] font-ui font-bold text-cyan-spark bg-[rgba(0,229,255,0.1)] px-1.5 py-0.5 rounded shrink-0">{triggerLabel(rule.trigger)}</span>
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" className="text-soft-gray-dark shrink-0"><path d="M2 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    {rule.action && <span className="text-[10px] font-ui font-semibold text-emerald-glow bg-emerald-ghost px-1.5 py-0.5 rounded truncate min-w-0">{ruleActionDef(rule.action)?.label ?? rule.action}</span>}
+                  </div>
+                  <div className="flex items-center gap-0.5 shrink-0">
                     <button title={enabled ? "Disable" : "Enable"} onClick={() => onUpdate(rule.id, { enabled: !enabled })}
-                      className={`relative w-7 h-4 rounded-full transition-colors ${enabled ? "bg-emerald-glow" : "bg-warm-wood"}`}>
+                      className={`relative w-7 h-4 rounded-full transition-colors shrink-0 ${enabled ? "bg-emerald-glow" : "bg-warm-wood"}`}>
                       <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-deep-void transition-all ${enabled ? "left-3.5" : "left-0.5"}`} />
                     </button>
                     <button title="Duplicate" onClick={() => onAdd({ ...rule })}
-                      className="p-1 rounded text-soft-gray-dark hover:text-parchment-light hover:bg-warm-wood-light opacity-0 group-hover:opacity-100 transition-opacity">
+                      className="p-1 rounded text-soft-gray-dark hover:text-parchment-light hover:bg-warm-wood-light opacity-60 group-hover:opacity-100 transition-opacity">
                       <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="3.5" y="3.5" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.1"/><path d="M2.5 8V2.5h5.5" stroke="currentColor" strokeWidth="1.1"/></svg>
                     </button>
-                    <button title="Delete" onClick={() => onDelete(rule.id)} className="p-1 rounded text-soft-gray-dark hover:text-crimson-flame hover:bg-crimson-flame/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button title="Delete" onClick={() => onDelete(rule.id)} className="p-1 rounded text-soft-gray-dark hover:text-crimson-flame hover:bg-crimson-flame/10 opacity-60 group-hover:opacity-100 transition-opacity">
                       <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2.5 3.5h7M5 3.5V2.5h2v1M3.5 3.5l.4 6h4.2l.4-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
                   </div>

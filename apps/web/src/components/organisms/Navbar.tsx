@@ -81,9 +81,6 @@ export function Navbar() {
                       {user.displayName?.[0]?.toUpperCase() ?? "V"}
                     </span>
                   </div>
-                  <span className="text-sm font-ui text-parchment-light hidden xl:block">
-                    {user.displayName}
-                  </span>
                 </Link>
                 {isAdmin && (
                   <Link href="/admin">
