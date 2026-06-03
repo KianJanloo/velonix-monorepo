@@ -36,23 +36,6 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
-  // Webpack configuration for Three.js and GLSL shaders
-  webpack(config) {
-    // GLSL shader support
-    config.module.rules.push({
-      test: /\.(glsl|vs|fs|vert|frag)$/,
-      use: ["raw-loader", "glslify-loader"],
-    });
-
-    // Ensure Three.js works correctly
-    config.externals = config.externals || [];
-    if (Array.isArray(config.externals)) {
-      // No special externals needed for R3F
-    }
-
-    return config;
-  },
-
   // Environment variables exposed to the browser
   env: {
     NEXT_PUBLIC_APP_URL: process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000",
