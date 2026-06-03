@@ -34,6 +34,7 @@ import { UploadsModule } from "./uploads/uploads.module";
 import { PlansModule } from "./plans/plans.module";
 import { EventsModule } from "./events/events.module";
 import { AssetsModule } from "./assets/assets.module";
+import { SettingsModule } from "./settings/settings.module";
 
 @Module({
   imports: [
@@ -126,6 +127,7 @@ import { AssetsModule } from "./assets/assets.module";
     PlansModule,
     EventsModule,
     AssetsModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

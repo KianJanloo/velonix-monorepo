@@ -1,10 +1,11 @@
-import { Injectable, UnauthorizedException, ConflictException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcryptjs";
 import { UserEntity } from "../users/user.entity";
+import { SettingsService } from "../settings/settings.service";
 import type { RegisterDto, LoginDto } from "@velonix/game-engine";
 
 interface JwtPayload {
@@ -28,12 +29,17 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
     private readonly jwtService: JwtService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private readonly settings: SettingsService
   ) {}
 
   // ── Registration / Login ────────────────────────────────────────────────
 
   async register(dto: RegisterDto) {
+    if (!(await this.settings.signupsEnabled())) {
+      throw new ForbiddenException("New account registration is currently disabled.");
+    }
+
     const exists = await this.userRepo.findOne({
       where: [{ email: dto.email }, { username: dto.username }],
     });

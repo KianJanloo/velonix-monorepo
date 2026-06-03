@@ -100,3 +100,115 @@ export function useAdminDeleteGame() {
     onError: (err) => toast.error(err instanceof ApiError ? err.message : "Failed to delete game."),
   });
 }
+
+// ── Payments ─────────────────────────────────────────────────────────────────
+
+export interface AdminPaymentStats {
+  grossRevenue: number;      // USD cents
+  platformRevenue: number;   // USD cents (Velonix's cut)
+  creatorEarnings: number;   // USD cents
+  transactionCount: number;
+  byType: {
+    game: { gross: number; fees: number; count: number };
+    asset: { gross: number; fees: number; count: number };
+  };
+}
+
+export function useAdminPaymentStats() {
+  return useQuery({
+    queryKey: ["admin", "payments", "stats"],
+    queryFn: () => apiClient.get<AdminPaymentStats>("/admin/payments/stats"),
+  });
+}
+
+export interface AdminTransaction {
+  id: string;
+  type: "game" | "asset";
+  buyer: { id: string; username: string } | null;
+  item: { id: string; title: string } | null;
+  amountPaidUsd: number;
+  platformFeeUsd: number;
+  creatorEarningsUsd: number;
+  stripePaymentIntentId: string | null;
+  createdAt: string;
+}
+
+export function useAdminTransactions(page = 1, perPage = 20, type?: "game" | "asset") {
+  return useQuery({
+    queryKey: ["admin", "payments", "transactions", { page, perPage, type }],
+    queryFn: () => apiClient.get<{ data: AdminTransaction[]; total: number; totalPages: number }>(
+      "/admin/payments/transactions",
+      { params: { page, perPage, ...(type ? { type } : {}) } }
+    ),
+  });
+}
+
+// ── Subscriptions ────────────────────────────────────────────────────────────
+
+export interface AdminSubscriptionStats {
+  byTier: { free: number; creator: number; pro: number; studio: number };
+  paidSubscribers: number;
+  totalUsers: number;
+}
+
+export function useAdminSubscriptionStats() {
+  return useQuery({
+    queryKey: ["admin", "subscriptions", "stats"],
+    queryFn: () => apiClient.get<AdminSubscriptionStats>("/admin/subscriptions/stats"),
+  });
+}
+
+export interface AdminSubscriber {
+  id: string; username: string; displayName: string; email: string;
+  subscriptionTier: string; subscriptionExpiresAt: string | null;
+  hasBilling: boolean; createdAt: string;
+}
+
+export function useAdminSubscribers(page = 1, perPage = 20, tier?: string) {
+  return useQuery({
+    queryKey: ["admin", "subscriptions", { page, perPage, tier }],
+    queryFn: () => apiClient.get<{ data: AdminSubscriber[]; total: number; totalPages: number }>(
+      "/admin/subscriptions",
+      { params: { page, perPage, ...(tier ? { tier } : {}) } }
+    ),
+  });
+}
+
+// ── Marketplace assets ───────────────────────────────────────────────────────
+
+export interface AdminAsset {
+  id: string; title: string; kind: string;
+  isFree: boolean; priceUsd: number | null; isPublished: boolean;
+  componentCount: number; totalPurchases: number; averageRating: number | null;
+  author: { id: string; username?: string };
+  createdAt: string;
+}
+
+export function useAdminAssets(page = 1, perPage = 20, search?: string) {
+  return useQuery({
+    queryKey: ["admin", "assets", { page, perPage, search }],
+    queryFn: () => apiClient.get<{ data: AdminAsset[]; total: number; totalPages: number }>(
+      "/admin/assets",
+      { params: { page, perPage, ...(search ? { search } : {}) } }
+    ),
+  });
+}
+
+export function useAdminSetAssetPublished() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, isPublished }: { id: string; isPublished: boolean }) =>
+      apiClient.patch(`/admin/assets/${id}/publish`, { isPublished }),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["admin", "assets"] }); toast.success("Asset updated."); },
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Failed to update asset."),
+  });
+}
+
+export function useAdminDeleteAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient.delete(`/admin/assets/${id}`),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["admin", "assets"] }); toast.success("Asset deleted."); },
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Failed to delete asset."),
+  });
+}

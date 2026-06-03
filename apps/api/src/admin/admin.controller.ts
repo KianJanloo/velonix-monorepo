@@ -3,11 +3,11 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiProperty, ApiBody, ApiParam } from "@nestjs/swagger";
-import { IsIn, IsString, MaxLength } from "class-validator";
+import { IsIn, IsString, IsBoolean, MaxLength } from "class-validator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { AdminService } from "./admin.service";
-import type { UserRole, GameStatus } from "@velonix/types";
+import type { UserRole, GameStatus, SubscriptionTier } from "@velonix/types";
 
 // ── Swagger DTO shapes ────────────────────────────────────────────────────────
 
@@ -24,6 +24,12 @@ class RejectGameBodyDto {
   @IsString()
   @MaxLength(500)
   reason!: string;
+}
+
+class SetPublishedBodyDto {
+  @ApiProperty({ example: false, description: "Whether the asset is publicly listed" })
+  @IsBoolean()
+  isPublished!: boolean;
 }
 
 @ApiTags("admin")
@@ -113,5 +119,80 @@ export class AdminController {
   @ApiOperation({ summary: "Admin delete game" })
   deleteGame(@Param("id") id: string) {
     return this.adminService.deleteGame(id);
+  }
+
+  // ── Payments ──────────────────────────────────────────────────────────────
+
+  @Get("payments/stats")
+  @ApiOperation({ summary: "Revenue totals across game + asset sales" })
+  getPaymentStats() {
+    return this.adminService.getPaymentStats();
+  }
+
+  @Get("payments/transactions")
+  @ApiOperation({ summary: "Unified, paginated transaction feed" })
+  listTransactions(
+    @Query("page") page?: string,
+    @Query("perPage") perPage?: string,
+    @Query("type") type?: "game" | "asset",
+  ) {
+    return this.adminService.listTransactions(
+      page ? parseInt(page, 10) : 1,
+      perPage ? parseInt(perPage, 10) : 20,
+      type === "game" || type === "asset" ? type : undefined,
+    );
+  }
+
+  // ── Subscriptions ───────────────────────────────────────────────────────────
+
+  @Get("subscriptions/stats")
+  @ApiOperation({ summary: "Subscriber counts per tier" })
+  getSubscriptionStats() {
+    return this.adminService.getSubscriptionStats();
+  }
+
+  @Get("subscriptions")
+  @ApiOperation({ summary: "List paid subscribers" })
+  listSubscribers(
+    @Query("page") page?: string,
+    @Query("perPage") perPage?: string,
+    @Query("tier") tier?: SubscriptionTier,
+  ) {
+    const valid = tier && ["free", "creator", "pro", "studio"].includes(tier) ? tier : undefined;
+    return this.adminService.listSubscribers(
+      page ? parseInt(page, 10) : 1,
+      perPage ? parseInt(perPage, 10) : 20,
+      valid,
+    );
+  }
+
+  // ── Marketplace assets ────────────────────────────────────────────────────────
+
+  @Get("assets")
+  @ApiOperation({ summary: "List marketplace component assets" })
+  listAssets(
+    @Query("page") page?: string,
+    @Query("perPage") perPage?: string,
+    @Query("search") search?: string,
+  ) {
+    return this.adminService.listAssets(
+      page ? parseInt(page, 10) : 1,
+      perPage ? parseInt(perPage, 10) : 20,
+      search,
+    );
+  }
+
+  @Patch("assets/:id/publish")
+  @ApiOperation({ summary: "Publish / unpublish an asset" })
+  @ApiParam({ name: "id", format: "uuid" })
+  @ApiBody({ type: SetPublishedBodyDto })
+  setAssetPublished(@Param("id") id: string, @Body() body: SetPublishedBodyDto) {
+    return this.adminService.setAssetPublished(id, body.isPublished);
+  }
+
+  @Delete("assets/:id")
+  @ApiOperation({ summary: "Delete a marketplace asset" })
+  deleteAsset(@Param("id") id: string) {
+    return this.adminService.deleteAsset(id);
   }
 }
