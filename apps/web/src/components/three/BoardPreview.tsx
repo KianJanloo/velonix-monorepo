@@ -8,6 +8,8 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { buildBoardScene } from "./realBoard";
+import type { CanvasComp } from "@/components/templates/studio/core";
 
 /** Duration (seconds) of one full cinematic flythrough loop. */
 export const FLYTHROUGH_DURATION = 12;
@@ -22,6 +24,11 @@ export interface BoardPreviewProps {
   flythrough?: boolean;
   /** Receives the WebGL canvas once mounted — used to record a demo video. */
   onCanvasReady?: (canvas: HTMLCanvasElement) => void;
+  /** Real game components to render. When omitted, a stylised placeholder is shown. */
+  components?: CanvasComp[];
+  /** Board (canvas) size in mm — used to scale/place real components. */
+  boardWidth?: number;
+  boardHeight?: number;
 }
 
 export function BoardPreview({
@@ -32,6 +39,9 @@ export function BoardPreview({
   className = "",
   flythrough = false,
   onCanvasReady,
+  components,
+  boardWidth,
+  boardHeight,
 }: BoardPreviewProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   // Read latest callback via ref so it isn't a render-loop dependency.
@@ -99,72 +109,80 @@ export function BoardPreview({
     table.receiveShadow = true;
     scene.add(table);
 
-    // ── Game board ─────────────────────────────────────────────────────────
-    const boardGeo = new THREE.BoxGeometry(4.2, 0.045, 3.2);
-    const boardMat = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.9 });
-    const board = new THREE.Mesh(boardGeo, boardMat);
-    board.position.set(0, 0.015, 0);
-    board.castShadow = true;
-    board.receiveShadow = true;
-    scene.add(board);
+    // ── Board contents: real game components, or a stylised placeholder ──────
+    let tokens: THREE.Mesh[] = [];
+    let disposeReal: (() => void) | null = null;
 
-    // Board border
-    const borderGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(4.22, 0.05, 3.22));
-    const borderMat = new THREE.LineBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.3 });
-    scene.add(new THREE.LineSegments(borderGeo, borderMat).translateY(0.015));
+    if (components && components.length > 0) {
+      disposeReal = buildBoardScene(scene, components, boardWidth ?? 800, boardHeight ?? 600);
+    } else {
+      // ── Game board (placeholder) ─────────────────────────────────────────
+      const boardGeo = new THREE.BoxGeometry(4.2, 0.045, 3.2);
+      const boardMat = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.9 });
+      const board = new THREE.Mesh(boardGeo, boardMat);
+      board.position.set(0, 0.015, 0);
+      board.castShadow = true;
+      board.receiveShadow = true;
+      scene.add(board);
 
-    // ── Cards ──────────────────────────────────────────────────────────────
-    const cardPositions: [number, number, number, number, string][] = [
-      [-0.9, 0.06, -0.4, 0.15, "#7c5cff"],
-      [-0.2, 0.065, 0.2, -0.08, "#f5c451"],
-      [0.7, 0.06, -0.5, 0.22, "#00e5ff"],
-      [0.9, 0.06, 0.3, -0.18, "#ff3b5c"],
-    ];
-    cardPositions.forEach(([cx, cy, cz, ry, accent]) => {
-      const cg = new THREE.BoxGeometry(0.63, 0.009, 0.88);
-      const cm = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.25, metalness: 0.1 });
-      const card = new THREE.Mesh(cg, cm);
-      card.position.set(cx, cy, cz);
-      card.rotation.y = ry;
-      card.castShadow = true;
-      scene.add(card);
+      // Board border
+      const borderGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(4.22, 0.05, 3.22));
+      const borderMat = new THREE.LineBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.3 });
+      scene.add(new THREE.LineSegments(borderGeo, borderMat).translateY(0.015));
 
-      // Accent pip
-      const pip = new THREE.Mesh(
-        new THREE.CircleGeometry(0.04, 16),
-        new THREE.MeshStandardMaterial({ color: new THREE.Color(accent), emissive: new THREE.Color(accent), emissiveIntensity: 1.2 })
-      );
-      pip.position.set(cx - 0.24, cy + 0.005, cz - 0.36);
-      pip.rotation.set(-Math.PI / 2, 0, ry);
-      scene.add(pip);
-    });
+      // ── Cards ────────────────────────────────────────────────────────────
+      const cardPositions: [number, number, number, number, string][] = [
+        [-0.9, 0.06, -0.4, 0.15, "#7c5cff"],
+        [-0.2, 0.065, 0.2, -0.08, "#f5c451"],
+        [0.7, 0.06, -0.5, 0.22, "#00e5ff"],
+        [0.9, 0.06, 0.3, -0.18, "#ff3b5c"],
+      ];
+      cardPositions.forEach(([cx, cy, cz, ry, accent]) => {
+        const cg = new THREE.BoxGeometry(0.63, 0.009, 0.88);
+        const cm = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.25, metalness: 0.1 });
+        const card = new THREE.Mesh(cg, cm);
+        card.position.set(cx, cy, cz);
+        card.rotation.y = ry;
+        card.castShadow = true;
+        scene.add(card);
 
-    // ── Token helper ───────────────────────────────────────────────────────
-    function makeToken(x: number, z: number, color: number) {
-      const tg = new THREE.CylinderGeometry(0.18, 0.18, 0.05, 32);
-      const tm = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.7, emissive: color, emissiveIntensity: 0.15 });
-      const tok = new THREE.Mesh(tg, tm);
-      tok.position.set(x, 0.075, z);
-      tok.castShadow = true;
-      scene.add(tok);
+        // Accent pip
+        const pip = new THREE.Mesh(
+          new THREE.CircleGeometry(0.04, 16),
+          new THREE.MeshStandardMaterial({ color: new THREE.Color(accent), emissive: new THREE.Color(accent), emissiveIntensity: 1.2 })
+        );
+        pip.position.set(cx - 0.24, cy + 0.005, cz - 0.36);
+        pip.rotation.set(-Math.PI / 2, 0, ry);
+        scene.add(pip);
+      });
 
-      const rim2 = new THREE.Mesh(
-        new THREE.TorusGeometry(0.17, 0.012, 8, 32),
-        new THREE.MeshStandardMaterial({ color: 0xf5c451, roughness: 0.1, metalness: 0.9, emissive: 0xf5c451, emissiveIntensity: 0.3 })
-      );
-      rim2.position.set(x, 0.075, z);
-      rim2.rotation.x = Math.PI / 2;
-      scene.add(rim2);
+      // ── Token helper ───────────────────────────────────────────────────────
+      const makeToken = (x: number, z: number, color: number) => {
+        const tg = new THREE.CylinderGeometry(0.18, 0.18, 0.05, 32);
+        const tm = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.7, emissive: color, emissiveIntensity: 0.15 });
+        const tok = new THREE.Mesh(tg, tm);
+        tok.position.set(x, 0.075, z);
+        tok.castShadow = true;
+        scene.add(tok);
 
-      return tok;
+        const rim2 = new THREE.Mesh(
+          new THREE.TorusGeometry(0.17, 0.012, 8, 32),
+          new THREE.MeshStandardMaterial({ color: 0xf5c451, roughness: 0.1, metalness: 0.9, emissive: 0xf5c451, emissiveIntensity: 0.3 })
+        );
+        rim2.position.set(x, 0.075, z);
+        rim2.rotation.x = Math.PI / 2;
+        scene.add(rim2);
+
+        return tok;
+      };
+
+      tokens = [
+        makeToken(-1.2, 0.7, 0x7c5cff),
+        makeToken(-0.5, -0.8, 0xf5c451),
+        makeToken(0.3, 0.85, 0xff3b5c),
+        makeToken(1.1, 0.6, 0x00e5ff),
+      ];
     }
-
-    const tokens = [
-      makeToken(-1.2, 0.7, 0x7c5cff),
-      makeToken(-0.5, -0.8, 0xf5c451),
-      makeToken(0.3, 0.85, 0xff3b5c),
-      makeToken(1.1, 0.6, 0x00e5ff),
-    ];
 
     // ── Mouse orbit ────────────────────────────────────────────────────────
     let autoRotY = 0;
@@ -244,9 +262,10 @@ export function BoardPreview({
       cancelAnimationFrame(frameId);
       obs.disconnect();
       renderer.dispose();
+      disposeReal?.();
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
     };
-  }, [disableControls, flythrough]);
+  }, [disableControls, flythrough, components, boardWidth, boardHeight]);
 
   return (
     <div className={`relative overflow-hidden rounded-xl ${className}`} style={{ height }} aria-label="3D board game preview">

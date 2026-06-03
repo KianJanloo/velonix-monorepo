@@ -67,7 +67,12 @@ async function bootstrap(): Promise<void> {
   });
 
   // ── Serve uploaded images ──────────────────────────────────────────────────
-  app.useStaticAssets(join(process.cwd(), "uploads"), { prefix: "/uploads/" });
+  // CORS header lets the 3D demo-video renderer use these as WebGL textures
+  // without tainting the canvas (which would block MediaRecorder capture).
+  app.useStaticAssets(join(process.cwd(), "uploads"), {
+    prefix: "/uploads/",
+    setHeaders: (res) => res.setHeader("Access-Control-Allow-Origin", "*"),
+  });
 
   // ── Winston logger ───────────────────────────────────────────────────────
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));

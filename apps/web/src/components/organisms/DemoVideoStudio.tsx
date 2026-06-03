@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { BoardPreview, FLYTHROUGH_DURATION } from "@/components/three/BoardPreview";
 import { Button } from "@/components/atoms/Button";
 import { useGame } from "@/hooks/useGames";
+import { normalizeComponents } from "@/components/templates/studio/core";
 
 type Phase = "idle" | "recording" | "ready";
 
@@ -18,6 +19,21 @@ function pickMime(): string | null {
 export function DemoVideoStudio({ gameId, gameTitle }: { gameId: string; gameTitle?: string }) {
   const { data: game } = useGame(gameId);
   const title = gameTitle ?? game?.title;
+
+  // Real board from the game's saved studio data (first page, with legacy fallback).
+  const board = useMemo(() => {
+    const data = game?.studioData as
+      | { components?: unknown; pages?: { width?: number; height?: number; components?: unknown }[] }
+      | null
+      | undefined;
+    const page = data?.pages?.[0];
+    return {
+      components: normalizeComponents(page?.components ?? data?.components ?? []),
+      width: page?.width ?? 800,
+      height: page?.height ?? 600,
+    };
+  }, [game?.studioData]);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -83,6 +99,9 @@ export function DemoVideoStudio({ gameId, gameTitle }: { gameId: string; gameTit
         {...(title ? { gameTitle: title } : {})}
         flythrough
         height={420}
+        components={board.components}
+        boardWidth={board.width}
+        boardHeight={board.height}
         onCanvasReady={(c) => { canvasRef.current = c; }}
         className="border border-warm-wood"
       />
