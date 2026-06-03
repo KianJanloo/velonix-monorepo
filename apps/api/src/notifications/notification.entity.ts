@@ -5,7 +5,7 @@ import {
 export type NotificationType =
   | "game_approved" | "game_rejected" | "game_published"
   | "new_review" | "new_sale" | "subscription" | "system"
-  | "collab_invite";
+  | "collab_invite" | "support_reply";
 
 @Entity("notifications")
 @Index(["userId", "createdAt"])

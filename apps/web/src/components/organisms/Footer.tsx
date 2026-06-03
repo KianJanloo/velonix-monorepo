@@ -16,6 +16,7 @@ const LINKS = {
     { label: "About", href: "/about" },
     { label: "Blog", href: "/blog" },
     { label: "Marketplace", href: "/marketplace" },
+    { label: "Support", href: "/support" },
   ],
   Legal: [
     { label: "Terms of Service", href: "/terms" },

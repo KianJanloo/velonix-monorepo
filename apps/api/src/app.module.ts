@@ -36,6 +36,7 @@ import { PlansModule } from "./plans/plans.module";
 import { EventsModule } from "./events/events.module";
 import { AssetsModule } from "./assets/assets.module";
 import { SettingsModule } from "./settings/settings.module";
+import { SupportModule } from "./support/support.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 
 @Module({
@@ -117,6 +118,7 @@ import { AnalyticsModule } from "./analytics/analytics.module";
     EventsModule,
     AssetsModule,
     SettingsModule,
+    SupportModule,
     AnalyticsModule,
   ],
   providers: [
