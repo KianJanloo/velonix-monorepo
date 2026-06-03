@@ -6,13 +6,13 @@
  * react-reconciler dependency entirely.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { buildBoardScene } from "./realBoard";
+import { FLYTHROUGH_DURATION } from "./boardPreview.constants";
 import type { CanvasComp } from "@/components/templates/studio/core";
 
-/** Duration (seconds) of one full cinematic flythrough loop. */
-export const FLYTHROUGH_DURATION = 12;
+export { FLYTHROUGH_DURATION };
 
 export interface BoardPreviewProps {
   gameId?: string;
@@ -29,6 +29,8 @@ export interface BoardPreviewProps {
   /** Board (canvas) size in mm — used to scale/place real components. */
   boardWidth?: number;
   boardHeight?: number;
+  /** Fired after the first frame renders (used to hide the loading skeleton). */
+  onReady?: () => void;
 }
 
 export function BoardPreview({
@@ -42,11 +44,15 @@ export function BoardPreview({
   components,
   boardWidth,
   boardHeight,
+  onReady,
 }: BoardPreviewProps) {
   const mountRef = useRef<HTMLDivElement>(null);
-  // Read latest callback via ref so it isn't a render-loop dependency.
+  const [ready, setReady] = useState(false);
+  // Read latest callbacks via refs so they aren't render-loop dependencies.
   const onCanvasReadyRef = useRef(onCanvasReady);
   onCanvasReadyRef.current = onCanvasReady;
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -56,11 +62,15 @@ export function BoardPreview({
     const h = mount.clientHeight;
 
     // ── Renderer ───────────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // The scene is static (only the camera moves), so render shadows once
+    // instead of every frame — a large saving during the flythrough.
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
     mount.appendChild(renderer.domElement);
@@ -112,9 +122,11 @@ export function BoardPreview({
     // ── Board contents: real game components, or a stylised placeholder ──────
     let tokens: THREE.Mesh[] = [];
     let disposeReal: (() => void) | null = null;
+    // Lazily-loaded artwork asks for a repaint via this holder (reassigned below).
+    const reqRender = { fn: () => {} };
 
     if (components && components.length > 0) {
-      disposeReal = buildBoardScene(scene, components, boardWidth ?? 800, boardHeight ?? 600);
+      disposeReal = buildBoardScene(scene, components, boardWidth ?? 800, boardHeight ?? 600, () => reqRender.fn());
     } else {
       // ── Game board (placeholder) ─────────────────────────────────────────
       const boardGeo = new THREE.BoxGeometry(4.2, 0.045, 3.2);
@@ -213,12 +225,13 @@ export function BoardPreview({
       }, { passive: true });
     }
 
-    // ── Animate ────────────────────────────────────────────────────────────
-    let frameId: number;
+    // ── Animate (paused when off-screen or tab hidden) ───────────────────────
+    let frameId = 0;
+    let running = false;
+    let firstFrame = true;
     const clock = new THREE.Clock();
 
-    function animate() {
-      frameId = requestAnimationFrame(animate);
+    function renderFrame() {
       const t = clock.getElapsedTime();
 
       if (flythrough) {
@@ -238,15 +251,42 @@ export function BoardPreview({
         if (!disableControls) updateCamera();
       }
 
-      // Floating tokens
-      tokens.forEach((tok, i) => {
-        tok.position.y = 0.075 + Math.sin(t * 0.6 + i * 1.2) * 0.005;
-      });
+      // Floating tokens (placeholder scene only)
+      if (tokens.length) {
+        tokens.forEach((tok, i) => {
+          tok.position.y = 0.075 + Math.sin(t * 0.6 + i * 1.2) * 0.005;
+        });
+      }
 
       renderer.render(scene, camera);
+
+      if (firstFrame) {
+        firstFrame = false;
+        setReady(true);
+        onReadyRef.current?.();
+      }
     }
 
-    animate();
+    const loop = () => { frameId = requestAnimationFrame(loop); renderFrame(); };
+    const start = () => { if (!running) { running = true; loop(); } };
+    const stop = () => { running = false; cancelAnimationFrame(frameId); };
+    // Repaint a single frame when paused (e.g. an artwork texture just loaded).
+    reqRender.fn = () => { if (!running) renderFrame(); };
+
+    // Only run the render loop while visible on screen and the tab is focused.
+    let docVisible = !document.hidden;
+    let onScreen = true;
+    const sync = () => { if (docVisible && onScreen) start(); else stop(); };
+
+    const onVisibility = () => { docVisible = !document.hidden; sync(); };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    const io = new IntersectionObserver(
+      (entries) => { onScreen = entries[0]?.isIntersecting ?? true; sync(); },
+      { threshold: 0.01 },
+    );
+    io.observe(mount);
+    sync();
 
     // ── Resize ────────────────────────────────────────────────────────────
     const obs = new ResizeObserver(() => {
@@ -255,11 +295,14 @@ export function BoardPreview({
       renderer.setSize(nw, nh);
       camera.aspect = nw / nh;
       camera.updateProjectionMatrix();
+      reqRender.fn(); // keep a crisp frame after layout changes
     });
     obs.observe(mount);
 
     return () => {
-      cancelAnimationFrame(frameId);
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+      io.disconnect();
       obs.disconnect();
       renderer.dispose();
       disposeReal?.();
@@ -270,6 +313,13 @@ export function BoardPreview({
   return (
     <div className={`relative overflow-hidden rounded-xl ${className}`} style={{ height }} aria-label="3D board game preview">
       <div ref={mountRef} className="absolute inset-0" />
+
+      {/* Progressive loading skeleton until the first frame paints */}
+      {!ready && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#0a0a0a]">
+          <div className="w-7 h-7 border-2 border-warm-wood border-t-emerald-glow rounded-full animate-spin" />
+        </div>
+      )}
 
       {/* Vignette */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-rich-wood-dark/50 to-transparent z-10" />

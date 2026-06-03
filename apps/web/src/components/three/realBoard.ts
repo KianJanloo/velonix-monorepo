@@ -13,7 +13,34 @@ const VERT = 2.4;
 
 type Disposable = { dispose: () => void };
 
-/** Realistic piece height in board millimetres (footprint comes from the comp). */
+/**
+ * Geometry + material caches. Identical pieces (same type/size/colour) share GPU
+ * resources instead of allocating per instance — a big win for boards with many
+ * tokens/cards. Everything is disposed exactly once at teardown.
+ */
+class ResourcePool {
+  private geo = new Map<string, THREE.BufferGeometry>();
+  private mat = new Map<string, THREE.Material>();
+  readonly extra: Disposable[] = []; // per-instance (textures, edges) — disposed once
+
+  geometry<T extends THREE.BufferGeometry>(key: string, make: () => T): T {
+    let g = this.geo.get(key);
+    if (!g) { g = make(); this.geo.set(key, g); }
+    return g as T;
+  }
+  material<T extends THREE.Material>(key: string, make: () => T): T {
+    let m = this.mat.get(key);
+    if (!m) { m = make(); this.mat.set(key, m); }
+    return m as T;
+  }
+  dispose() {
+    this.geo.forEach((g) => g.dispose());
+    this.mat.forEach((m) => m.dispose());
+    this.extra.forEach((d) => d.dispose());
+    this.geo.clear(); this.mat.clear();
+  }
+}
+
 function heightMm(t: CompType): number {
   switch (t) {
     case "card": return 0.5;
@@ -28,153 +55,129 @@ function heightMm(t: CompType): number {
   }
 }
 
-/** Small helper to register a mesh's geometry + material for disposal. */
-function mesh(geo: THREE.BufferGeometry, mat: THREE.Material, disp: Disposable[]): THREE.Mesh {
-  disp.push(geo, mat);
-  const m = new THREE.Mesh(geo, mat);
-  m.castShadow = true; m.receiveShadow = true;
-  return m;
+/** Quantise to stabilise cache keys (sub-mm differences shouldn't fork resources). */
+const q = (n: number) => Math.round(n * 100) / 100;
+
+function stdMat(pool: ResourcePool, color: THREE.Color, opts: { roughness?: number; metalness?: number; map?: THREE.Texture } = {}): THREE.MeshStandardMaterial {
+  const rough = opts.roughness ?? 0.45;
+  const metal = opts.metalness ?? 0.1;
+  // Textured materials are unique per image and not pooled.
+  if (opts.map) {
+    const m = new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal, map: opts.map });
+    pool.extra.push(m);
+    return m;
+  }
+  return pool.material(`std:${color.getHexString()}:${rough}:${metal}`, () =>
+    new THREE.MeshStandardMaterial({ color: color.clone(), roughness: rough, metalness: metal, emissive: color.clone(), emissiveIntensity: 0.06 }),
+  );
 }
 
-function std(color: THREE.ColorRepresentation, opts: THREE.MeshStandardMaterialParameters = {}): THREE.MeshStandardMaterial {
-  return new THREE.MeshStandardMaterial({ color, roughness: 0.45, metalness: 0.1, ...opts });
-}
+// ── Builders. Each returns an Object3D with its base at y=0. ───────────────────
 
-// ── Per-type builders. Each returns an Object3D with its base at y=0. ──────────
+/** LOD disc for tokens/coins/markers: 48-seg + rim → 20-seg → 8-seg. */
+function buildDisc(pool: ResourcePool, diam: number, h: number, color: THREE.Color, metal: boolean): THREE.Object3D {
+  const lod = new THREE.LOD();
+  const r = diam / 2;
+  const mat = stdMat(pool, color, metal ? { metalness: 0.7, roughness: 0.25 } : { roughness: 0.5 });
 
-function buildCard(w: number, d: number, h: number, color: THREE.Color, disp: Disposable[], map?: THREE.Texture): THREE.Object3D {
-  const mat = std(color, { roughness: 0.3, metalness: 0.05 });
-  if (map) mat.map = map;
-  const card = mesh(new THREE.BoxGeometry(w, h, d), mat, disp);
-  card.position.y = h / 2;
-  // Thin gold edge so cards read as cards, not slabs.
-  const edge = new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, d)),
-    new THREE.LineBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.35 }),
-  );
-  disp.push(edge.geometry, edge.material as THREE.Material);
-  edge.position.y = h / 2;
-  const g = new THREE.Group(); g.add(card, edge);
-  return g;
-}
+  const cyl = (seg: number) => pool.geometry(`cyl:${q(r)}:${q(h)}:${seg}`, () => new THREE.CylinderGeometry(r, r, h, seg));
 
-function buildDisc(diam: number, h: number, color: THREE.Color, disp: Disposable[], metal = false): THREE.Object3D {
-  const body = mesh(
-    new THREE.CylinderGeometry(diam / 2, diam / 2, h, 48),
-    std(color, metal ? { metalness: 0.7, roughness: 0.25 } : { roughness: 0.5 }),
-    disp,
-  );
-  body.position.y = h / 2;
-  // Raised rim ring.
-  const ring = mesh(
-    new THREE.TorusGeometry(diam / 2 * 0.92, Math.max(0.004, diam * 0.03), 10, 48),
-    std(0xf5c451, { metalness: 0.8, roughness: 0.2 }),
-    disp,
-  );
+  // Near: detailed + gold rim.
+  const near = new THREE.Group();
+  const nearBody = new THREE.Mesh(cyl(48), mat); nearBody.position.y = h / 2; nearBody.castShadow = true; nearBody.receiveShadow = true;
+  const rimMat = stdMat(pool, new THREE.Color(0xf5c451), { metalness: 0.8, roughness: 0.2 });
+  const ring = new THREE.Mesh(pool.geometry(`rim:${q(r)}`, () => new THREE.TorusGeometry(r * 0.92, Math.max(0.004, diam * 0.03), 8, 32)), rimMat);
   ring.rotation.x = Math.PI / 2; ring.position.y = h;
-  const g = new THREE.Group(); g.add(body, ring);
-  return g;
+  near.add(nearBody, ring);
+
+  const midBody = new THREE.Mesh(cyl(20), mat); midBody.position.y = h / 2; midBody.castShadow = true;
+  const farBody = new THREE.Mesh(cyl(8), mat); farBody.position.y = h / 2;
+
+  lod.addLevel(near, 0);
+  lod.addLevel(midBody, 6);
+  lod.addLevel(farBody, 9);
+  return lod;
 }
 
-function buildDie(size: number, color: THREE.Color, disp: Disposable[]): THREE.Object3D {
+/** LOD card: box + gold edge near, plain box far. */
+function buildCard(pool: ResourcePool, w: number, d: number, h: number, color: THREE.Color, map?: THREE.Texture): THREE.Object3D {
+  const lod = new THREE.LOD();
+  const box = pool.geometry(`box:${q(w)}:${q(h)}:${q(d)}`, () => new THREE.BoxGeometry(w, h, d));
+  const mat = stdMat(pool, color, { roughness: 0.3, metalness: 0.05, ...(map ? { map } : {}) });
+
+  const near = new THREE.Group();
+  const face = new THREE.Mesh(box, mat); face.position.y = h / 2; face.castShadow = true; face.receiveShadow = true;
+  const edges = new THREE.LineSegments(
+    pool.geometry(`edge:${q(w)}:${q(h)}:${q(d)}`, () => new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, d))),
+    pool.material("edge:gold", () => new THREE.LineBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.35 })),
+  );
+  edges.position.y = h / 2;
+  near.add(face, edges);
+
+  const far = new THREE.Mesh(box, mat); far.position.y = h / 2; far.castShadow = true;
+
+  lod.addLevel(near, 0);
+  lod.addLevel(far, 7);
+  return lod;
+}
+
+function buildDie(pool: ResourcePool, size: number, color: THREE.Color): THREE.Object3D {
   const g = new THREE.Group();
-  const cube = mesh(new THREE.BoxGeometry(size, size, size), std(color, { roughness: 0.35 }), disp);
-  cube.position.y = size / 2;
+  const cube = new THREE.Mesh(pool.geometry(`cube:${q(size)}`, () => new THREE.BoxGeometry(size, size, size)), stdMat(pool, color, { roughness: 0.35 }));
+  cube.position.y = size / 2; cube.castShadow = true; cube.receiveShadow = true;
   g.add(cube);
-  // Five pips on the top face.
-  const pipMat = std(0x0a0a0a, { roughness: 0.6 });
-  disp.push(pipMat);
-  const r = size * 0.07;
+  const pipMat = stdMat(pool, new THREE.Color(0x0a0a0a), { roughness: 0.6 });
+  const pipGeo = pool.geometry(`pip:${q(size)}`, () => new THREE.SphereGeometry(size * 0.07, 10, 10));
   const o = size * 0.27;
-  const spots: [number, number][] = [[-o, -o], [o, -o], [0, 0], [-o, o], [o, o]];
-  for (const [px, pz] of spots) {
-    const geo = new THREE.SphereGeometry(r, 12, 12);
-    disp.push(geo);
-    const pip = new THREE.Mesh(geo, pipMat);
-    pip.position.set(px, size + r * 0.3, pz);
-    pip.scale.y = 0.4;
+  for (const [px, pz] of [[-o, -o], [o, -o], [0, 0], [-o, o], [o, o]] as const) {
+    const pip = new THREE.Mesh(pipGeo, pipMat);
+    pip.position.set(px, size + size * 0.07 * 0.3, pz); pip.scale.y = 0.4;
     g.add(pip);
   }
   return g;
 }
 
-function buildPawn(diam: number, height: number, color: THREE.Color, disp: Disposable[]): THREE.Object3D {
+function buildPawn(pool: ResourcePool, diam: number, height: number, color: THREE.Color): THREE.Object3D {
   const g = new THREE.Group();
-  const mat = std(color, { roughness: 0.3, metalness: 0.15 });
-  disp.push(mat);
-  // Flared base
-  const baseGeo = new THREE.CylinderGeometry(diam * 0.42, diam * 0.5, height * 0.16, 32);
-  disp.push(baseGeo);
-  const base = new THREE.Mesh(baseGeo, mat); base.castShadow = true; base.position.y = height * 0.08;
-  // Tapered stem
-  const stemGeo = new THREE.CylinderGeometry(diam * 0.18, diam * 0.34, height * 0.5, 32);
-  disp.push(stemGeo);
-  const stem = new THREE.Mesh(stemGeo, mat); stem.castShadow = true; stem.position.y = height * 0.4;
-  // Collar + head
-  const collarGeo = new THREE.SphereGeometry(diam * 0.26, 24, 16);
-  disp.push(collarGeo);
-  const collar = new THREE.Mesh(collarGeo, mat); collar.castShadow = true; collar.position.y = height * 0.68; collar.scale.y = 0.5;
-  const headGeo = new THREE.SphereGeometry(diam * 0.28, 24, 20);
-  disp.push(headGeo);
-  const head = new THREE.Mesh(headGeo, mat); head.castShadow = true; head.position.y = height * 0.86;
-  g.add(base, stem, collar, head);
-  return g;
-}
-
-function buildMeeple(w: number, height: number, color: THREE.Color, disp: Disposable[]): THREE.Object3D {
-  const g = new THREE.Group();
-  const mat = std(color, { roughness: 0.4 });
-  disp.push(mat);
-  const u = w; // overall width scale
-  const add = (geo: THREE.BufferGeometry, x: number, y: number, z = 0, rz = 0) => {
-    disp.push(geo);
-    const m = new THREE.Mesh(geo, mat); m.castShadow = true;
-    m.position.set(x, y, z); m.rotation.z = rz; g.add(m);
+  const mat = stdMat(pool, color, { roughness: 0.3, metalness: 0.15 });
+  const part = (geo: THREE.BufferGeometry, y: number, sy = 1) => {
+    const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.position.y = y; if (sy !== 1) m.scale.y = sy; g.add(m);
   };
-  // Head
-  add(new THREE.SphereGeometry(u * 0.2, 20, 16), 0, height * 0.8);
-  // Torso (tapered)
-  add(new THREE.CylinderGeometry(u * 0.16, u * 0.26, height * 0.42, 20), 0, height * 0.5);
-  // Arms
-  add(new THREE.CapsuleGeometry(u * 0.07, height * 0.28, 4, 8), u * 0.26, height * 0.52, 0, Math.PI / 4);
-  add(new THREE.CapsuleGeometry(u * 0.07, height * 0.28, 4, 8), -u * 0.26, height * 0.52, 0, -Math.PI / 4);
-  // Legs
-  add(new THREE.CapsuleGeometry(u * 0.09, height * 0.3, 4, 8), u * 0.12, height * 0.18);
-  add(new THREE.CapsuleGeometry(u * 0.09, height * 0.3, 4, 8), -u * 0.12, height * 0.18);
+  part(pool.geometry(`pawnB:${q(diam)}:${q(height)}`, () => new THREE.CylinderGeometry(diam * 0.42, diam * 0.5, height * 0.16, 24)), height * 0.08);
+  part(pool.geometry(`pawnS:${q(diam)}:${q(height)}`, () => new THREE.CylinderGeometry(diam * 0.18, diam * 0.34, height * 0.5, 24)), height * 0.4);
+  part(pool.geometry(`pawnC:${q(diam)}`, () => new THREE.SphereGeometry(diam * 0.26, 20, 14)), height * 0.68, 0.5);
+  part(pool.geometry(`pawnH:${q(diam)}`, () => new THREE.SphereGeometry(diam * 0.28, 20, 16)), height * 0.86);
   return g;
 }
 
-function buildDeck(w: number, d: number, h: number, color: THREE.Color, disp: Disposable[], map?: THREE.Texture): THREE.Object3D {
+function buildMeeple(pool: ResourcePool, w: number, height: number, color: THREE.Color): THREE.Object3D {
   const g = new THREE.Group();
-  const topMat = std(color, { roughness: 0.3 });
-  if (map) topMat.map = map;
-  const top = mesh(new THREE.BoxGeometry(w, h, d), topMat, disp);
-  top.position.y = h / 2; g.add(top);
-  // Striations to suggest stacked cards.
-  for (let k = 1; k <= 4; k++) {
-    const lg = new THREE.BoxGeometry(w * 1.002, h * 0.02, d * 1.002);
-    disp.push(lg);
-    const lm = std(0x000000, { roughness: 0.9 }); disp.push(lm);
-    const line = new THREE.Mesh(lg, lm);
-    line.position.y = (h / 5) * k;
-    g.add(line);
-  }
+  const mat = stdMat(pool, color, { roughness: 0.4 });
+  const u = w;
+  const add = (geo: THREE.BufferGeometry, x: number, y: number, rz = 0) => {
+    const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.position.set(x, y, 0); m.rotation.z = rz; g.add(m);
+  };
+  add(pool.geometry(`mH:${q(u)}`, () => new THREE.SphereGeometry(u * 0.2, 16, 12)), 0, height * 0.8);
+  add(pool.geometry(`mT:${q(u)}:${q(height)}`, () => new THREE.CylinderGeometry(u * 0.16, u * 0.26, height * 0.42, 16)), 0, height * 0.5);
+  const arm = pool.geometry(`mA:${q(u)}:${q(height)}`, () => new THREE.CapsuleGeometry(u * 0.07, height * 0.28, 3, 6));
+  add(arm, u * 0.26, height * 0.52, Math.PI / 4);
+  add(arm, -u * 0.26, height * 0.52, -Math.PI / 4);
+  const leg = pool.geometry(`mL:${q(u)}:${q(height)}`, () => new THREE.CapsuleGeometry(u * 0.09, height * 0.3, 3, 6));
+  add(leg, u * 0.12, height * 0.18);
+  add(leg, -u * 0.12, height * 0.18);
   return g;
 }
 
-function buildFlat(w: number, d: number, h: number, color: THREE.Color, circle: boolean, disp: Disposable[], map?: THREE.Texture): THREE.Object3D {
-  const mat = std(color, { roughness: 0.7 });
-  if (map) mat.map = map;
+function buildFlat(pool: ResourcePool, w: number, d: number, h: number, color: THREE.Color, circle: boolean, map?: THREE.Texture): THREE.Object3D {
   const geo = circle
-    ? new THREE.CylinderGeometry(w / 2, w / 2, h, 40)
-    : new THREE.BoxGeometry(w, h, d);
-  const m = mesh(geo, mat, disp);
-  m.position.y = h / 2;
+    ? pool.geometry(`fcyl:${q(w)}:${q(h)}`, () => new THREE.CylinderGeometry(w / 2, w / 2, h, 24))
+    : pool.geometry(`fbox:${q(w)}:${q(h)}:${q(d)}`, () => new THREE.BoxGeometry(w, h, d));
+  const m = new THREE.Mesh(geo, stdMat(pool, color, { roughness: 0.7, ...(map ? { map } : {}) }));
+  m.position.y = h / 2; m.castShadow = true; m.receiveShadow = true;
   return m;
 }
 
-/** Renders text onto a transparent canvas texture so labels appear on the board. */
-function textTexture(text: string, color: string, disp: Disposable[]): THREE.CanvasTexture {
+function textTexture(text: string, color: string, pool: ResourcePool): THREE.CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 512; c.height = 256;
   const ctx = c.getContext("2d")!;
@@ -184,41 +187,49 @@ function textTexture(text: string, color: string, disp: Disposable[]): THREE.Can
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(text.slice(0, 32), c.width / 2, c.height / 2, c.width - 24);
   const tex = new THREE.CanvasTexture(c);
-  tex.anisotropy = 4; disp.push(tex);
+  tex.anisotropy = 4; pool.extra.push(tex);
   return tex;
 }
 
 /**
- * Builds the real game board — every visible component becomes a realistic 3D
- * piece (cards lie flat, tokens are discs, dice show pips, pawns/meeples are
- * figures) sized, placed, coloured and rotated from its canvas definition.
+ * Builds the real game board with LOD pieces and pooled GPU resources.
+ * `onTexture` fires when a lazily-loaded artwork texture arrives so the caller
+ * can request a re-render (progressive image loading).
  */
 export function buildBoardScene(
   scene: THREE.Scene,
   comps: CanvasComp[],
   boardW: number,
   boardH: number,
+  onTexture?: () => void,
 ): () => void {
   const scale = TARGET_WORLD / Math.max(boardW, boardH, 1);
   const bw = boardW * scale;
   const bh = boardH * scale;
-  const disp: Disposable[] = [];
+  const pool = new ResourcePool();
   const added: THREE.Object3D[] = [];
   const surfaceY = 0.03;
 
-  const boardGeo = new THREE.BoxGeometry(bw, 0.05, bh);
-  const boardMat = std(0x12161d, { roughness: 0.92, metalness: 0.02 });
-  const boardMesh = mesh(boardGeo, boardMat, disp);
-  boardMesh.position.y = 0.005;
+  const boardMesh = new THREE.Mesh(
+    pool.geometry(`board:${q(bw)}:${q(bh)}`, () => new THREE.BoxGeometry(bw, 0.05, bh)),
+    stdMat(pool, new THREE.Color(0x12161d), { roughness: 0.92, metalness: 0.02 }),
+  );
+  boardMesh.position.y = 0.005; boardMesh.receiveShadow = true;
   scene.add(boardMesh); added.push(boardMesh);
 
-  const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(bw + 0.02, 0.06, bh + 0.02));
-  const edgeMat = new THREE.LineBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.3 });
-  disp.push(edges, edgeMat);
-  const border = new THREE.LineSegments(edges, edgeMat); border.position.y = 0.012;
+  const border = new THREE.LineSegments(
+    pool.geometry("boardEdge", () => new THREE.EdgesGeometry(new THREE.BoxGeometry(bw + 0.02, 0.06, bh + 0.02))),
+    pool.material("edge:gold", () => new THREE.LineBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.3 })),
+  );
+  border.position.y = 0.012;
   scene.add(border); added.push(border);
 
   const loader = new THREE.TextureLoader();
+  const loadTex = (url: string): THREE.Texture => {
+    const tex = loader.load(url, (t) => { t.colorSpace = THREE.SRGBColorSpace; onTexture?.(); }, undefined, () => {});
+    pool.extra.push(tex);
+    return tex;
+  };
 
   comps.filter((c) => c.visible).forEach((c, i) => {
     const w = Math.max(0.03, c.width * scale);
@@ -228,39 +239,28 @@ export function buildBoardScene(
     const cx = (c.x + c.width / 2 - boardW / 2) * scale;
     const cz = (c.y + c.height / 2 - boardH / 2) * scale;
     const color = new THREE.Color(safeColor(c.fill, "#1a2535"));
-
-    // Texture from the component's artwork (CORS-enabled; tolerates failure).
-    let map: THREE.Texture | undefined;
     const wantMap = c.type === "card" || c.type === "deck" || c.type === "tile" || c.type === "board";
-    if (c.image && wantMap) {
-      map = loader.load(c.image, (t) => { t.colorSpace = THREE.SRGBColorSpace; }, undefined, () => {});
-      disp.push(map);
-    }
+    const map = c.image && wantMap ? loadTex(c.image) : undefined;
 
     let obj: THREE.Object3D;
     switch (c.type) {
-      case "card": obj = buildCard(w, d, h, color, disp, map); break;
-      case "deck": obj = buildDeck(w, d, h, color, disp, map); break;
-      case "die": case "cube": obj = buildDie(diam, color, disp); break;
-      case "pawn": obj = buildPawn(diam, h, color, disp); break;
-      case "meeple": obj = buildMeeple(w, h, color, disp); break;
-      case "token": case "coin": case "marker":
-        obj = buildDisc(diam, h, color, disp, c.type === "coin"); break;
-      default:
-        obj = buildFlat(w, d, h, color, isCircleType(c.type), disp, map);
+      case "card": obj = buildCard(pool, w, d, h, color, map); break;
+      case "deck": obj = buildCard(pool, w, d, h, color, map); break;
+      case "die": case "cube": obj = buildDie(pool, diam, color); break;
+      case "pawn": obj = buildPawn(pool, diam, h, color); break;
+      case "meeple": obj = buildMeeple(pool, w, h, color); break;
+      case "token": case "coin": case "marker": obj = buildDisc(pool, diam, h, color, c.type === "coin"); break;
+      default: obj = buildFlat(pool, w, d, h, color, isCircleType(c.type), map);
     }
 
     obj.position.set(cx, surfaceY + i * 0.0008, cz);
     obj.rotation.y = (-c.rotation * Math.PI) / 180;
-    obj.traverse((o) => { if (o instanceof THREE.Mesh) { o.castShadow = true; o.receiveShadow = true; } });
     scene.add(obj); added.push(obj);
 
-    // Text label as a flat plane just above the piece.
     if (c.type === "text" && c.text) {
-      const tex = textTexture(c.text, c.textColor ?? "#e8d5b8", disp);
-      const pgeo = new THREE.PlaneGeometry(w, d); disp.push(pgeo);
-      const pmat = new THREE.MeshBasicMaterial({ map: tex, transparent: true }); disp.push(pmat);
-      const plane = new THREE.Mesh(pgeo, pmat);
+      const tex = textTexture(c.text, c.textColor ?? "#e8d5b8", pool);
+      const pmat = new THREE.MeshBasicMaterial({ map: tex, transparent: true }); pool.extra.push(pmat);
+      const plane = new THREE.Mesh(pool.geometry(`plane:${q(w)}:${q(d)}`, () => new THREE.PlaneGeometry(w, d)), pmat);
       plane.rotation.x = -Math.PI / 2;
       plane.rotation.z = (-c.rotation * Math.PI) / 180;
       plane.position.set(cx, surfaceY + h + 0.01 + i * 0.0008, cz);
@@ -270,6 +270,6 @@ export function buildBoardScene(
 
   return () => {
     for (const o of added) scene.remove(o);
-    for (const x of disp) x.dispose();
+    pool.dispose();
   };
 }

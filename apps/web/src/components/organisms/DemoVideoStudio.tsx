@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { BoardPreview, FLYTHROUGH_DURATION } from "@/components/three/BoardPreview";
+import { LazyBoardPreview as BoardPreview } from "@/components/three/LazyBoardPreview";
+import { FLYTHROUGH_DURATION } from "@/components/three/boardPreview.constants";
 import { startStudioMusic } from "@/components/three/studioMusic";
 import { Button } from "@/components/atoms/Button";
 import { useGame, useUpdateGame } from "@/hooks/useGames";
