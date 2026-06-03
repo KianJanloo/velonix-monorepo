@@ -311,7 +311,11 @@ export function useStudioEditorState(gameId: string) {
 
   const selectedComp = components.find((c) => c.id === selectedId) ?? null;
 
-  const inPreview = mode !== "design";
+  const isPlaytest = mode === "playtest";
+
+  // Static previews (2D/3D). Playtest has its own interactive view, so it is
+  // intentionally excluded here.
+  const inPreview = mode === "preview_2d" || mode === "preview_3d";
 
   // ── Selection set (supports groups + shift multi-select) ─────────────────────
 
@@ -512,7 +516,7 @@ export function useStudioEditorState(gameId: string) {
     publish, membership, myRole, readOnly, collabEnabled, shareOpen,
     setShareOpen, tutorialOpen, setTutorialOpen, marketOpen, setMarketOpen, moreOpen,
     setMoreOpen, menu, setMenu, applyingRemoteRef, pendingRemoteRef, broadcastTimerRef,
-    collabBroadcastRef, readOnlyRef, selectedComp, inPreview, multiIds, setMultiIds,
+    collabBroadcastRef, readOnlyRef, selectedComp, inPreview, isPlaytest, multiIds, setMultiIds,
     selectionIds, selectionRef, selectedGroupIds, canGroup, canUngroup, hydratedRef,
     suppressDirtyRef, mountedRef,
   };

@@ -507,7 +507,7 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
 
   // ── 3D gating ───────────────────────────────────────────────────────────────
 
-  function handleMode(m: "design" | "preview_2d" | "preview_3d") {
+  function handleMode(m: "design" | "preview_2d" | "preview_3d" | "playtest") {
     if (m === "preview_3d" && !plan.has3DPreview) {
       toast.error(
         "3D preview is a paid feature. Upgrade your plan to unlock it.",

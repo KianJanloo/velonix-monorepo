@@ -288,6 +288,14 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
           </button>
 
           <button
+            onClick={() => handleMode("playtest")}
+            title="Playtest — drag pieces, track turns, roll dice"
+            className={`px-2 py-1 rounded-md text-2xs font-ui font-semibold ${(mode as string) === "playtest" ? "bg-emerald-glow text-deep-void" : "text-soft-gray hover:text-parchment-light"}`}
+          >
+            Playtest
+          </button>
+
+          <button
             onClick={() => handleMode("preview_3d")}
             title={
               plan.has3DPreview ? "3D Preview" : "3D preview — upgrade required"
