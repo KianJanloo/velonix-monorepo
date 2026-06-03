@@ -7,7 +7,6 @@ import type { StudioEditor } from "./useStudioEditor";
 export function MobileNotice({ ed }: { ed: StudioEditor }) {
   const {
     setMode,
-    game,
   } = ed;
 
   return (

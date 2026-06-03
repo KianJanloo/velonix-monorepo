@@ -5,12 +5,6 @@ import {
 } from "sonner";
 
 import {
-  MM_TO_PX,
-  GRID_MM,
-  CompView,
-} from "../core";
-
-import {
   GroupBar,
   PropertiesPanel,
   StylePanel,
@@ -19,6 +13,12 @@ import {
   AssetsPanel,
   RulesPanel,
 } from "../panels";
+
+import {
+  MM_TO_PX,
+  GRID_MM,
+  CompView,
+} from "../core";
 
 import type { StudioEditor } from "./useStudioEditor";
 
@@ -51,7 +51,6 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
     setLeftOpen,
     rightOpen,
     setRightOpen,
-    menu,
     selectedComp,
     setMultiIds,
     selectionIds,
