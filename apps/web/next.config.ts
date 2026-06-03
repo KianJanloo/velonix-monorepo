@@ -32,14 +32,21 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "assets.velonix.gg",
       },
+      // localhost
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },
 
   // Environment variables exposed to the browser
   env: {
-    NEXT_PUBLIC_APP_URL: process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000",
-    NEXT_PUBLIC_API_URL: process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001",
+    NEXT_PUBLIC_APP_URL:
+      process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000",
+    NEXT_PUBLIC_API_URL:
+      process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001",
   },
 
   // Experimental features
