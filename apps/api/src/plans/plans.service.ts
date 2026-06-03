@@ -49,6 +49,7 @@ export class PlansService implements OnApplicationBootstrap {
           priceMonthly: s.priceMonthly, priceYearly: s.priceYearly,
           commissionRate: limits.commissionRate,
           maxProjects: limits.maxProjects,
+          maxPagesPerProject: limits.maxPagesPerProject,
           has3DPreview: limits.has3DPreview,
           hasAnalytics: limits.hasAnalytics,
           hasRuleEngine: s.hasRuleEngine,
