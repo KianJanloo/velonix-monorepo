@@ -4,9 +4,10 @@
  */
 
 import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { APP_GUARD } from "@nestjs/core";
+import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { WinstonModule } from "nest-winston";
 import * as winston from "winston";
 import * as path from "path";
@@ -93,23 +94,10 @@ import { SettingsModule } from "./settings/settings.module";
 
     // ── Rate Limiting ────────────────────────────────────────────────────
     ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        throttlers: [
-          {
-            // Global: 200 requests per minute per IP
-            name: "global",
-            ttl: 60_000,
-            limit: 200,
-          },
-          {
-            // Auth: 10 auth attempts per minute
-            name: "auth",
-            ttl: 60_000,
-            limit: 10,
-          },
-        ],
+      useFactory: () => ({
+        // Single always-on limiter (200 req/min/IP). Sensitive routes tighten
+        // this with a per-route @Throttle() override (see auth + uploads).
+        throttlers: [{ name: "default", ttl: 60_000, limit: 200 }],
       }),
     }),
 
@@ -128,6 +116,10 @@ import { SettingsModule } from "./settings/settings.module";
     EventsModule,
     AssetsModule,
     SettingsModule,
+  ],
+  providers: [
+    // Enforce rate limiting globally (the ThrottlerModule above only configures it).
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

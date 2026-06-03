@@ -12,6 +12,7 @@ import {
 } from "@/hooks/useAssets";
 import type { ComponentAsset, AssetKind } from "@velonix/types";
 import { ASSET_KINDS } from "@velonix/types";
+import { ImageUploadField } from "@/components/molecules/ImageUploadField";
 
 const money = (cents: number | null) =>
   cents == null ? "Free" : `$${(cents / 100).toFixed(2)}`;
@@ -380,6 +381,7 @@ function PublishTab({
     kind: AssetKind;
     isFree: boolean;
     priceUsd: number | null;
+    thumbnailUrl: string | null;
   }) => void;
   myAssets: ComponentAsset[];
   onDelete: (id: string) => void;
@@ -389,6 +391,7 @@ function PublishTab({
   const [kind, setKind] = useState<AssetKind>("token");
   const [isFree, setIsFree] = useState(true);
   const [price, setPrice] = useState(199);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   const canPublish = selectionCount > 0 && title.trim().length > 0;
 
@@ -422,6 +425,13 @@ function PublishTab({
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Describe what's included…"
         className="v-input text-sm resize-none h-16"
+      />
+      <ImageUploadField
+        label="Thumbnail (optional)"
+        shape="cover"
+        value={thumbnailUrl}
+        onChange={setThumbnailUrl}
+        hint="Shown on the marketplace card. Max 5MB."
       />
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
@@ -492,6 +502,7 @@ function PublishTab({
             kind,
             isFree,
             priceUsd: isFree ? null : price,
+            thumbnailUrl,
           })
         }
         disabled={!canPublish || creating}

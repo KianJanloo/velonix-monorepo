@@ -5,7 +5,11 @@ import {
 import {
   ApiTags, ApiOperation, ApiBody, ApiResponse, ApiProperty, ApiBearerAuth, ApiExcludeEndpoint,
 } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import { ConfigService } from "@nestjs/config";
+
+// Credential endpoints: 10 attempts per minute per IP (brute-force protection).
+const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
 import { AuthService, type GoogleProfile } from "./auth.service";
 import { RegisterSchema, LoginSchema, type RegisterDto, type LoginDto } from "@velonix/game-engine";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
@@ -79,6 +83,7 @@ export class AuthController {
 
   @Post("register")
   @Version("1")
+  @Throttle(AUTH_THROTTLE)
   @ApiOperation({ summary: "Register a new user account" })
   @ApiBody({ type: RegisterBodyDto })
   @ApiResponse({ status: 201, description: "Account created", type: AuthResponseDto })
@@ -90,6 +95,7 @@ export class AuthController {
 
   @Post("login")
   @Version("1")
+  @Throttle(AUTH_THROTTLE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Sign in with email and password" })
   @ApiBody({ type: LoginBodyDto })
@@ -101,6 +107,7 @@ export class AuthController {
 
   @Post("refresh")
   @Version("1")
+  @Throttle(AUTH_THROTTLE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Exchange a refresh token for a new access + refresh token pair" })
   @ApiBody({ type: RefreshBodyDto })
