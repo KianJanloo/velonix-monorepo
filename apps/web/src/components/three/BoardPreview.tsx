@@ -9,12 +9,19 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
+/** Duration (seconds) of one full cinematic flythrough loop. */
+export const FLYTHROUGH_DURATION = 12;
+
 export interface BoardPreviewProps {
   gameId?: string;
   height?: number;
   disableControls?: boolean;
   gameTitle?: string;
   className?: string;
+  /** Run a scripted cinematic camera path (orbit + dolly) instead of drag-orbit. */
+  flythrough?: boolean;
+  /** Receives the WebGL canvas once mounted — used to record a demo video. */
+  onCanvasReady?: (canvas: HTMLCanvasElement) => void;
 }
 
 export function BoardPreview({
@@ -23,8 +30,13 @@ export function BoardPreview({
   disableControls = false,
   gameTitle,
   className = "",
+  flythrough = false,
+  onCanvasReady,
 }: BoardPreviewProps) {
   const mountRef = useRef<HTMLDivElement>(null);
+  // Read latest callback via ref so it isn't a render-loop dependency.
+  const onCanvasReadyRef = useRef(onCanvasReady);
+  onCanvasReadyRef.current = onCanvasReady;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -42,6 +54,7 @@ export function BoardPreview({
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
     mount.appendChild(renderer.domElement);
+    onCanvasReadyRef.current?.(renderer.domElement);
 
     // ── Scene + Camera ─────────────────────────────────────────────────────
     const scene = new THREE.Scene();
@@ -168,7 +181,7 @@ export function BoardPreview({
       camera.lookAt(0, 0.2, 0);
     }
 
-    if (!disableControls) {
+    if (!disableControls && !flythrough) {
       mount.addEventListener("mousedown", (e) => { isDragging = true; lastX = e.clientX; });
       mount.addEventListener("mouseup", () => { isDragging = false; });
       mount.addEventListener("mousemove", (e) => {
@@ -190,9 +203,22 @@ export function BoardPreview({
       frameId = requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      // Auto-rotate
-      if (!isDragging) { autoRotY += 0.003; theta = autoRotY; }
-      if (!disableControls) updateCamera();
+      if (flythrough) {
+        // Scripted cinematic path: a full orbit while dollying in/out and
+        // tilting, so a recorded clip reads as a polished demo flythrough.
+        const u = (t % FLYTHROUGH_DURATION) / FLYTHROUGH_DURATION;
+        const fTheta = u * Math.PI * 2;
+        const fPhi = 0.62 + 0.26 * Math.sin(u * Math.PI * 2);
+        const fRadius = 7.6 + 2.4 * Math.cos(u * Math.PI * 2);
+        camera.position.x = fRadius * Math.sin(fPhi) * Math.sin(fTheta);
+        camera.position.y = fRadius * Math.cos(fPhi) + 0.3;
+        camera.position.z = fRadius * Math.sin(fPhi) * Math.cos(fTheta);
+        camera.lookAt(0, 0.2, 0);
+      } else {
+        // Auto-rotate
+        if (!isDragging) { autoRotY += 0.003; theta = autoRotY; }
+        if (!disableControls) updateCamera();
+      }
 
       // Floating tokens
       tokens.forEach((tok, i) => {
@@ -220,7 +246,7 @@ export function BoardPreview({
       renderer.dispose();
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
     };
-  }, [disableControls]);
+  }, [disableControls, flythrough]);
 
   return (
     <div className={`relative overflow-hidden rounded-xl ${className}`} style={{ height }} aria-label="3D board game preview">
@@ -240,7 +266,7 @@ export function BoardPreview({
           <p className="font-display text-parchment-light text-lg font-semibold tracking-display drop-shadow-lg">{gameTitle}</p>
         </div>
       )}
-      {!disableControls && (
+      {!disableControls && !flythrough && (
         <div className="absolute bottom-6 right-6 z-20 pointer-events-none">
           <p className="text-soft-gray text-2xs font-ui tracking-wider uppercase opacity-60">Drag to rotate</p>
         </div>

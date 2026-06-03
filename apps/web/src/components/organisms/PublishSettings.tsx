@@ -217,12 +217,21 @@ export function PublishSettings({ gameId }: { gameId: string }) {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 sticky bottom-4">
-            <Button variant="outline" className="flex-1" isLoading={updateGame.isPending} onClick={() => save(false)}>Save Draft</Button>
-            <Button variant="primary" className="flex-1" isLoading={publish.isPending || updateGame.isPending}
-              disabled={game.status === "reviewing"}
-              onClick={() => save(true)}>
-              {game.status === "reviewing" ? "In Review" : "Save & Submit for Review"}
-            </Button>
+            {game.status === "published" ? (
+              // A published game can have its store info edited; changes go live immediately.
+              <Button variant="primary" className="flex-1" isLoading={updateGame.isPending} onClick={() => save(false)}>
+                Save Changes
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" className="flex-1" isLoading={updateGame.isPending} onClick={() => save(false)}>Save Draft</Button>
+                <Button variant="primary" className="flex-1" isLoading={publish.isPending || updateGame.isPending}
+                  disabled={game.status === "reviewing"}
+                  onClick={() => save(true)}>
+                  {game.status === "reviewing" ? "In Review" : "Save & Submit for Review"}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

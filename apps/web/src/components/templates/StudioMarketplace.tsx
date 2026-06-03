@@ -13,6 +13,7 @@ import {
 import type { ComponentAsset, AssetKind } from "@velonix/types";
 import { ASSET_KINDS } from "@velonix/types";
 import { ImageUploadField } from "@/components/molecules/ImageUploadField";
+import { useBundleStore } from "@/stores/bundleStore";
 
 const money = (cents: number | null) =>
   cents == null ? "Free" : `$${(cents / 100).toFixed(2)}`;
@@ -64,6 +65,10 @@ export function StudioMarketplace({
   const acquire = useAcquireAsset();
   const create = useCreateAsset();
   const del = useDeleteAsset();
+
+  const bundleIds = useBundleStore((s) => s.ids);
+  const toggleBundle = useBundleStore((s) => s.toggle);
+  const clearBundle = useBundleStore((s) => s.clear);
 
   const ownedPayload = useMemo(() => {
     const m = new Map<string, unknown[]>();
@@ -221,6 +226,9 @@ export function StudioMarketplace({
                             ? insertOwned(a.id)
                             : getOrInsert(a.id, a.isFree)
                         }
+                        bundlable={!owned && !a.isFree}
+                        inBundle={bundleIds.includes(a.id)}
+                        onToggleBundle={() => toggleBundle(a.id)}
                       />
                     );
                   })}
@@ -270,6 +278,33 @@ export function StudioMarketplace({
             />
           )}
         </div>
+
+        {bundleIds.length > 0 && (
+          <div className="border-t border-warm-wood px-5 py-3 flex items-center gap-3 shrink-0">
+            <span className="text-2xs font-ui text-parchment-mid">
+              <span className="font-bold text-emerald-glow">{bundleIds.length}</span> in bundle
+              {bundleIds.length < 2 && (
+                <span className="text-soft-gray-dark"> · add {2 - bundleIds.length} more to unlock a discount</span>
+              )}
+            </span>
+            <button
+              onClick={clearBundle}
+              className="text-2xs font-ui text-soft-gray-dark hover:text-crimson-flame ml-auto"
+            >
+              Clear
+            </button>
+            <button
+              disabled={bundleIds.length < 2}
+              onClick={() => {
+                router.push("/checkout/bundle");
+                onClose();
+              }}
+              className="px-3 py-1.5 rounded-lg bg-royal-gold text-deep-void text-2xs font-ui font-bold hover:brightness-110 disabled:opacity-40"
+            >
+              Checkout bundle →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -311,6 +346,9 @@ function AssetCard({
   actionLabel,
   busy,
   onAction,
+  bundlable,
+  inBundle,
+  onToggleBundle,
 }: {
   title: string;
   kind: string;
@@ -322,6 +360,9 @@ function AssetCard({
   actionLabel: string;
   busy?: boolean;
   onAction: () => void;
+  bundlable?: boolean;
+  inBundle?: boolean;
+  onToggleBundle?: () => void;
 }) {
   return (
     <div className="v-card p-2.5 flex flex-col gap-2">
@@ -362,6 +403,18 @@ function AssetCard({
           {actionLabel}
         </button>
       </div>
+      {bundlable && (
+        <button
+          onClick={onToggleBundle}
+          className={`w-full py-1 rounded-md text-[10px] font-ui font-semibold transition-colors ${
+            inBundle
+              ? "bg-emerald-ghost text-emerald-glow ring-1 ring-emerald-glow/40"
+              : "bg-warm-wood/40 text-soft-gray hover:text-parchment-light hover:bg-warm-wood"
+          }`}
+        >
+          {inBundle ? "✓ In bundle" : "+ Add to bundle"}
+        </button>
+      )}
     </div>
   );
 }

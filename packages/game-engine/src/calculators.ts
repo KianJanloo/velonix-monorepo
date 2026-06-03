@@ -40,6 +40,28 @@ export function calculateCommission(
 }
 
 /**
+ * Bundle discount tiers — the more paid components a buyer bundles, the bigger
+ * the discount. Shared by the API (authoritative pricing) and the bundle builder
+ * UI (live estimate). Returns a percentage (0–100).
+ */
+export function bundleDiscountRate(itemCount: number): Percentage {
+  if (itemCount >= 5) return 20;
+  if (itemCount >= 3) return 12;
+  if (itemCount >= 2) return 7;
+  return 0;
+}
+
+/** Applies the bundle discount to a subtotal, returning cents. */
+export function calculateBundlePricing(
+  itemPricesUsd: CurrencyAmount[],
+): { subtotal: CurrencyAmount; discount: CurrencyAmount; total: CurrencyAmount; rate: Percentage } {
+  const subtotal = itemPricesUsd.reduce((s, p) => s + p, 0);
+  const rate = bundleDiscountRate(itemPricesUsd.length);
+  const discount = Math.round((subtotal * rate) / 100);
+  return { subtotal, discount, total: subtotal - discount, rate };
+}
+
+/**
  * Calculates the monthly potential earnings for display on the pricing page.
  */
 export function projectMonthlyEarnings(

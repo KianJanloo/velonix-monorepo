@@ -20,6 +20,9 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/dashboard/analytics" className="px-4 py-2 rounded-lg border border-warm-wood-light text-parchment-light text-sm font-ui font-semibold hover:border-emerald-glow/50 hover:text-emerald-glow transition-all">
+              Analytics
+            </Link>
             <Link href="/pricing" className="px-4 py-2 rounded-lg border border-warm-wood-light text-parchment-light text-sm font-ui font-semibold hover:border-royal-gold/50 hover:text-royal-gold transition-all">
               Plans
             </Link>

@@ -40,6 +40,10 @@ export class AssetPurchaseEntity {
   @Column({ name: "stripe_payment_intent_id", type: "varchar", length: 128, nullable: true })
   stripePaymentIntentId!: string | null;
 
+  /** ISO 3166-1 alpha-2 country of the buyer's payment method (for regional sales). */
+  @Column({ name: "country", type: "varchar", length: 2, nullable: true })
+  country!: string | null;
+
   @CreateDateColumn({ name: "created_at", type: "timestamptz" })
   createdAt!: Date;
 }

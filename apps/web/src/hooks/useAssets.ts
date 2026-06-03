@@ -121,3 +121,20 @@ export function usePurchaseAssetIntent() {
     onError: (err) => toast.error(err instanceof ApiError ? err.message : "Could not start checkout."),
   });
 }
+
+export interface BundleIntent {
+  clientSecret: string | null;
+  bundleId: string;
+  subtotal: number;
+  discount: number;
+  total: number;
+  items: { assetId: string; allocatedUsd: number }[];
+}
+
+/** Create a Stripe PaymentIntent for a custom bundle of paid assets. */
+export function useBundleIntent() {
+  return useMutation({
+    mutationFn: (assetIds: string[]) => apiClient.post<BundleIntent>("/payments/bundle/intent", { assetIds }),
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Could not start bundle checkout."),
+  });
+}

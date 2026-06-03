@@ -36,6 +36,7 @@ import { PlansModule } from "./plans/plans.module";
 import { EventsModule } from "./events/events.module";
 import { AssetsModule } from "./assets/assets.module";
 import { SettingsModule } from "./settings/settings.module";
+import { AnalyticsModule } from "./analytics/analytics.module";
 
 @Module({
   imports: [
@@ -116,6 +117,7 @@ import { SettingsModule } from "./settings/settings.module";
     EventsModule,
     AssetsModule,
     SettingsModule,
+    AnalyticsModule,
   ],
   providers: [
     // Enforce rate limiting globally (the ThrottlerModule above only configures it).

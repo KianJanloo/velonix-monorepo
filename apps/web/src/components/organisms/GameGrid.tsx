@@ -129,15 +129,23 @@ function GameRow({
         <Link href={`/studio/${game.id}`}>
           <Button variant="ghost" size="sm">Edit</Button>
         </Link>
+        <Link href={`/studio/${game.id}/demo`}>
+          <Button variant="ghost" size="sm">Demo video</Button>
+        </Link>
         {(game.status === "draft" || game.status === "rejected") && (
           <Link href={`/studio/${game.id}/publish`}>
             <Button variant="primary" size="sm">Publish</Button>
           </Link>
         )}
         {game.status === "published" && (
-          <Link href={`/marketplace/${game.id}`}>
-            <Button variant="ghost" size="sm">View</Button>
-          </Link>
+          <>
+            <Link href={`/studio/${game.id}/publish`}>
+              <Button variant="ghost" size="sm">Edit info</Button>
+            </Link>
+            <Link href={`/marketplace/${game.id}`}>
+              <Button variant="ghost" size="sm">View</Button>
+            </Link>
+          </>
         )}
         <ConfirmDialog
           title="Delete game?"

@@ -5,10 +5,17 @@ import {
 import type { Request as ExpressRequest } from "express";
 import {
   ApiTags, ApiBearerAuth, ApiOperation,
-  ApiParam, ApiResponse, ApiHeader,
+  ApiParam, ApiResponse, ApiHeader, ApiProperty,
 } from "@nestjs/swagger";
+import { IsArray, IsString, ArrayMinSize, ArrayMaxSize } from "class-validator";
 import { PaymentsService } from "./payments.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+
+class CreateBundleDto {
+  @ApiProperty({ type: [String], description: "IDs of the paid component assets to bundle" })
+  @IsArray() @ArrayMinSize(2) @ArrayMaxSize(20) @IsString({ each: true })
+  assetIds!: string[];
+}
 
 @ApiTags("payments")
 @Controller("payments")
@@ -45,6 +52,20 @@ export class PaymentsController {
     @Request() req: { user: { id: string } }
   ) {
     return this.paymentsService.createAssetPurchaseIntent(req.user.id, assetId);
+  }
+
+  @Post("bundle/intent")
+  @Version("1")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("JWT")
+  @ApiOperation({ summary: "Create a PaymentIntent for a custom bundle of paid component assets" })
+  @ApiResponse({ status: 201, description: "PaymentIntent client secret + bundle pricing breakdown" })
+  @ApiResponse({ status: 400, description: "Invalid bundle (too few items, free/owned items, etc.)" })
+  createBundleIntent(
+    @Body() body: CreateBundleDto,
+    @Request() req: { user: { id: string } },
+  ) {
+    return this.paymentsService.createBundleIntent(req.user.id, body.assetIds);
   }
 
   @Post("connect/onboard")
