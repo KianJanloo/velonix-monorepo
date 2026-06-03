@@ -67,6 +67,8 @@ export interface SubscriptionLimits {
   commissionRate: Percentage; // Velonix's cut
   hasAnalytics: boolean;
   has3DPreview: boolean;
+  /** Auto-generated 3D demo-video flythrough of the board. */
+  hasDemoVideo: boolean;
   hasCustomDomain: boolean;
   hasTeamCollaboration: boolean;
   /** Max collaborators a creator can invite *per game* (excludes the owner). 0 = none. */
@@ -83,6 +85,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     commissionRate: 25,
     hasAnalytics: false,
     has3DPreview: false,
+    hasDemoVideo: false,
     hasCustomDomain: false,
     hasTeamCollaboration: false,
     maxCollaborators: 0,
@@ -96,6 +99,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     commissionRate: 20,
     hasAnalytics: false,
     has3DPreview: true,
+    hasDemoVideo: false,
     hasCustomDomain: false,
     hasTeamCollaboration: false,
     maxCollaborators: 0,
@@ -109,6 +113,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     commissionRate: 17,
     hasAnalytics: true,
     has3DPreview: true,
+    hasDemoVideo: true,
     hasCustomDomain: false,
     hasTeamCollaboration: true,
     maxCollaborators: 3,
@@ -122,6 +127,7 @@ export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> =
     commissionRate: 15,
     hasAnalytics: true,
     has3DPreview: true,
+    hasDemoVideo: true,
     hasCustomDomain: true,
     hasTeamCollaboration: true,
     maxCollaborators: 10,

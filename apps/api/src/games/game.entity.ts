@@ -52,6 +52,10 @@ export class GameEntity {
   @Column({ name: "thumbnail_url", type: "varchar", length: 512, nullable: true })
   thumbnailUrl!: string | null;
 
+  /** URL of the auto-generated 3D demo-video flythrough (.webm). */
+  @Column({ name: "demo_video_url", type: "varchar", length: 512, nullable: true })
+  demoVideoUrl!: string | null;
+
   @Column({ name: "preview_images", type: "jsonb", default: [] })
   previewImages!: string[];
 

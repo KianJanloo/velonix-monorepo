@@ -124,6 +124,15 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
               )}
             </div>
 
+            {/* 3D demo video */}
+            {game.demoVideoUrl && (
+              <div>
+                <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-1.5">3D demo flythrough</p>
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <video src={game.demoVideoUrl} controls loop playsInline className="w-full rounded-2xl border border-warm-wood" />
+              </div>
+            )}
+
             {/* Preview images */}
             {game.previewImages?.length > 0 && (
               <div className="grid grid-cols-3 gap-3">

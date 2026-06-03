@@ -14,6 +14,7 @@ export interface PlanConfig {
   maxProjects: number | null;
   maxPagesPerProject: number | null;
   has3DPreview: boolean;
+  hasDemoVideo: boolean;
   hasAnalytics: boolean;
   hasRuleEngine: boolean;
   hasPrioritySupport: boolean;

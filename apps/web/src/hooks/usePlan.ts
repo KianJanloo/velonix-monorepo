@@ -21,6 +21,7 @@ export function usePlan() {
         maxPagesPerProject: config.maxPagesPerProject,
         commissionRate: config.commissionRate,
         has3DPreview: config.has3DPreview,
+        hasDemoVideo: config.hasDemoVideo,
         hasAnalytics: config.hasAnalytics,
         hasPrioritySupport: config.hasPrioritySupport,
       }
@@ -32,6 +33,7 @@ export function usePlan() {
     limits,
     hasAnalytics: limits.hasAnalytics,
     has3DPreview: limits.has3DPreview,
+    hasDemoVideo: limits.hasDemoVideo,
     hasCustomDomain: limits.hasCustomDomain,
     hasTeamCollaboration: limits.hasTeamCollaboration,
     hasPrioritySupport: limits.hasPrioritySupport,

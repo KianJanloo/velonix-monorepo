@@ -72,6 +72,7 @@ function PlanEditor({ plan }: { plan: PlanConfig }) {
         <div className="border-t border-warm-wood pt-2">
           <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider mb-1">Feature access</p>
           {toggle("3D Preview", "has3DPreview")}
+          {toggle("3D Demo Video", "hasDemoVideo")}
           {toggle("Analytics", "hasAnalytics")}
           {toggle("Rule Engine", "hasRuleEngine")}
           {toggle("Priority Support", "hasPrioritySupport")}

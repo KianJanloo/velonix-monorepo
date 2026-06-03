@@ -8,6 +8,7 @@ export interface GameRecord {
   description: string;
   shortDescription: string;
   thumbnailUrl: string | null;
+  demoVideoUrl: string | null;
   previewImages: string[];
   category: GameCategory;
   tags: string[];

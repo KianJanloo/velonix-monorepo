@@ -51,6 +51,7 @@ export class PlansService implements OnApplicationBootstrap {
           maxProjects: limits.maxProjects,
           maxPagesPerProject: limits.maxPagesPerProject,
           has3DPreview: limits.has3DPreview,
+          hasDemoVideo: limits.hasDemoVideo,
           hasAnalytics: limits.hasAnalytics,
           hasRuleEngine: s.hasRuleEngine,
           hasPrioritySupport: limits.hasPrioritySupport,

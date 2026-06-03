@@ -37,6 +37,9 @@ export class PlanConfigEntity {
   @Column({ name: "has_3d_preview", default: false })
   has3DPreview!: boolean;
 
+  @Column({ name: "has_demo_video", default: false })
+  hasDemoVideo!: boolean;
+
   @Column({ name: "has_analytics", default: false })
   hasAnalytics!: boolean;
 
