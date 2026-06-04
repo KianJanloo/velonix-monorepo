@@ -11,6 +11,7 @@ import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { WinstonModule } from "nest-winston";
 import * as winston from "winston";
 import { mkdirSync } from "fs";
+import * as os from "os";
 import * as path from "path";
 
 import { DatabaseConfig } from "./config/database.config";
@@ -23,19 +24,27 @@ import {
   storageConfig,
 } from "./config/app.config";
 
-const logDir = path.resolve(process.cwd(), "logs");
-const loggerTransports: winston.transport[] = [new winston.transports.Console()];
-if (process.env["NODE_ENV"] === "production") {
-  try {
-    mkdirSync(logDir, { recursive: true });
-  } catch (err) {
-    console.warn(`Could not create logs directory: ${err}`);
-  }
+const defaultLogDir = path.resolve(process.cwd(), "logs");
+const fallbackLogDir = path.join(os.tmpdir(), "logs");
 
+function ensureLogDirectory(dir: string): string | null {
+  try {
+    mkdirSync(dir, { recursive: true });
+    return dir;
+  } catch {
+    return null;
+  }
+}
+
+const writableLogDir = ensureLogDirectory(defaultLogDir) ?? ensureLogDirectory(fallbackLogDir);
+const loggerTransports: winston.transport[] = [new winston.transports.Console()];
+if (process.env["NODE_ENV"] === "production" && writableLogDir) {
   loggerTransports.push(
-    new winston.transports.File({ dirname: logDir, filename: "error.log" }),
-    new winston.transports.File({ dirname: logDir, filename: "combined.log" }),
+    new winston.transports.File({ dirname: writableLogDir, filename: "error.log" }),
+    new winston.transports.File({ dirname: writableLogDir, filename: "combined.log" }),
   );
+} else if (process.env["NODE_ENV"] === "production") {
+  console.warn("Production file logging disabled because no writable log directory is available.");
 }
 
 import { AuthModule } from "./auth/auth.module";
