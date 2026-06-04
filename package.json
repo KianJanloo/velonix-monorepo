@@ -8,7 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm --filter @velonix/api... build",
+    "build": "turbo run build",
+    "build:api": "pnpm --filter @velonix/api... build",
     "dev": "turbo run dev --parallel",
     "dev:web": "turbo run dev --filter=@velonix/web",
     "dev:api": "turbo run dev --filter=@velonix/api",
