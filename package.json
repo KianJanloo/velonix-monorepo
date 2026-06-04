@@ -19,7 +19,7 @@
     "test:e2e": "turbo run test:e2e",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') { require('child_process').execSync('husky install', {stdio: 'inherit'}) }\"",
+    "prepare": "husky install",
     "db:migrate": "turbo run db:migrate --filter=@velonix/api",
     "db:seed": "turbo run db:seed --filter=@velonix/api",
     "db:studio": "turbo run db:studio --filter=@velonix/api"
