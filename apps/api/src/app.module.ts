@@ -31,7 +31,7 @@ import { PaymentsModule } from "./payments/payments.module";
 import { AdminModule } from "./admin/admin.module";
 import { BlogModule } from "./blog/blog.module";
 import { NotificationsModule } from "./notifications/notifications.module";
-import { UploadsModule } from "./uploads/uploads.module";
+import { UploadsModule } from "./uploadsModule/uploads.module";
 import { PlansModule } from "./plans/plans.module";
 import { EventsModule } from "./events/events.module";
 import { AssetsModule } from "./assets/assets.module";
