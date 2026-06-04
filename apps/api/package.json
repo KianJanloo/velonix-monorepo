@@ -32,6 +32,7 @@
     "@nestjs/throttler": "^6.3.0",
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.4.15",
+    "@nestjs/cli": "^10.4.9",
     "@velonix/game-engine": "workspace:*",
     "@velonix/types": "workspace:*",
     "aws-sdk": "^2.1692.0",
@@ -60,7 +61,6 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.9",
     "@nestjs/schematics": "^10.2.3",
     "@nestjs/testing": "^10.4.15",
     "@types/bcryptjs": "^2.4.6",
