@@ -9,7 +9,7 @@ import {
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { EventsService } from "./events.service";
-import type { PromoEventVariant, PromoEventPlacement } from "@velonix/types";
+import type { PromoEventVariant, PromoEventPlacement } from "@velonix/types/src";
 
 const VARIANTS: PromoEventVariant[] = ["promo", "sale", "info", "warning"];
 const PLACEMENTS: PromoEventPlacement[] = ["global", "landing", "marketplace"];

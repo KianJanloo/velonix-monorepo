@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { UserEntity } from "./user.entity";
 import { GameEntity } from "../games/game.entity";
-import type { UpdateProfileDto } from "@velonix/game-engine";
+import type { UpdateProfileDto } from "@velonix/game-engine/src";
 
 @Injectable()
 export class UsersService {

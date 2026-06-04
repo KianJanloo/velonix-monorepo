@@ -6,9 +6,9 @@ import { Repository, FindManyOptions, ILike, In } from "typeorm";
 import { GameEntity } from "../games/game.entity";
 import { ReviewEntity } from "./review.entity";
 import { PurchaseEntity } from "./purchase.entity";
-import { calculateCommission } from "@velonix/game-engine";
-import type { MarketplaceFiltersDto, CreateReviewDto } from "@velonix/game-engine";
-import type { SubscriptionTier } from "@velonix/types";
+import { calculateCommission } from "@velonix/game-engine/src";
+import type { MarketplaceFiltersDto, CreateReviewDto } from "@velonix/game-engine/src";
+import type { SubscriptionTier } from "@velonix/types/src";
 import { NotificationsService } from "../notifications/notifications.service";
 
 @Injectable()

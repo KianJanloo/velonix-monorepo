@@ -19,7 +19,7 @@ import type {
   GameCategory,
   GameComplexity,
   PlayerCountRange,
-} from "@velonix/types";
+} from "@velonix/types/src";
 import { UserEntity } from "../users/user.entity";
 
 @Entity("games")

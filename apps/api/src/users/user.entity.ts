@@ -15,7 +15,7 @@ import {
   BeforeUpdate,
 } from "typeorm";
 import * as bcrypt from "bcryptjs";
-import type { UserRole, SubscriptionTier } from "@velonix/types";
+import type { UserRole, SubscriptionTier } from "@velonix/types/src";
 
 @Entity("users")
 export class UserEntity {

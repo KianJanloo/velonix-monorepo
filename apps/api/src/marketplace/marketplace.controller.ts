@@ -12,7 +12,7 @@ import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
 import {
   MarketplaceFiltersSchema, CreateReviewSchema,
   type MarketplaceFiltersDto, type CreateReviewDto
-} from "@velonix/game-engine";
+} from "@velonix/game-engine/src";
 
 // ── Swagger DTO shapes ────────────────────────────────────────────────────────
 

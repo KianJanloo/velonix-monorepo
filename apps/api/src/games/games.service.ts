@@ -4,10 +4,10 @@ import { Repository, In } from "typeorm";
 import { GameEntity } from "./game.entity";
 import { UserEntity } from "../users/user.entity";
 import { CollaboratorsService } from "./collaborators.service";
-import { createStarterGameData, suggestGamePrice } from "@velonix/game-engine";
-import { SUBSCRIPTION_LIMITS } from "@velonix/types";
-import type { SubscriptionTier } from "@velonix/types";
-import type { CreateGameDto, UpdateGameDto } from "@velonix/game-engine";
+import { createStarterGameData, suggestGamePrice } from "@velonix/game-engine/src";
+import { SUBSCRIPTION_LIMITS } from "@velonix/types/src";
+import type { SubscriptionTier } from "@velonix/types/src";
+import type { CreateGameDto, UpdateGameDto } from "@velonix/game-engine/src";
 
 @Injectable()
 export class GamesService {

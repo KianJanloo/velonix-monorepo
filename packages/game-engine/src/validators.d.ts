@@ -26,7 +26,7 @@ export declare const CreateGameSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     title: string;
     description: string;
     shortDescription: string;
-    category: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other";
+    category: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia";
     tags: string[];
     playerCountMin: number;
     playerCountMax: number;
@@ -39,7 +39,7 @@ export declare const CreateGameSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     title: string;
     description: string;
     shortDescription: string;
-    category: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other";
+    category: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia";
     playerCountMin: number;
     playerCountMax: number;
     playtimeMin: number;
@@ -52,7 +52,7 @@ export declare const CreateGameSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     title: string;
     description: string;
     shortDescription: string;
-    category: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other";
+    category: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia";
     tags: string[];
     playerCountMin: number;
     playerCountMax: number;
@@ -65,7 +65,7 @@ export declare const CreateGameSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     title: string;
     description: string;
     shortDescription: string;
-    category: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other";
+    category: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia";
     playerCountMin: number;
     playerCountMax: number;
     playtimeMin: number;
@@ -78,7 +78,7 @@ export declare const CreateGameSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     title: string;
     description: string;
     shortDescription: string;
-    category: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other";
+    category: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia";
     tags: string[];
     playerCountMin: number;
     playerCountMax: number;
@@ -91,7 +91,7 @@ export declare const CreateGameSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     title: string;
     description: string;
     shortDescription: string;
-    category: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other";
+    category: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia";
     playerCountMin: number;
     playerCountMax: number;
     playtimeMin: number;
@@ -114,11 +114,18 @@ export declare const UpdateGameSchema: z.ZodObject<{
     complexity: z.ZodOptional<z.ZodEnum<["light", "medium", "medium_heavy", "heavy"]>>;
     minAge: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
     language: z.ZodOptional<z.ZodDefault<z.ZodString>>;
+} & {
+    studioData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+    thumbnailUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    demoVideoUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    isFree: z.ZodOptional<z.ZodBoolean>;
+    priceUsd: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    hasTrial: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     title?: string | undefined;
     description?: string | undefined;
     shortDescription?: string | undefined;
-    category?: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other" | undefined;
+    category?: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | undefined;
     tags?: string[] | undefined;
     playerCountMin?: number | undefined;
     playerCountMax?: number | undefined;
@@ -127,11 +134,17 @@ export declare const UpdateGameSchema: z.ZodObject<{
     complexity?: "light" | "medium" | "medium_heavy" | "heavy" | undefined;
     minAge?: number | undefined;
     language?: string | undefined;
+    studioData?: Record<string, unknown> | undefined;
+    thumbnailUrl?: string | null | undefined;
+    demoVideoUrl?: string | null | undefined;
+    isFree?: boolean | undefined;
+    priceUsd?: number | null | undefined;
+    hasTrial?: boolean | undefined;
 }, {
     title?: string | undefined;
     description?: string | undefined;
     shortDescription?: string | undefined;
-    category?: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other" | undefined;
+    category?: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | undefined;
     tags?: string[] | undefined;
     playerCountMin?: number | undefined;
     playerCountMax?: number | undefined;
@@ -140,6 +153,12 @@ export declare const UpdateGameSchema: z.ZodObject<{
     complexity?: "light" | "medium" | "medium_heavy" | "heavy" | undefined;
     minAge?: number | undefined;
     language?: string | undefined;
+    studioData?: Record<string, unknown> | undefined;
+    thumbnailUrl?: string | null | undefined;
+    demoVideoUrl?: string | null | undefined;
+    isFree?: boolean | undefined;
+    priceUsd?: number | null | undefined;
+    hasTrial?: boolean | undefined;
 }>;
 export declare const SetGamePricingSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     isFree: z.ZodBoolean;
@@ -179,14 +198,14 @@ export declare const CreateComponentSchema: z.ZodObject<{
     height: z.ZodNumber;
     quantity: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    type: "board" | "card" | "token" | "tile" | "die" | "pawn" | "rulebook" | "custom";
+    type: "token" | "board" | "card" | "tile" | "die" | "pawn" | "rulebook" | "custom";
     name: string;
     gameId: string;
     width: number;
     height: number;
     quantity: number;
 }, {
-    type: "board" | "card" | "token" | "tile" | "die" | "pawn" | "rulebook" | "custom";
+    type: "token" | "board" | "card" | "tile" | "die" | "pawn" | "rulebook" | "custom";
     name: string;
     gameId: string;
     width: number;
@@ -225,11 +244,14 @@ export declare const LoginSchema: z.ZodObject<{
 export declare const UpdateProfileSchema: z.ZodObject<{
     displayName: z.ZodOptional<z.ZodString>;
     bio: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    avatarUrl: z.ZodUnion<[z.ZodOptional<z.ZodNullable<z.ZodString>>, z.ZodLiteral<"">]>;
 }, "strip", z.ZodTypeAny, {
     displayName?: string | undefined;
+    avatarUrl?: string | null | undefined;
     bio?: string | null | undefined;
 }, {
     displayName?: string | undefined;
+    avatarUrl?: string | null | undefined;
     bio?: string | null | undefined;
 }>;
 export declare const MarketplaceFiltersSchema: z.ZodObject<{
@@ -250,7 +272,7 @@ export declare const MarketplaceFiltersSchema: z.ZodObject<{
     page: number;
     perPage: number;
     search?: string | undefined;
-    category?: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other" | undefined;
+    category?: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | undefined;
     tags?: string[] | undefined;
     complexity?: "light" | "medium" | "medium_heavy" | "heavy" | undefined;
     isFree?: boolean | undefined;
@@ -261,7 +283,7 @@ export declare const MarketplaceFiltersSchema: z.ZodObject<{
 }, {
     sort?: "newest" | "popular" | "top_rated" | "price_asc" | "price_desc" | "most_sold" | undefined;
     search?: string | undefined;
-    category?: "family" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "other" | undefined;
+    category?: "family" | "other" | "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | undefined;
     tags?: string[] | undefined;
     complexity?: "light" | "medium" | "medium_heavy" | "heavy" | undefined;
     isFree?: boolean | undefined;

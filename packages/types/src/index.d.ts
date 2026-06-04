@@ -41,13 +41,19 @@ export type UserRole = "user" | "creator" | "admin";
 export type SubscriptionTier = "free" | "creator" | "pro" | "studio";
 export interface SubscriptionLimits {
     maxProjects: number | null;
+    /** Max design pages (canvases) per game project. null = unlimited. */
+    maxPagesPerProject: number | null;
     maxComponentsPerProject: number | null;
     maxStorageGb: number;
     commissionRate: Percentage;
     hasAnalytics: boolean;
     has3DPreview: boolean;
+    /** Auto-generated 3D demo-video flythrough of the board. */
+    hasDemoVideo: boolean;
     hasCustomDomain: boolean;
     hasTeamCollaboration: boolean;
+    /** Max collaborators a creator can invite *per game* (excludes the owner). 0 = none. */
+    maxCollaborators: number;
     hasPrioritySupport: boolean;
 }
 export declare const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits>;
@@ -78,6 +84,59 @@ export interface UserPublicProfile {
     subscriptionTier: SubscriptionTier;
     totalSales: number;
     createdAt: ISODateString;
+}
+export type AssetKind = "token" | "board" | "card" | "tile" | "piece" | "pack" | "other";
+export declare const ASSET_KINDS: AssetKind[];
+/** Public listing shape (no payload — the buyable component data is gated). */
+export interface ComponentAssetSummary {
+    id: ID;
+    authorId: ID;
+    authorUsername: string;
+    title: string;
+    description: string;
+    kind: AssetKind;
+    thumbnailUrl: Nullable<string>;
+    isFree: boolean;
+    priceUsd: Nullable<CurrencyAmount>;
+    componentCount: number;
+    totalPurchases: number;
+    averageRating: Nullable<number>;
+    createdAt: ISODateString;
+    /** Whether the requesting user already owns / authored it (when authenticated). */
+    owned?: boolean;
+}
+/** Full asset incl. the component payload — only returned when free/owned/author. */
+export interface ComponentAsset extends ComponentAssetSummary {
+    /** Array of studio component definitions (CanvasComp-shaped). */
+    payload: unknown[];
+}
+export type PromoEventVariant = "promo" | "sale" | "info" | "warning";
+export type PromoEventPlacement = "global" | "landing" | "marketplace";
+export interface PromoEvent {
+    id: ID;
+    title: string;
+    message: string;
+    ctaLabel: Nullable<string>;
+    ctaUrl: Nullable<string>;
+    variant: PromoEventVariant;
+    placement: PromoEventPlacement;
+    isActive: boolean;
+    dismissible: boolean;
+    priority: number;
+    startsAt: Nullable<ISODateString>;
+    endsAt: Nullable<ISODateString>;
+    createdAt: ISODateString;
+    updatedAt: ISODateString;
+}
+export type CollaboratorRole = "editor" | "viewer";
+export interface GameCollaborator {
+    id: ID;
+    gameId: ID;
+    userId: ID;
+    role: CollaboratorRole;
+    invitedById: ID;
+    createdAt: ISODateString;
+    user?: UserPublicProfile;
 }
 export type GameStatus = "draft" | "reviewing" | "published" | "unpublished" | "rejected";
 export type GameCategory = "strategy" | "party" | "cooperative" | "deck_building" | "worker_placement" | "euro" | "ameritrash" | "abstract" | "rpg" | "trivia" | "family" | "other";

@@ -11,7 +11,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne,
   JoinColumn, CreateDateColumn, UpdateDateColumn, Index,
 } from "typeorm";
-import type { AssetKind } from "@velonix/types";
+import type { AssetKind } from "@velonix/types/src";
 import { UserEntity } from "../users/user.entity";
 
 @Entity("component_assets")
