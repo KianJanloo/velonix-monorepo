@@ -10,6 +10,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { WinstonModule } from "nest-winston";
 import * as winston from "winston";
+import { mkdirSync } from "fs";
 import * as path from "path";
 
 import { DatabaseConfig } from "./config/database.config";
@@ -21,6 +22,21 @@ import {
   stripeConfig,
   storageConfig,
 } from "./config/app.config";
+
+const logDir = path.resolve(process.cwd(), "logs");
+const loggerTransports: winston.transport[] = [new winston.transports.Console()];
+if (process.env["NODE_ENV"] === "production") {
+  try {
+    mkdirSync(logDir, { recursive: true });
+  } catch (err) {
+    console.warn(`Could not create logs directory: ${err}`);
+  }
+
+  loggerTransports.push(
+    new winston.transports.File({ dirname: logDir, filename: "error.log" }),
+    new winston.transports.File({ dirname: logDir, filename: "combined.log" }),
+  );
+}
 
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
@@ -71,21 +87,7 @@ import { AnalyticsModule } from "./analytics/analytics.module";
           return `${timestamp} [${(context as string) ?? "App"}] ${level}: ${message}`;
         }),
       ),
-      transports: [
-        new winston.transports.Console(),
-        // Production: add file transport or CloudWatch transport
-        ...(process.env["NODE_ENV"] === "production"
-          ? [
-              new winston.transports.File({
-                filename: "logs/error.log",
-                // level: "error",
-              }),
-              new winston.transports.File({
-                filename: "logs/combined.log",
-              }),
-            ]
-          : []),
-      ],
+      transports: loggerTransports,
     }),
 
     // ── Database ─────────────────────────────────────────────────────────
