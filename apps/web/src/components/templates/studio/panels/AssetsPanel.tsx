@@ -2,6 +2,8 @@
 
 import { useRef } from "react";
 
+import Image from "next/image";
+
 import { useImageUpload } from "@/hooks/useUpload";
 
 interface AssetsPanelProps {
@@ -128,15 +130,9 @@ export function AssetsPanel({
                       ? "Apply to selected component"
                       : "Select a component first"
                   }
-                  className={`w-full h-full rounded-lg overflow-hidden border transition-all disabled:cursor-not-allowed ${active ? "border-emerald-glow ring-1 ring-emerald-glow" : "border-warm-wood hover:border-emerald-glow/50"}`}
+                  className={`relative w-full h-full rounded-lg overflow-hidden border transition-all disabled:cursor-not-allowed ${active ? "border-emerald-glow ring-1 ring-emerald-glow" : "border-warm-wood hover:border-emerald-glow/50"}`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-
-                  <img
-                    src={url}
-                    alt="asset"
-                    className="w-full h-full object-cover"
-                  />
+                  <Image src={url} alt="asset" fill unoptimized className="object-cover" />
                 </button>
 
                 {active && (

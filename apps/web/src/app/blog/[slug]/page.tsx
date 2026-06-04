@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { useBlogPost } from "@/hooks/useBlog";
 import { ApiError } from "@/lib/apiClient";
@@ -69,8 +70,13 @@ export default function BlogPostPage({ params }: PostPageProps) {
 
         {/* Cover */}
         {post.coverImageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.coverImageUrl} alt={post.title} className="w-full rounded-xl mb-8 border border-warm-wood" />
+          <Image
+            src={post.coverImageUrl}
+            alt={post.title}
+            width={1200}
+            height={630}
+            className="w-full h-auto rounded-xl mb-8 border border-warm-wood"
+          />
         )}
 
         {/* Content */}

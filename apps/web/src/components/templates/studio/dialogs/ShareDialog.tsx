@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import Link from "next/link";
+import Image from "next/image";
 
 import {
   useCollaborators,
@@ -33,17 +34,11 @@ export function PresenceAvatar({ member }: { member: PresenceMember }) {
 
   return (
     <div
-      className={`w-6 h-6 rounded-full bg-warm-wood border border-rich-wood-dark ring-1 ${ring} overflow-hidden flex items-center justify-center text-[9px] font-ui font-bold text-parchment-light z-10`}
+      className={`relative w-6 h-6 rounded-full bg-warm-wood border border-rich-wood-dark ring-1 ${ring} overflow-hidden flex items-center justify-center text-[9px] font-ui font-bold text-parchment-light z-10`}
       title={`${member.displayName} · ${member.role}`}
     >
       {member.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-
-        <img
-          src={member.avatarUrl}
-          alt={member.displayName}
-          className="w-full h-full object-cover"
-        />
+        <Image src={member.avatarUrl} alt={member.displayName} fill className="object-cover" />
       ) : (
         initials
       )}
@@ -189,15 +184,9 @@ export function ShareDialog({
           ) : (
             collaborators.map((c) => (
               <div key={c.id} className="flex items-center gap-2.5 py-1.5">
-                <div className="w-8 h-8 rounded-full bg-warm-wood overflow-hidden flex items-center justify-center text-2xs font-ui font-bold text-parchment-light shrink-0">
+                <div className="relative w-8 h-8 rounded-full bg-warm-wood overflow-hidden flex items-center justify-center text-2xs font-ui font-bold text-parchment-light shrink-0">
                   {c.user?.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-
-                    <img
-                      src={c.user.avatarUrl}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
+                    <Image src={c.user.avatarUrl} alt="" fill className="object-cover" />
                   ) : (
                     (c.user?.displayName ?? "?").slice(0, 2).toUpperCase()
                   )}

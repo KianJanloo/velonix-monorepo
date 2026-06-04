@@ -141,7 +141,6 @@ export default function PricingPage() {
           </h2>
           <div className="space-y-4">
             {[
-              { q: "Can I switch plans at any time?", a: "Yes. You can upgrade or downgrade your plan at any time. Changes take effect immediately for upgrades and at the end of your billing cycle for downgrades." },
               { q: "What is the commission rate?", a: "Commission is Velonix's platform cut from each marketplace sale. Free tier is 22%, Creator 17%, Pro 12%, Studio 8%. You always keep the rest." },
               { q: "Do you offer refunds?", 
                 // a: "We offer a 14-day money-back guarantee on all paid plans. Contact support within 14 days of your purchase and we'll refund in full, no questions asked."

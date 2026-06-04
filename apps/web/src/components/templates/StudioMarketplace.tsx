@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   useAssetMarketplace,
@@ -366,14 +367,9 @@ function AssetCard({
 }) {
   return (
     <div className="v-card p-2.5 flex flex-col gap-2">
-      <div className="aspect-[4/3] rounded-lg bg-felt-dark border border-warm-wood overflow-hidden flex items-center justify-center">
+      <div className="relative aspect-[4/3] rounded-lg bg-felt-dark border border-warm-wood overflow-hidden flex items-center justify-center">
         {thumbnailUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={thumbnailUrl}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
+          <Image src={thumbnailUrl} alt={title} fill className="object-cover" />
         ) : (
           <span className="text-3xl text-soft-gray-dark">
             {KIND_GLYPH[kind] ?? "◆"}

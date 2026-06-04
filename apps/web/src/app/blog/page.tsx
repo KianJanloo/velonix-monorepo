@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useBlogPosts } from "@/hooks/useBlog";
 
 export default function BlogPage() {
@@ -59,8 +60,7 @@ export default function BlogPage() {
                 {/* Cover */}
                 <div className="relative h-40 bg-felt-dark overflow-hidden flex items-center justify-center">
                   {post.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={post.coverImageUrl} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <Image src={post.coverImageUrl} alt={post.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                   ) : (
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="opacity-20">
                       <polyline points="4,9 20,31 36,9" fill="none" stroke="#f5c451" strokeWidth="3" />

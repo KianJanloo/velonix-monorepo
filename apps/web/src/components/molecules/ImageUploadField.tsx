@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { useImageUpload } from "@/hooks/useUpload";
 
 interface ImageUploadFieldProps {
@@ -34,10 +35,9 @@ export function ImageUploadField({ value, onChange, label, shape = "cover", hint
       {label && <span className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider block mb-1.5">{label}</span>}
       <div className={shape === "avatar" ? "flex items-center gap-4" : "space-y-2"}>
         {/* Preview */}
-        <div className={`${previewClass} bg-warm-wood/40 border border-warm-wood overflow-hidden flex items-center justify-center shrink-0`}>
+        <div className={`relative ${previewClass} bg-warm-wood/40 border border-warm-wood overflow-hidden flex items-center justify-center shrink-0`}>
           {value ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={value} alt="preview" className="w-full h-full object-cover" />
+            <Image src={value} alt="preview" fill unoptimized className="object-cover" />
           ) : (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-warm-wood-light">
               <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.3"/>

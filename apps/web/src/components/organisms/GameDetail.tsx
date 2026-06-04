@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { toast } from "sonner";
 import { useGame, useGameReviews, useCreateReview, usePurchaseGame } from "@/hooks/useGames";
 import { useCurrentUser } from "@/hooks/useAuth";
@@ -117,8 +118,7 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
             {/* Hero image */}
             <div className="relative h-56 sm:h-72 rounded-2xl overflow-hidden bg-felt-dark border border-warm-wood flex items-center justify-center">
               {game.thumbnailUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={game.thumbnailUrl} alt={game.title} className="w-full h-full object-cover" />
+                <Image src={game.thumbnailUrl} alt={game.title} fill className="object-cover" />
               ) : (
                 <svg width="64" height="64" viewBox="0 0 80 80" fill="none" className="opacity-20"><polyline points="8,18 40,62 72,18" fill="none" stroke="#f5c451" strokeWidth="5"/></svg>
               )}
@@ -137,8 +137,9 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
             {game.previewImages?.length > 0 && (
               <div className="grid grid-cols-3 gap-3">
                 {game.previewImages.slice(0, 6).map((src, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={i} src={src} alt={`preview ${i + 1}`} className="rounded-lg border border-warm-wood object-cover h-24 w-full" />
+                  <div key={i} className="relative h-24 w-full rounded-lg border border-warm-wood overflow-hidden">
+                    <Image src={src} alt={`preview ${i + 1}`} fill className="object-cover" />
+                  </div>
                 ))}
               </div>
             )}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
 import { useMyGames, useDeleteGame } from "@/hooks/useGames";
@@ -88,10 +89,9 @@ function GameRow({
     <div className="v-card flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 hover:border-warm-wood-light">
       {/* Thumbnail + info */}
       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-felt-dark border border-warm-wood shrink-0 flex items-center justify-center overflow-hidden">
+        <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-felt-dark border border-warm-wood shrink-0 flex items-center justify-center overflow-hidden">
           {game.thumbnailUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={game.thumbnailUrl} alt={game.title} className="w-full h-full object-cover" />
+            <Image src={game.thumbnailUrl} alt={game.title} fill className="object-cover" />
           ) : (
             <span className="font-display text-royal-gold text-xl font-bold opacity-40">
               {game.title[0]}

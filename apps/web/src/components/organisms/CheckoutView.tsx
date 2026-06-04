@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Elements,
@@ -223,10 +224,9 @@ export function CheckoutView({ gameId }: { gameId: string }) {
           <div className="v-card p-6 lg:sticky lg:top-20">
             <h2 className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider mb-4">Order summary</h2>
             <div className="flex gap-3 mb-4">
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-felt-dark border border-warm-wood shrink-0 flex items-center justify-center">
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-felt-dark border border-warm-wood shrink-0 flex items-center justify-center">
                 {game.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={game.thumbnailUrl} alt={game.title} className="w-full h-full object-cover" />
+                  <Image src={game.thumbnailUrl} alt={game.title} fill className="object-cover" />
                 ) : (
                   <svg width="24" height="24" viewBox="0 0 80 80" fill="none" className="opacity-20"><polyline points="8,18 40,62 72,18" fill="none" stroke="#f5c451" strokeWidth="6"/></svg>
                 )}

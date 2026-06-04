@@ -1,6 +1,7 @@
 "use client";
 
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { GameCard } from "@/components/molecules/GameCard";
 import { usePublicProfile } from "@/hooks/useProfile";
 import { ApiError } from "@/lib/apiClient";
@@ -37,10 +38,9 @@ export function ProfileView({ username }: { username: string }) {
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="v-card p-8 mb-8 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-          <div className="w-20 h-20 rounded-full bg-warm-wood border-2 border-royal-gold/30 flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="relative w-20 h-20 rounded-full bg-warm-wood border-2 border-royal-gold/30 flex items-center justify-center shrink-0 overflow-hidden">
             {profile.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatarUrl} alt={profile.displayName} className="w-full h-full object-cover" />
+              <Image src={profile.avatarUrl} alt={profile.displayName} fill className="object-cover" />
             ) : (
               <span className="font-display text-2xl text-royal-gold font-bold">
                 {profile.displayName[0]?.toUpperCase() ?? "V"}
