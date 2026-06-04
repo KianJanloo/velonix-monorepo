@@ -4,8 +4,8 @@ import { Repository } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import Stripe from "stripe";
 import { UserEntity } from "../users/user.entity";
-import { SUBSCRIPTION_LIMITS } from "@velonix/types/src";
-import type { SubscriptionTier } from "@velonix/types/src";
+import { SUBSCRIPTION_LIMITS } from "@velonix/types";
+import type { SubscriptionTier } from "@velonix/types";
 
 type BillingInterval = "monthly" | "yearly";
 

@@ -8,8 +8,8 @@ import {
 } from "class-validator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { AssetsService } from "./assets.service";
-import type { AssetKind } from "@velonix/types/src";
-import { ASSET_KINDS } from "@velonix/types/src";
+import type { AssetKind } from "@velonix/types";
+import { ASSET_KINDS } from "@velonix/types";
 
 class CreateAssetBody {
   @IsString() @MaxLength(120) title!: string;

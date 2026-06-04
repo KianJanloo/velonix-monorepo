@@ -10,7 +10,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column,
   CreateDateColumn, UpdateDateColumn, Index,
 } from "typeorm";
-import type { PromoEventVariant, PromoEventPlacement } from "@velonix/types/src";
+import type { PromoEventVariant, PromoEventPlacement } from "@velonix/types";
 
 @Entity("promo_events")
 @Index(["isActive"])

@@ -5,8 +5,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, FindOptionsWhere, ILike, In } from "typeorm";
 import { AssetEntity } from "./asset.entity";
 import { AssetPurchaseEntity } from "./asset-purchase.entity";
-import type { AssetKind } from "@velonix/types/src";
-import { ASSET_KINDS } from "@velonix/types/src";
+import type { AssetKind } from "@velonix/types";
+import { ASSET_KINDS } from "@velonix/types";
 
 export interface BrowseAssetsQuery {
   kind?: AssetKind;

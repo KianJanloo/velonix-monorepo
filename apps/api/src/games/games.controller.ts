@@ -9,7 +9,7 @@ import {
 import { GamesService } from "./games.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
-import { CreateGameSchema, UpdateGameSchema, type CreateGameDto, type UpdateGameDto } from "@velonix/game-engine/src";
+import { CreateGameSchema, UpdateGameSchema, type CreateGameDto, type UpdateGameDto } from "@velonix/game-engine";
 
 // ── Swagger DTO shapes ────────────────────────────────────────────────────────
 

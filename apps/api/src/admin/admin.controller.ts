@@ -7,7 +7,7 @@ import { IsIn, IsString, IsBoolean, MaxLength } from "class-validator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { AdminService } from "./admin.service";
-import type { UserRole, GameStatus, SubscriptionTier } from "@velonix/types/src";
+import type { UserRole, GameStatus, SubscriptionTier } from "@velonix/types";
 
 // ── Swagger DTO shapes ────────────────────────────────────────────────────────
 

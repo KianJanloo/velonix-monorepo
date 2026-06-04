@@ -10,7 +10,7 @@ import { AssetEntity } from "../assets/asset.entity";
 import { AssetPurchaseEntity } from "../assets/asset-purchase.entity";
 import { AssetBundleEntity, type BundleItem } from "./asset-bundle.entity";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
-import { calculateCommission, calculateBundlePricing } from "@velonix/game-engine/src";
+import { calculateCommission, calculateBundlePricing } from "@velonix/game-engine";
 
 @Injectable()
 export class PaymentsService {

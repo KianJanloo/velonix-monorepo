@@ -20,8 +20,6 @@
     "noUnusedParameters": false,
     "preserveSymlinks": true,
     "paths": {
-      "@velonix/types": ["../../packages/types/src"],
-      "@velonix/game-engine": ["../../packages/game-engine/src"]
     }
   },
   "include": ["src/**/*"],

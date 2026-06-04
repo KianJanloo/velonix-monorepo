@@ -5,7 +5,7 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from "@nestjs/swagger";
 import { CollaboratorsService } from "./collaborators.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import type { CollaboratorRole } from "@velonix/types/src";
+import type { CollaboratorRole } from "@velonix/types";
 
 const ROLES: CollaboratorRole[] = ["editor", "viewer"];
 
