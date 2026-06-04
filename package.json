@@ -20,10 +20,13 @@
     "test:e2e": "turbo run test:e2e",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "prepare": "pnpm exec -- husky install || node -e \"process.exit(0)\"",
+    "prepare": "node -e \"try { require('child_process').execSync('pnpm exec -- husky install', { stdio: 'inherit' }); } catch (err) { process.exit(0); }\"",
     "db:migrate": "turbo run db:migrate --filter=@velonix/api",
     "db:seed": "turbo run db:seed --filter=@velonix/api",
     "db:studio": "turbo run db:studio --filter=@velonix/api"
+  },
+  "dependencies": {
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
     "turbo": "^2.3.3",
