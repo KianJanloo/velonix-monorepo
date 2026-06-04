@@ -12,6 +12,6 @@
  * - Version utilities
  */
 
-export * from "./validators.js";
-export * from "./calculators.js";
-export * from "./factories.js";
+export * from "./validators";
+export * from "./calculators";
+export * from "./factories";

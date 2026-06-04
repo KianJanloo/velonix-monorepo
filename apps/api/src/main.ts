@@ -126,7 +126,10 @@ async function bootstrap(): Promise<void> {
   );
 
   // ── Swagger API Documentation ─────────────────────────────────────────────
-  if (nodeEnv !== "production") {
+  // Allow explicit enabling of Swagger in production via ENABLE_SWAGGER=true
+  const enableSwagger = config.get<boolean>("app.enableSwagger") ?? false;
+
+  if (nodeEnv !== "production" || enableSwagger) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("Velonix API")
       .setDescription(

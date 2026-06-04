@@ -16,6 +16,7 @@ export const appConfig = registerAs("app", () => ({
     ","
   ),
   bcryptRounds: parseInt(process.env["BCRYPT_ROUNDS"] ?? "12", 10),
+  enableSwagger: (process.env["ENABLE_SWAGGER"] ?? "false") === "true",
 }));
 
 // ── Admin bootstrap ────────────────────────────────────────────────────────
