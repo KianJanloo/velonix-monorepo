@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcryptjs";
 import { UserEntity } from "../users/user.entity";
 import { SettingsService } from "../settings/settings.service";
-import type { RegisterDto, LoginDto } from "@velonix/game-engine";
+import type { RegisterDto, LoginDto } from "@velonix/game-engine/src";
 
 interface JwtPayload {
   sub: string;

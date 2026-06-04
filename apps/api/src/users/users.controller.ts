@@ -6,7 +6,7 @@ import {
 import { UsersService } from "./users.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
-import { UpdateProfileSchema, type UpdateProfileDto } from "@velonix/game-engine";
+import { UpdateProfileSchema, type UpdateProfileDto } from "@velonix/game-engine/src";
 
 // ── Swagger DTO shapes ────────────────────────────────────────────────────────
 

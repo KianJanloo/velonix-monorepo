@@ -8,8 +8,8 @@ import { GameEntity } from "./game.entity";
 import { GameCollaboratorEntity } from "./collaborator.entity";
 import { UserEntity } from "../users/user.entity";
 import { NotificationsService } from "../notifications/notifications.service";
-import { SUBSCRIPTION_LIMITS } from "@velonix/types";
-import type { CollaboratorRole, SubscriptionTier } from "@velonix/types";
+import { SUBSCRIPTION_LIMITS } from "@velonix/types/src";
+import type { CollaboratorRole, SubscriptionTier } from "@velonix/types/src";
 
 export type StudioMembership =
   | { kind: "owner" }

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, type OnApplicationBootstrap, Logger } fr
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PlanConfigEntity } from "./plan.entity";
-import { SUBSCRIPTION_LIMITS, type SubscriptionTier } from "@velonix/types";
+import { SUBSCRIPTION_LIMITS, type SubscriptionTier } from "@velonix/types/src";
 
 const SEED: Record<SubscriptionTier, { name: string; description: string; priceMonthly: number; priceYearly: number; hasRuleEngine: boolean; features: string[]; sortOrder: number }> = {
   free: {

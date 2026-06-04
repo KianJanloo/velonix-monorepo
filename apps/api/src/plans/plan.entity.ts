@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, UpdateDateColumn } from "typeorm";
-import type { SubscriptionTier } from "@velonix/types";
+import type { SubscriptionTier } from "@velonix/types/src";
 
 /**
  * Admin-editable plan configuration. Seeded from SUBSCRIPTION_LIMITS on first boot,

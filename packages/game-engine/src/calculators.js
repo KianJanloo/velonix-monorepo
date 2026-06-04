@@ -4,9 +4,12 @@
  * Pure functions for pricing, commission, and grid math.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.STANDARD_CARD_SIZES = void 0;
+exports.STANDARD_CARD_SIZES = exports.COMPLEXITY_PRICE_ANCHORS = void 0;
 exports.calculateCommission = calculateCommission;
+exports.bundleDiscountRate = bundleDiscountRate;
+exports.calculateBundlePricing = calculateBundlePricing;
 exports.projectMonthlyEarnings = projectMonthlyEarnings;
+exports.suggestGamePrice = suggestGamePrice;
 exports.generateSquareGrid = generateSquareGrid;
 exports.generateHexGrid = generateHexGrid;
 exports.mmToPx = mmToPx;
@@ -38,6 +41,27 @@ function calculateCommission(salePriceUsd, creatorTier) {
     };
 }
 /**
+ * Bundle discount tiers — the more paid components a buyer bundles, the bigger
+ * the discount. Shared by the API (authoritative pricing) and the bundle builder
+ * UI (live estimate). Returns a percentage (0–100).
+ */
+function bundleDiscountRate(itemCount) {
+    if (itemCount >= 5)
+        return 20;
+    if (itemCount >= 3)
+        return 12;
+    if (itemCount >= 2)
+        return 7;
+    return 0;
+}
+/** Applies the bundle discount to a subtotal, returning cents. */
+function calculateBundlePricing(itemPricesUsd) {
+    const subtotal = itemPricesUsd.reduce((s, p) => s + p, 0);
+    const rate = bundleDiscountRate(itemPricesUsd.length);
+    const discount = Math.round((subtotal * rate) / 100);
+    return { subtotal, discount, total: subtotal - discount, rate };
+}
+/**
  * Calculates the monthly potential earnings for display on the pricing page.
  */
 function projectMonthlyEarnings(pricePerGameUsd, estimatedSalesPerMonth, tier) {
@@ -48,6 +72,83 @@ function projectMonthlyEarnings(pricePerGameUsd, estimatedSalesPerMonth, tier) {
         grossRevenue: gross,
         netRevenue: gross - totalFees,
         platformFees: totalFees,
+    };
+}
+// ---------------------------------------------------------------------------
+// SMART PRICING SUGGESTION
+// ---------------------------------------------------------------------------
+/**
+ * Baseline anchor price (USD cents) for each complexity tier. Used when there
+ * aren't enough comparable published games to derive a market price from, and
+ * blended with market data when there are.
+ */
+exports.COMPLEXITY_PRICE_ANCHORS = {
+    light: 299,
+    medium: 599,
+    medium_heavy: 899,
+    heavy: 1299,
+};
+function median(values) {
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0
+        ? Math.round(((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2)
+        : (sorted[mid] ?? 0);
+}
+/** Round a price to the nearest "psychological" .99 ending, min $0.99. */
+function roundToCharm(cents) {
+    const dollars = Math.max(1, Math.round(cents / 100));
+    return dollars * 100 - 1;
+}
+/**
+ * Suggests a price for a game based on its complexity and the prices of
+ * similar already-published games.
+ *
+ * Strategy:
+ *  - Prefer comparables of the same complexity; otherwise use the category set.
+ *  - Blend the market median with the complexity anchor (more market weight as
+ *    the sample grows) so early/empty markets fall back to a sane baseline.
+ *  - Returns a charm-priced suggestion plus a low/high range and rationale.
+ */
+function suggestGamePrice(complexity, comparables) {
+    const anchor = exports.COMPLEXITY_PRICE_ANCHORS[complexity];
+    const priced = comparables.filter((c) => c.priceUsd > 0);
+    // Prefer same-complexity comps; fall back to same-category comps.
+    const sameComplexity = priced.filter((c) => c.complexity === complexity);
+    const pool = sameComplexity.length >= 3 ? sameComplexity : priced;
+    if (pool.length === 0) {
+        return {
+            suggestedUsd: anchor,
+            rangeUsd: { min: roundToCharm(anchor * 0.7), max: roundToCharm(anchor * 1.4) },
+            marketMedianUsd: null,
+            sampleSize: 0,
+            basis: "baseline",
+            rationale: [
+                `No comparable paid ${complexity.replace("_", " ")} games yet — using a baseline for this complexity.`,
+            ],
+        };
+    }
+    const prices = pool.map((c) => c.priceUsd);
+    const marketMedian = median(prices);
+    // Market weight grows with sample size, capped at 0.8 (always keep some anchor pull).
+    const marketWeight = Math.min(0.8, pool.length / 10);
+    const blended = marketMedian * marketWeight + anchor * (1 - marketWeight);
+    const suggested = roundToCharm(blended);
+    const lo = Math.min(...prices);
+    const hi = Math.max(...prices);
+    return {
+        suggestedUsd: suggested,
+        rangeUsd: {
+            min: roundToCharm(Math.min(lo, suggested * 0.75)),
+            max: roundToCharm(Math.max(hi, suggested * 1.25)),
+        },
+        marketMedianUsd: marketMedian,
+        sampleSize: pool.length,
+        basis: "market",
+        rationale: [
+            `Based on ${pool.length} similar published ${pool === sameComplexity ? complexity.replace("_", " ") + " " : ""}game${pool.length === 1 ? "" : "s"}.`,
+            `Market median is $${(marketMedian / 100).toFixed(2)}; blended with the ${complexity.replace("_", " ")} complexity baseline of $${(anchor / 100).toFixed(2)}.`,
+        ],
     };
 }
 /**

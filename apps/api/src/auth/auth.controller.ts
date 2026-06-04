@@ -11,7 +11,7 @@ import { ConfigService } from "@nestjs/config";
 // Credential endpoints: 10 attempts per minute per IP (brute-force protection).
 const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
 import { AuthService, type GoogleProfile } from "./auth.service";
-import { RegisterSchema, LoginSchema, type RegisterDto, type LoginDto } from "@velonix/game-engine";
+import { RegisterSchema, LoginSchema, type RegisterDto, type LoginDto } from "@velonix/game-engine/src";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { GoogleAuthGuard } from "./guards/google-auth.guard";

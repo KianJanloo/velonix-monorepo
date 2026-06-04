@@ -11,7 +11,7 @@ import { Repository } from "typeorm";
 import type { Server, Socket } from "socket.io";
 import { UserEntity } from "../users/user.entity";
 import { CollaboratorsService } from "./collaborators.service";
-import type { CollaboratorRole } from "@velonix/types";
+import type { CollaboratorRole } from "@velonix/types/src";
 
 type StudioRole = "owner" | CollaboratorRole;
 

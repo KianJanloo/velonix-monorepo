@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 import { PromoEventEntity } from "./event.entity";
-import type { PromoEventPlacement } from "@velonix/types";
+import type { PromoEventPlacement } from "@velonix/types/src";
 
 export interface UpsertEventDto {
   title: string;

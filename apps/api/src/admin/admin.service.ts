@@ -7,7 +7,7 @@ import { PurchaseEntity } from "../marketplace/purchase.entity";
 import { AssetPurchaseEntity } from "../assets/asset-purchase.entity";
 import { AssetEntity } from "../assets/asset.entity";
 import { NotificationsService } from "../notifications/notifications.service";
-import type { UserRole, GameStatus, SubscriptionTier } from "@velonix/types";
+import type { UserRole, GameStatus, SubscriptionTier } from "@velonix/types/src";
 
 @Injectable()
 export class AdminService {

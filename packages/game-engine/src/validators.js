@@ -75,7 +75,16 @@ exports.CreateGameSchema = BaseCreateGameSchema.refine((data) => data.playerCoun
     message: "Minimum playtime cannot exceed maximum",
     path: ["playtimeMin"],
 });
-exports.UpdateGameSchema = BaseCreateGameSchema.partial();
+exports.UpdateGameSchema = BaseCreateGameSchema.partial().extend({
+    // Studio editor state — arbitrary JSON snapshot of components/board design
+    studioData: zod_1.z.record(zod_1.z.string(), zod_1.z.unknown()).optional(),
+    thumbnailUrl: zod_1.z.string().url().nullable().optional(),
+    demoVideoUrl: zod_1.z.string().url().nullable().optional(),
+    // Pricing (also editable from the studio / game settings)
+    isFree: zod_1.z.boolean().optional(),
+    priceUsd: zod_1.z.number().int().min(0).max(99999).nullable().optional(),
+    hasTrial: zod_1.z.boolean().optional(),
+});
 exports.SetGamePricingSchema = zod_1.z.object({
     isFree: zod_1.z.boolean(),
     priceUsd: zod_1.z.number().int().min(99).max(9999).optional().nullable(),
@@ -140,6 +149,7 @@ exports.LoginSchema = zod_1.z.object({
 exports.UpdateProfileSchema = zod_1.z.object({
     displayName: zod_1.z.string().min(2).max(64).trim().optional(),
     bio: zod_1.z.string().max(500).trim().nullable().optional(),
+    avatarUrl: zod_1.z.string().url("Must be a valid URL").max(512).nullable().optional().or(zod_1.z.literal("")),
 });
 // ---------------------------------------------------------------------------
 // MARKETPLACE FILTERS
