@@ -276,7 +276,7 @@ export function SettingsTabs() {
             <h2 className="font-display text-lg font-semibold tracking-display text-crimson-flame mb-5">
               Danger Zone
             </h2>
-            <div className="flex items-center justify-between p-4 bg-crimson-ghost border border-crimson-flame/20 rounded-lg">
+            <div className="flex max-md:flex-col gap-4 md:items-center justify-between p-4 bg-crimson-ghost border border-crimson-flame/20 rounded-lg">
               <div>
                 <p className="text-sm font-ui font-semibold text-parchment-light">Delete Account</p>
                 <p className="text-xs text-soft-gray font-ui">Permanently delete your account and all data. This cannot be undone.</p>

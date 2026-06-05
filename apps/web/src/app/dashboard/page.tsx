@@ -10,12 +10,12 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-deep-void text-parchment-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-10">
-          <div>
+        <div className="flex max-lg:flex-col gap-4 items-center justify-between mb-10">
+          <div className="flex flex-col gap-4 max-lg:items-center">
             <h1 className="font-display text-3xl font-bold tracking-display text-parchment-light mb-1">
               Dashboard
             </h1>
-            <p className="text-soft-gray font-ui text-sm max-lg:hidden">
+            <p className="text-soft-gray font-ui text-sm text-center">
               Manage your games, track earnings, and publish to the marketplace.
             </p>
           </div>

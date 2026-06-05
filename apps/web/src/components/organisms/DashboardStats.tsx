@@ -17,10 +17,13 @@ function deriveStats(games: GameRecord[], subscriptionTier: string) {
   const totalPurchases = games.reduce((s, g) => s + (g.totalPurchases ?? 0), 0);
   const totalViews = games.reduce((s, g) => s + (g.totalViews ?? 0), 0);
 
-  const ratedGames = published.filter((g) => g.averageRating != null && g.totalRatings > 0);
+  const ratedGames = published.filter(
+    (g) => g.averageRating != null && g.totalRatings > 0,
+  );
   const avgRating =
     ratedGames.length > 0
-      ? ratedGames.reduce((s, g) => s + (g.averageRating ?? 0), 0) / ratedGames.length
+      ? ratedGames.reduce((s, g) => s + (g.averageRating ?? 0), 0) /
+        ratedGames.length
       : null;
   const totalRatings = ratedGames.reduce((s, g) => s + g.totalRatings, 0);
 
@@ -39,12 +42,43 @@ function deriveStats(games: GameRecord[], subscriptionTier: string) {
       : String(totalViews);
 
   return [
-    { label: "Total Purchases", value: totalPurchases.toLocaleString(), change: `${published.length} published games`, accent: "emerald" as const },
-    { label: "Marketplace Views", value: viewsDisplay, change: "All-time views", accent: "cyan" as const },
-    { label: "Active Games", value: String(active), change: reviewing > 0 ? `${reviewing} in review` : "All published", changePositive: reviewing === 0, accent: "parchment" as const },
-    { label: "Avg. Rating", value: avgRating ? avgRating.toFixed(1) : "—", change: totalRatings > 0 ? `${totalRatings} reviews` : "No reviews yet", accent: "gold" as const },
-    { label: "Total Games", value: String(games.length), change: `${games.filter((g) => g.status === "draft").length} drafts`, accent: "emerald" as const },
-    { label: "Commission Rate", value: `${commissionRate}%`, change: tierLabel, accent: "gold" as const },
+    {
+      label: "Total Purchases",
+      value: totalPurchases.toLocaleString(),
+      change: `${published.length} published games`,
+      accent: "emerald" as const,
+    },
+    {
+      label: "Marketplace Views",
+      value: viewsDisplay,
+      change: "All-time views",
+      accent: "cyan" as const,
+    },
+    {
+      label: "Active Games",
+      value: String(active),
+      change: reviewing > 0 ? `${reviewing} in review` : "All published",
+      changePositive: reviewing === 0,
+      accent: "parchment" as const,
+    },
+    {
+      label: "Avg. Rating",
+      value: avgRating ? avgRating.toFixed(1) : "—",
+      change: totalRatings > 0 ? `${totalRatings} reviews` : "No reviews yet",
+      accent: "gold" as const,
+    },
+    {
+      label: "Total Games",
+      value: String(games.length),
+      change: `${games.filter((g) => g.status === "draft").length} drafts`,
+      accent: "emerald" as const,
+    },
+    {
+      label: "Commission Rate",
+      value: `${commissionRate}%`,
+      change: tierLabel,
+      accent: "gold" as const,
+    },
   ];
 }
 
@@ -57,7 +91,10 @@ export function DashboardStats() {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="v-card p-4 h-20 animate-pulse bg-warm-wood/20" />
+          <div
+            key={i}
+            className="v-card p-4 h-20 animate-pulse bg-warm-wood/20"
+          />
         ))}
       </div>
     );
