@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Reveal } from "@/components/atoms/Reveal";
+import { VelonixLogo } from "@/components/atoms";
 
 export const metadata: Metadata = {
   title: "Velonix — Play. Think. Conquer.",
@@ -36,20 +37,12 @@ function Hero() {
       <div className="pointer-events-none hidden dark:block absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_80%,rgba(58,42,31,0.4),transparent)]" />
 
       <div className="mb-8 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-hidden="true">
-          <defs>
-            <linearGradient id="vg" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#c4b49a" />
-              <stop offset="50%" stopColor="#f5c451" />
-              <stop offset="100%" stopColor="#c4b49a" />
-            </linearGradient>
-          </defs>
-          <polyline points="8,18 40,62 72,18" fill="none" stroke="url(#vg)" strokeWidth="5" strokeLinejoin="miter" />
-          <polyline points="18,18 40,52 62,18" fill="none" stroke="url(#vg)" strokeWidth="3" strokeLinejoin="miter" opacity="0.45" />
-          <circle cx="40" cy="15" r="3.5" fill="url(#vg)" />
-          <rect x="37.5" y="8" width="5" height="2.5" rx="1" fill="url(#vg)" />
-          <circle cx="40" cy="7" r="2" fill="url(#vg)" opacity="0.75" />
-        </svg>
+        <div className="md:hidden" >
+          <VelonixLogo size={72} />
+        </div>
+        <div className="max-md:hidden">
+          <VelonixLogo size={100} />
+        </div>
       </div>
 
       <h1

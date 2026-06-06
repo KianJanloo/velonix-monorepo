@@ -52,6 +52,23 @@ export function useRegister() {
   });
 }
 
+export function useForgetPass() {
+  // const setAuth = useAuthStore((s) => s.setAuth);
+  // const router = useRouter();
+
+  // return useMutation({
+  //   mutationFn: (dto: ForgetPassDto) =>
+  //     apiClient.post<AuthResponse>("/auth/forget-pass", dto),
+  //   onSuccess: ({ accessToken, refreshToken, user }) => {
+  //     setAuth(user, accessToken, refreshToken);
+  //     router.push("/dashboard");
+  //   },
+  //   onError: (err) => {
+  //     toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
+  //   },
+  // });
+}
+
 export function useLogout() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const qc = useQueryClient();

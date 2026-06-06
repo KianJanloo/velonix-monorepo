@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/organisms/LoginForm";
 import { VelonixLogo } from "@/components/atoms";
+import { ForgetPassForm } from "@/components/organisms/ForgetPassForm";
 
 export const metadata: Metadata = { title: "Sign In" };
 
@@ -18,36 +19,17 @@ export default function LoginPage() {
               VELONIX
             </span>
           </Link>
-          <p className="text-soft-gray text-sm mt-3 font-ui">
-            Welcome back to the table
-          </p>
+          <p className="text-soft-gray text-sm mt-3 font-ui">Welcome back to the table</p>
         </div>
 
         {/* Card */}
         <div className="v-card p-8">
           <h1 className="font-display text-xl font-bold tracking-display text-parchment-light mb-6 text-center">
-            Sign In
+            Forget Password
           </h1>
-          <Suspense
-            fallback={
-              <div className="h-40 flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-warm-wood border-t-emerald-glow rounded-full animate-spin" />
-              </div>
-            }
-          >
-            <LoginForm />
+          <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-6 h-6 border-2 border-warm-wood border-t-emerald-glow rounded-full animate-spin" /></div>}>
+            <ForgetPassForm />
           </Suspense>
-          <div className="mt-6 text-center">
-            <p className="text-soft-gray text-sm font-ui">
-              No account?{" "}
-              <Link
-                href="/auth/register"
-                className="text-emerald-glow hover:text-emerald-bright transition-colors"
-              >
-                Create one free
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>
