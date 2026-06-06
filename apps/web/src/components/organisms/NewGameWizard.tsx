@@ -85,10 +85,10 @@ export function NewGameWizard() {
       {/* Header */}
       <header className="h-14 bg-rich-wood-dark border-b border-warm-wood flex items-center px-6 gap-4 shrink-0">
         <Link href="/dashboard" className="text-soft-gray hover:text-parchment-light transition-colors text-sm font-ui">
-          ← Back to Dashboard
+          ← <span className="max-md:hidden">Back to Dashboard</span>
         </Link>
         <div className="w-px h-5 bg-warm-wood" />
-        <span className="font-display text-sm font-bold tracking-wide text-royal-gold">New Game</span>
+        <span className="font-display text-sm font-bold tracking-wide text-royal-gold max-md:hidden">New Game</span>
         <div className="ml-auto flex items-center gap-2">
           {([1, 2, 3] as const).map((s) => (
             <div key={s} className="flex items-center gap-2">

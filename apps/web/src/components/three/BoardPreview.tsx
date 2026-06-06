@@ -62,7 +62,11 @@ export function BoardPreview({
     const h = mount.clientHeight;
 
     // ── Renderer ───────────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance",
+    });
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
@@ -92,9 +96,12 @@ export function BoardPreview({
     key.position.set(3, 6, 4);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.near = 0.5; key.shadow.camera.far = 30;
-    key.shadow.camera.left = -6; key.shadow.camera.right = 6;
-    key.shadow.camera.top = 6; key.shadow.camera.bottom = -6;
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = 30;
+    key.shadow.camera.left = -6;
+    key.shadow.camera.right = 6;
+    key.shadow.camera.top = 6;
+    key.shadow.camera.bottom = -6;
     key.shadow.bias = -0.001;
     scene.add(key);
 
@@ -112,7 +119,11 @@ export function BoardPreview({
 
     // ── Table surface ──────────────────────────────────────────────────────
     const tableGeo = new THREE.PlaneGeometry(12, 12);
-    const tableMat = new THREE.MeshStandardMaterial({ color: 0x1c140f, roughness: 0.85, metalness: 0.02 });
+    const tableMat = new THREE.MeshStandardMaterial({
+      color: 0x1c140f,
+      roughness: 0.85,
+      metalness: 0.02,
+    });
     const table = new THREE.Mesh(tableGeo, tableMat);
     table.rotation.x = -Math.PI / 2;
     table.position.y = -0.02;
@@ -126,11 +137,20 @@ export function BoardPreview({
     const reqRender = { fn: () => {} };
 
     if (components && components.length > 0) {
-      disposeReal = buildBoardScene(scene, components, boardWidth ?? 800, boardHeight ?? 600, () => reqRender.fn());
+      disposeReal = buildBoardScene(
+        scene,
+        components,
+        boardWidth ?? 800,
+        boardHeight ?? 600,
+        () => reqRender.fn(),
+      );
     } else {
       // ── Game board (placeholder) ─────────────────────────────────────────
       const boardGeo = new THREE.BoxGeometry(4.2, 0.045, 3.2);
-      const boardMat = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.9 });
+      const boardMat = new THREE.MeshStandardMaterial({
+        color: 0x1a2535,
+        roughness: 0.9,
+      });
       const board = new THREE.Mesh(boardGeo, boardMat);
       board.position.set(0, 0.015, 0);
       board.castShadow = true;
@@ -138,8 +158,14 @@ export function BoardPreview({
       scene.add(board);
 
       // Board border
-      const borderGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(4.22, 0.05, 3.22));
-      const borderMat = new THREE.LineBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.3 });
+      const borderGeo = new THREE.EdgesGeometry(
+        new THREE.BoxGeometry(4.22, 0.05, 3.22),
+      );
+      const borderMat = new THREE.LineBasicMaterial({
+        color: 0xf5c451,
+        transparent: true,
+        opacity: 0.3,
+      });
       scene.add(new THREE.LineSegments(borderGeo, borderMat).translateY(0.015));
 
       // ── Cards ────────────────────────────────────────────────────────────
@@ -151,7 +177,11 @@ export function BoardPreview({
       ];
       cardPositions.forEach(([cx, cy, cz, ry, accent]) => {
         const cg = new THREE.BoxGeometry(0.63, 0.009, 0.88);
-        const cm = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.25, metalness: 0.1 });
+        const cm = new THREE.MeshStandardMaterial({
+          color: 0x1a2535,
+          roughness: 0.25,
+          metalness: 0.1,
+        });
         const card = new THREE.Mesh(cg, cm);
         card.position.set(cx, cy, cz);
         card.rotation.y = ry;
@@ -161,7 +191,11 @@ export function BoardPreview({
         // Accent pip
         const pip = new THREE.Mesh(
           new THREE.CircleGeometry(0.04, 16),
-          new THREE.MeshStandardMaterial({ color: new THREE.Color(accent), emissive: new THREE.Color(accent), emissiveIntensity: 1.2 })
+          new THREE.MeshStandardMaterial({
+            color: new THREE.Color(accent),
+            emissive: new THREE.Color(accent),
+            emissiveIntensity: 1.2,
+          }),
         );
         pip.position.set(cx - 0.24, cy + 0.005, cz - 0.36);
         pip.rotation.set(-Math.PI / 2, 0, ry);
@@ -171,7 +205,13 @@ export function BoardPreview({
       // ── Token helper ───────────────────────────────────────────────────────
       const makeToken = (x: number, z: number, color: number) => {
         const tg = new THREE.CylinderGeometry(0.18, 0.18, 0.05, 32);
-        const tm = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.7, emissive: color, emissiveIntensity: 0.15 });
+        const tm = new THREE.MeshStandardMaterial({
+          color,
+          roughness: 0.3,
+          metalness: 0.7,
+          emissive: color,
+          emissiveIntensity: 0.15,
+        });
         const tok = new THREE.Mesh(tg, tm);
         tok.position.set(x, 0.075, z);
         tok.castShadow = true;
@@ -179,7 +219,13 @@ export function BoardPreview({
 
         const rim2 = new THREE.Mesh(
           new THREE.TorusGeometry(0.17, 0.012, 8, 32),
-          new THREE.MeshStandardMaterial({ color: 0xf5c451, roughness: 0.1, metalness: 0.9, emissive: 0xf5c451, emissiveIntensity: 0.3 })
+          new THREE.MeshStandardMaterial({
+            color: 0xf5c451,
+            roughness: 0.1,
+            metalness: 0.9,
+            emissive: 0xf5c451,
+            emissiveIntensity: 0.3,
+          }),
         );
         rim2.position.set(x, 0.075, z);
         rim2.rotation.x = Math.PI / 2;
@@ -212,17 +258,26 @@ export function BoardPreview({
     }
 
     if (!disableControls && !flythrough) {
-      mount.addEventListener("mousedown", (e) => { isDragging = true; lastX = e.clientX; });
-      mount.addEventListener("mouseup", () => { isDragging = false; });
+      mount.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        lastX = e.clientX;
+      });
+      mount.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
       mount.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         theta -= (e.clientX - lastX) * 0.005;
         lastX = e.clientX;
       });
-      mount.addEventListener("wheel", (e) => {
-        phi = Math.max(0.3, Math.min(Math.PI / 2.1, phi + e.deltaY * 0.002));
-        updateCamera();
-      }, { passive: true });
+      mount.addEventListener(
+        "wheel",
+        (e) => {
+          phi = Math.max(0.3, Math.min(Math.PI / 2.1, phi + e.deltaY * 0.002));
+          updateCamera();
+        },
+        { passive: true },
+      );
     }
 
     // ── Animate (paused when off-screen or tab hidden) ───────────────────────
@@ -247,7 +302,10 @@ export function BoardPreview({
         camera.lookAt(0, 0.2, 0);
       } else {
         // Auto-rotate
-        if (!isDragging) { autoRotY += 0.003; theta = autoRotY; }
+        if (!isDragging) {
+          autoRotY += 0.003;
+          theta = autoRotY;
+        }
         if (!disableControls) updateCamera();
       }
 
@@ -267,22 +325,44 @@ export function BoardPreview({
       }
     }
 
-    const loop = () => { frameId = requestAnimationFrame(loop); renderFrame(); };
-    const start = () => { if (!running) { running = true; loop(); } };
-    const stop = () => { running = false; cancelAnimationFrame(frameId); };
+    const loop = () => {
+      frameId = requestAnimationFrame(loop);
+      renderFrame();
+    };
+    const start = () => {
+      if (!running) {
+        running = true;
+        loop();
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(frameId);
+    };
     // Repaint a single frame when paused (e.g. an artwork texture just loaded).
-    reqRender.fn = () => { if (!running) renderFrame(); };
+    reqRender.fn = () => {
+      if (!running) renderFrame();
+    };
 
     // Only run the render loop while visible on screen and the tab is focused.
     let docVisible = !document.hidden;
     let onScreen = true;
-    const sync = () => { if (docVisible && onScreen) start(); else stop(); };
+    const sync = () => {
+      if (docVisible && onScreen) start();
+      else stop();
+    };
 
-    const onVisibility = () => { docVisible = !document.hidden; sync(); };
+    const onVisibility = () => {
+      docVisible = !document.hidden;
+      sync();
+    };
     document.addEventListener("visibilitychange", onVisibility);
 
     const io = new IntersectionObserver(
-      (entries) => { onScreen = entries[0]?.isIntersecting ?? true; sync(); },
+      (entries) => {
+        onScreen = entries[0]?.isIntersecting ?? true;
+        sync();
+      },
       { threshold: 0.01 },
     );
     io.observe(mount);
@@ -306,12 +386,17 @@ export function BoardPreview({
       obs.disconnect();
       renderer.dispose();
       disposeReal?.();
-      if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
+      if (mount.contains(renderer.domElement))
+        mount.removeChild(renderer.domElement);
     };
   }, [disableControls, flythrough, components, boardWidth, boardHeight]);
 
   return (
-    <div className={`relative overflow-hidden rounded-xl ${className}`} style={{ height }} aria-label="3D board game preview">
+    <div
+      className={`relative overflow-hidden rounded-xl ${className}`}
+      style={{ height }}
+      aria-label="3D board game preview"
+    >
       <div ref={mountRef} className="absolute inset-0" />
 
       {/* Progressive loading skeleton until the first frame paints */}
@@ -326,18 +411,30 @@ export function BoardPreview({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-rich-wood-dark/70 to-transparent z-10" />
 
       {/* Corner accents */}
-      {["top-3 left-3 border-t-2 border-l-2 rounded-tl","top-3 right-3 border-t-2 border-r-2 rounded-tr","bottom-3 left-3 border-b-2 border-l-2 rounded-bl","bottom-3 right-3 border-b-2 border-r-2 rounded-br"].map(cls => (
-        <div key={cls} className={`pointer-events-none absolute w-5 h-5 z-20 border-emerald-glow/30 ${cls}`} />
+      {[
+        "top-3 left-3 border-t-2 border-l-2 rounded-tl",
+        "top-3 right-3 border-t-2 border-r-2 rounded-tr",
+        "bottom-3 left-3 border-b-2 border-l-2 rounded-bl",
+        "bottom-3 right-3 border-b-2 border-r-2 rounded-br",
+      ].map((cls) => (
+        <div
+          key={cls}
+          className={`pointer-events-none absolute w-5 h-5 z-20 border-emerald-glow/30 ${cls}`}
+        />
       ))}
 
       {gameTitle && (
         <div className="absolute bottom-6 left-6 z-20 pointer-events-none">
-          <p className="font-display text-parchment-light text-lg font-semibold tracking-display drop-shadow-lg">{gameTitle}</p>
+          <p className="font-display text-parchment-light text-lg font-semibold tracking-display drop-shadow-lg">
+            {gameTitle}
+          </p>
         </div>
       )}
       {!disableControls && !flythrough && (
         <div className="absolute bottom-6 right-6 z-20 pointer-events-none">
-          <p className="text-soft-gray text-2xs font-ui tracking-wider uppercase opacity-60">Drag to rotate</p>
+          <p className="text-soft-gray text-2xs font-ui tracking-wider uppercase opacity-60">
+            Drag to rotate
+          </p>
         </div>
       )}
     </div>
