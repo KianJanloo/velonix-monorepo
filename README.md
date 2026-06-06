@@ -222,17 +222,6 @@ pnpm dev:api          # NestJS only
 
 ---
 
-## Subscription Tiers
-
-| Tier | Price | Projects | Commission | Analytics |
-|---|---|---|---|---|
-| Free | $0 | 3 | 25% | No |
-| Creator | $12/mo | 10 | 20% | No |
-| Pro | $29/mo | Unlimited | 17% | Yes |
-| Studio | $79/mo | Unlimited | 15% | Yes + Priority |
-
----
-
 ## Key Features
 
 ### Board Game Designer Studio
