@@ -53,28 +53,72 @@ export class UserEntity {
   })
   subscriptionTier!: SubscriptionTier;
 
-  @Column({ name: "subscription_expires_at", type: "timestamptz", nullable: true })
+  @Column({
+    name: "subscription_expires_at",
+    type: "timestamptz",
+    nullable: true,
+  })
   subscriptionExpiresAt!: Date | null;
 
-  @Column({ name: "stripe_customer_id", type: "varchar", length: 64, nullable: true })
+  @Column({
+    name: "stripe_customer_id",
+    type: "varchar",
+    length: 64,
+    nullable: true,
+  })
   stripeCustomerId!: string | null;
 
-  @Column({ name: "stripe_connect_account_id", type: "varchar", length: 64, nullable: true })
+  @Column({
+    name: "stripe_connect_account_id",
+    type: "varchar",
+    length: 64,
+    nullable: true,
+  })
   stripeConnectAccountId!: string | null;
 
   @Column({ name: "is_email_verified", default: false })
   isEmailVerified!: boolean;
 
-  @Column({ name: "email_verification_token", type: "varchar", length: 128, nullable: true, select: false })
+  @Column({
+    name: "email_verification_token",
+    type: "varchar",
+    length: 128,
+    nullable: true,
+    select: false,
+  })
   emailVerificationToken!: string | null;
 
-  @Column({ name: "password_reset_token", type: "varchar", length: 128, nullable: true, select: false })
-  passwordResetToken!: string | null;
+  @Column({
+    name: "password_reset_token",
+    type: "varchar",
+    nullable: true,
+    select: false,
+  })
+  passwordResetTokenHash!: string | null;
 
-  @Column({ name: "password_reset_expires_at", type: "timestamptz", nullable: true, select: false })
+  @Column({
+    name: "password_reset_code",
+    type: "varchar",
+    nullable: true,
+    select: false,
+  })
+  passwordResetCodeHash!: string | null;
+
+  @Column({
+    name: "password_reset_expires_at",
+    type: "timestamptz",
+    nullable: true,
+    select: false,
+  })
   passwordResetExpiresAt!: Date | null;
 
-  @Column({ name: "refresh_token_hash", type: "varchar", length: 255, nullable: true, select: false })
+  @Column({
+    name: "refresh_token_hash",
+    type: "varchar",
+    length: 255,
+    nullable: true,
+    select: false,
+  })
   refreshTokenHash!: string | null;
 
   /** Total earnings in cents (USD) */

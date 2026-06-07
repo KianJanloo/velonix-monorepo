@@ -1,4 +1,11 @@
-import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from "@nestjs/common";
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -6,7 +13,12 @@ import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcryptjs";
 import { UserEntity } from "../users/user.entity";
 import { SettingsService } from "../settings/settings.service";
-import type { RegisterDto, LoginDto } from "@velonix/game-engine";
+import type {
+  RegisterDto,
+  LoginDto,
+  ForgetPassDto,
+  ResetPassDto,
+} from "@velonix/game-engine";
 
 interface JwtPayload {
   sub: string;
@@ -30,14 +42,16 @@ export class AuthService {
     private readonly userRepo: Repository<UserEntity>,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
-    private readonly settings: SettingsService
+    private readonly settings: SettingsService,
   ) {}
 
   // ── Registration / Login ────────────────────────────────────────────────
 
   async register(dto: RegisterDto) {
     if (!(await this.settings.signupsEnabled())) {
-      throw new ForbiddenException("New account registration is currently disabled.");
+      throw new ForbiddenException(
+        "New account registration is currently disabled.",
+      );
     }
 
     const exists = await this.userRepo.findOne({
@@ -47,7 +61,7 @@ export class AuthService {
       throw new ConflictException(
         exists.email === dto.email
           ? "An account with this email already exists."
-          : "This username is already taken."
+          : "This username is already taken.",
       );
     }
 
@@ -69,18 +83,125 @@ export class AuthService {
     const user = await this.userRepo.findOne({
       where: { email: dto.email },
       select: {
-        id: true, email: true, username: true, displayName: true,
-        avatarUrl: true, bio: true, role: true, subscriptionTier: true,
-        totalSales: true, createdAt: true, passwordHash: true,
+        id: true,
+        email: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true,
+        role: true,
+        subscriptionTier: true,
+        totalSales: true,
+        createdAt: true,
+        passwordHash: true,
       },
     });
 
-    if (!user || !user.passwordHash || !(await bcrypt.compare(dto.password, user.passwordHash))) {
+    if (
+      !user ||
+      !user.passwordHash ||
+      !(await bcrypt.compare(dto.password, user.passwordHash))
+    ) {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
     await this.userRepo.update(user.id, { lastLoginAt: new Date() });
     return this.issueTokens(user);
+  }
+
+  // ── Forget Password ───────────────────────────────────────────────────────
+
+  async forgetPass(dto: ForgetPassDto) {
+    const user = await this.userRepo.findOne({
+      where: { email: dto.email },
+      select: {
+        id: true,
+        email: true,
+        passwordResetCodeHash: true,
+        passwordResetTokenHash: true,
+        passwordResetExpiresAt: true,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    const code = this.generateCode();
+    const token = this.generateToken();
+    const tokenWithCode = `${token}?code=${code}`;
+    const rounds = this.config.get<number>("app.bcryptRounds") ?? 12;
+
+    user.passwordResetTokenHash = await bcrypt.hash(token, rounds);
+    user.passwordResetCodeHash = await bcrypt.hash(code, rounds);
+    user.passwordResetExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    // Sending email function:
+    // await this.mailerService.sendMail({
+    //   to: user.email,
+    //   subject: "Password Reset Code",
+    //   text: `Your password reset code is: ${code}. It expires in 15 minutes.`,
+    // });
+
+    await this.userRepo.save(user);
+
+    return {
+      message: "Verification code sent to your email",
+      // mock
+      tokenWithCode,
+    };
+  }
+
+  // ── Reset Password ────────────────────────────────────────────────────────
+
+  async resetPass(dto: ResetPassDto) {
+    const user = await this.userRepo.findOne({
+      where: { email: dto.email },
+      select: {
+        id: true,
+        email: true,
+        passwordResetCodeHash: true,
+        passwordResetTokenHash: true,
+        passwordResetExpiresAt: true,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    if (
+      !user.passwordResetExpiresAt ||
+      user.passwordResetExpiresAt < new Date()
+    ) {
+      throw new BadRequestException("Reset code has expired");
+    }
+
+    const isCodeValid = await bcrypt.compare(
+      dto.code,
+      user.passwordResetCodeHash ?? "",
+    );
+    if (!isCodeValid) {
+      throw new BadRequestException("Invalid reset code");
+    }
+
+    const isTokenValid = await bcrypt.compare(
+      dto.token,
+      user.passwordResetTokenHash ?? "",
+    );
+    if (!isTokenValid) {
+      throw new UnauthorizedException("Invalid reset token");
+    }
+
+    const rounds = this.config.get<number>("app.bcryptRounds") ?? 12;
+    user.passwordHash = await bcrypt.hash(dto.newPassword, rounds);
+
+    // Clear reset fields
+    user.passwordResetCodeHash = null;
+    user.passwordResetTokenHash = null;
+    user.passwordResetExpiresAt = null;
+
+    await this.userRepo.save(user);
+
+    return { message: "Password has been reset successfully" };
   }
 
   // ── Google OAuth ──────────────────────────────────────────────────────────
@@ -90,7 +211,12 @@ export class AuthService {
     let user = await this.userRepo.findOne({ where: { email: profile.email } });
 
     if (!user) {
-      const base = profile.email.split("@")[0]!.replace(/[^a-z0-9_-]/gi, "").toLowerCase().slice(0, 24) || "user";
+      const base =
+        profile.email
+          .split("@")[0]!
+          .replace(/[^a-z0-9_-]/gi, "")
+          .toLowerCase()
+          .slice(0, 24) || "user";
       let username = base;
       let n = 0;
       while (await this.userRepo.findOne({ where: { username } })) {
@@ -104,7 +230,10 @@ export class AuthService {
         displayName: profile.displayName || base,
         avatarUrl: profile.avatarUrl ?? null,
         // OAuth users have no usable local password
-        passwordHash: await bcrypt.hash(`oauth:${profile.googleId}:${Date.now()}`, 10),
+        passwordHash: await bcrypt.hash(
+          `oauth:${profile.googleId}:${Date.now()}`,
+          10,
+        ),
         isEmailVerified: true,
       });
       user = await this.userRepo.save(user);
@@ -132,9 +261,17 @@ export class AuthService {
     const user = await this.userRepo.findOne({
       where: { id: payload.sub },
       select: {
-        id: true, email: true, username: true, displayName: true,
-        avatarUrl: true, bio: true, role: true, subscriptionTier: true,
-        totalSales: true, createdAt: true, refreshTokenHash: true,
+        id: true,
+        email: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true,
+        role: true,
+        subscriptionTier: true,
+        totalSales: true,
+        createdAt: true,
+        refreshTokenHash: true,
       },
     });
 
@@ -196,5 +333,20 @@ export class AuthService {
 
   async validateJwtPayload(payload: { sub: string }) {
     return this.userRepo.findOne({ where: { id: payload.sub } });
+  }
+
+  // Generator helpers
+  private generateCode(): string {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    return Array.from({ length: 6 }, () =>
+      chars.charAt(Math.floor(Math.random() * chars.length)),
+    ).join("");
+  }
+
+  private generateToken(): string {
+    const array = new Uint8Array(96); // 96 bytes → 128 base64 chars
+    crypto.getRandomValues(array);
+    return btoa(String.fromCharCode(...array)).slice(0, 128);
   }
 }

@@ -177,6 +177,17 @@ export const LoginSchema = z.object({
   rememberMe: z.boolean().default(false),
 });
 
+export const ForgetPassSchema = z.object({
+  email: z.string().email().toLowerCase().trim(),
+});
+
+export const ResetPassSchema = z.object({
+  email: z.string().email().toLowerCase().trim(),
+  code: z.string().length(6),
+  token: z.string().length(128),
+  newPassword: z.string().min(1),
+});
+
 export const UpdateProfileSchema = z.object({
   displayName: z.string().min(2).max(64).trim().optional(),
   bio: z.string().max(500).trim().nullable().optional(),
@@ -225,6 +236,8 @@ export type SetGamePricingDto = z.infer<typeof SetGamePricingSchema>;
 export type CreateComponentDto = z.infer<typeof CreateComponentSchema>;
 export type RegisterDto = z.infer<typeof RegisterSchema>;
 export type LoginDto = z.infer<typeof LoginSchema>;
+export type ForgetPassDto = z.infer<typeof ForgetPassSchema>;
+export type ResetPassDto = z.infer<typeof ResetPassSchema>;
 export type UpdateProfileDto = z.infer<typeof UpdateProfileSchema>;
 export type MarketplaceFiltersDto = z.infer<typeof MarketplaceFiltersSchema>;
 export type CreateReviewDto = z.infer<typeof CreateReviewSchema>;

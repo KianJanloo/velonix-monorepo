@@ -1,9 +1,23 @@
 import {
-  Controller, Post, Get, Body, HttpCode, HttpStatus, Version,
-  UseGuards, Request, Res,
+  Controller,
+  Post,
+  Get,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Version,
+  UseGuards,
+  Request,
+  Res,
 } from "@nestjs/common";
 import {
-  ApiTags, ApiOperation, ApiBody, ApiResponse, ApiProperty, ApiBearerAuth, ApiExcludeEndpoint,
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiProperty,
+  ApiBearerAuth,
+  ApiExcludeEndpoint,
 } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import { ConfigService } from "@nestjs/config";
@@ -11,7 +25,16 @@ import { ConfigService } from "@nestjs/config";
 // Credential endpoints: 10 attempts per minute per IP (brute-force protection).
 const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
 import { AuthService, type GoogleProfile } from "./auth.service";
-import { RegisterSchema, LoginSchema, type RegisterDto, type LoginDto } from "@velonix/game-engine";
+import {
+  RegisterSchema,
+  LoginSchema,
+  ForgetPassSchema,
+  ResetPassSchema,
+  type RegisterDto,
+  type LoginDto,
+  type ForgetPassDto,
+  type ResetPassDto,
+} from "@velonix/game-engine";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { GoogleAuthGuard } from "./guards/google-auth.guard";
@@ -28,7 +51,11 @@ class RegisterBodyDto {
   @ApiProperty({ example: "Alice Builder", minLength: 2, maxLength: 64 })
   displayName!: string;
 
-  @ApiProperty({ example: "S3cur3P@ss", minLength: 8, description: "Min 8 chars, 1 uppercase, 1 number" })
+  @ApiProperty({
+    example: "S3cur3P@ss",
+    minLength: 8,
+    description: "Min 8 chars, 1 uppercase, 1 number",
+  })
   password!: string;
 }
 
@@ -41,6 +68,25 @@ class LoginBodyDto {
 
   @ApiProperty({ required: false, default: false })
   rememberMe?: boolean;
+}
+
+class ForgetPassBodyDto {
+  @ApiProperty({ example: "alice@example.com" })
+  email!: string;
+}
+
+class resetPassBodyDto {
+  @ApiProperty({ example: "alice@example.com" })
+  email!: string;
+
+  @ApiProperty({ example: "S3cur3P@ss" })
+  newPassword!: string;
+
+  @ApiProperty({ description: "The refresh token issued at login" })
+  token!: string;
+
+  @ApiProperty({ example: "At3F2s" })
+  code!: string;
 }
 
 class RefreshBodyDto {
@@ -86,7 +132,11 @@ export class AuthController {
   @Throttle(AUTH_THROTTLE)
   @ApiOperation({ summary: "Register a new user account" })
   @ApiBody({ type: RegisterBodyDto })
-  @ApiResponse({ status: 201, description: "Account created", type: AuthResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: "Account created",
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 409, description: "Email or username already in use" })
   @ApiResponse({ status: 400, description: "Validation error" })
   register(@Body(new ZodValidationPipe(RegisterSchema)) dto: RegisterDto) {
@@ -99,19 +149,65 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Sign in with email and password" })
   @ApiBody({ type: LoginBodyDto })
-  @ApiResponse({ status: 200, description: "Login successful", type: AuthResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: "Login successful",
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 401, description: "Invalid credentials" })
   login(@Body(new ZodValidationPipe(LoginSchema)) dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post("forget-pass")
+  @Version("1")
+  @Throttle(AUTH_THROTTLE)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Forget Password with email" })
+  @ApiBody({ type: ForgetPassBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: "Code sent for your email",
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: "Invalid email" })
+  forgetPass(
+    @Body(new ZodValidationPipe(ForgetPassSchema)) dto: ForgetPassDto,
+  ) {
+    return this.authService.forgetPass(dto);
+  }
+
+  @Post("reset-pass")
+  @Version("1")
+  @Throttle(AUTH_THROTTLE)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Reset Password with email" })
+  @ApiBody({ type: resetPassBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: "Password reset successfully",
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: "Invalid code or token" })
+  resetPass(
+    @Body(new ZodValidationPipe(ResetPassSchema)) dto: ResetPassDto,
+  ) {
+    return this.authService.resetPass(dto);
   }
 
   @Post("refresh")
   @Version("1")
   @Throttle(AUTH_THROTTLE)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Exchange a refresh token for a new access + refresh token pair" })
+  @ApiOperation({
+    summary: "Exchange a refresh token for a new access + refresh token pair",
+  })
   @ApiBody({ type: RefreshBodyDto })
-  @ApiResponse({ status: 200, description: "New token pair", type: AuthResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: "New token pair",
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 401, description: "Invalid or expired refresh token" })
   refresh(@Body() body: RefreshBodyDto) {
     return this.authService.refresh(body.refreshToken);
@@ -146,7 +242,10 @@ export class AuthController {
   @Version("1")
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: "Begin Google OAuth sign-in (redirects to Google)" })
-  @ApiResponse({ status: 302, description: "Redirect to Google consent screen" })
+  @ApiResponse({
+    status: 302,
+    description: "Redirect to Google consent screen",
+  })
   @ApiResponse({ status: 503, description: "Google sign-in not configured" })
   googleAuth() {
     // Guard redirects to Google; this handler body never executes.
@@ -161,7 +260,8 @@ export class AuthController {
     @Res() res: RedirectResponse,
   ) {
     const tokens = await this.authService.validateGoogleUser(req.user);
-    const webUrl = this.config.get<string>("oauth.webAppUrl") ?? "http://localhost:3000";
+    const webUrl =
+      this.config.get<string>("oauth.webAppUrl") ?? "http://localhost:3000";
     const params = new URLSearchParams({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
