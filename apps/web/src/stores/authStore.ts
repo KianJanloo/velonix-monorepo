@@ -17,10 +17,12 @@ interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
   refreshToken: string | null;
+  resetEmail: string | null;
   /** True once the persisted store has rehydrated from localStorage (client only). */
   hasHydrated: boolean;
   setAuth: (user: AuthUser, accessToken: string, refreshToken?: string) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
+  setResetEmail: (resetEmail: string | null) => void;
   updateUser: (patch: Partial<AuthUser>) => void;
   clearAuth: () => void;
   setHasHydrated: (v: boolean) => void;
@@ -32,10 +34,12 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       refreshToken: null,
+      resetEmail: null,
       hasHydrated: false,
       setAuth: (user, accessToken, refreshToken) =>
         set((s) => ({ user, accessToken, refreshToken: refreshToken ?? s.refreshToken })),
       setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
+      setResetEmail: (resetEmail) => set({ resetEmail }),
       updateUser: (patch) =>
         set((s) => ({ user: s.user ? { ...s.user, ...patch } : s.user })),
       clearAuth: () => set({ user: null, accessToken: null, refreshToken: null }),
@@ -53,3 +57,4 @@ export const useAuthStore = create<AuthState>()(
 /** Module-level getters used by apiClient to avoid circular imports */
 export const getAccessToken = () => useAuthStore.getState().accessToken;
 export const getRefreshToken = () => useAuthStore.getState().refreshToken;
+export const getResetEmail = () => useAuthStore.getState().resetEmail;

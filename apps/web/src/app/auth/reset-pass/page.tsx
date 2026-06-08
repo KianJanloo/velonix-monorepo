@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { ForgetPassForm } from "@/components/organisms/ForgetPassForm";
+import { ResetPassForm } from "@/components/organisms/ResetPassForm";
 import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
+import { Suspense } from "react";
 
 export const metadata: Metadata = { title: "Sign In" };
 
 export default function LoginPage() {
   return (
     <AuthPagesLayout
-      card_name="Forget Password"
-      header_information="Forgetting password? No worry"
+      card_name="Reset Password"
+      header_information="Reset your password and login again."
     >
       <Suspense
         fallback={
@@ -18,7 +18,7 @@ export default function LoginPage() {
           </div>
         }
       >
-        <ForgetPassForm />
+        <ResetPassForm />
       </Suspense>
     </AuthPagesLayout>
   );

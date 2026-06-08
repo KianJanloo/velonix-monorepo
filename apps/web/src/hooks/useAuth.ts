@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { apiClient, ApiError } from "@/lib/apiClient";
 import { useAuthStore, type AuthUser } from "@/stores/authStore";
-import type { LoginDto, RegisterDto } from "@velonix/game-engine";
+import type { ForgetPassDto, LoginDto, RegisterDto, ResetPassDto } from "@velonix/game-engine";
 
 interface AuthResponse {
   accessToken: string;
@@ -53,20 +53,34 @@ export function useRegister() {
 }
 
 export function useForgetPass() {
-  // const setAuth = useAuthStore((s) => s.setAuth);
-  // const router = useRouter();
+  const router = useRouter();
 
-  // return useMutation({
-  //   mutationFn: (dto: ForgetPassDto) =>
-  //     apiClient.post<AuthResponse>("/auth/forget-pass", dto),
-  //   onSuccess: ({ accessToken, refreshToken, user }) => {
-  //     setAuth(user, accessToken, refreshToken);
-  //     router.push("/dashboard");
-  //   },
-  //   onError: (err) => {
-  //     toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
-  //   },
-  // });
+  return useMutation({
+    mutationFn: (dto: ForgetPassDto) =>
+      apiClient.post<AuthResponse>("/auth/forget-pass", dto),
+    onSuccess: () => {
+      toast.success('Verification Code sent for your email.')
+      router.push("/auth/reset-pass");
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
+    },
+  });
+}
+
+export function useResetPass() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (dto: ResetPassDto) =>
+      apiClient.post<AuthResponse>("/auth/reset-pass", dto),
+    onSuccess: () => {
+      router.push("/auth/login");
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
+    },
+  });
 }
 
 export function useLogout() {
