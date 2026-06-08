@@ -79,7 +79,8 @@ export class AuthService {
     return this.issueTokens(saved);
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto & { turnstileToken: string | null }) {
+    if (dto.turnstileToken) await this.verifyTurnstile(dto.turnstileToken);
     const user = await this.userRepo.findOne({
       where: { email: dto.email },
       select: {
@@ -107,6 +108,21 @@ export class AuthService {
 
     await this.userRepo.update(user.id, { lastLoginAt: new Date() });
     return this.issueTokens(user);
+  }
+
+  async verifyTurnstile(token: string): Promise<void> {
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        body: new URLSearchParams({
+          secret: process.env.TURNSTILE_SECRET_KEY ?? "",
+          response: token,
+        }),
+      },
+    ) as any;
+    const { success } = await res.json();
+    if (!success) throw new UnauthorizedException("Bot check failed.");
   }
 
   // ── Forget Password ───────────────────────────────────────────────────────

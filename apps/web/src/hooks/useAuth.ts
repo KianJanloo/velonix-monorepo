@@ -22,7 +22,7 @@ export function useLogin() {
   const params = useSearchParams();
 
   return useMutation({
-    mutationFn: (dto: LoginDto) =>
+    mutationFn: (dto: LoginDto & { turnstileToken: string | null }) =>
       apiClient.post<AuthResponse>("/auth/login", dto),
     onSuccess: ({ accessToken, refreshToken, user }) => {
       setAuth(user, accessToken, refreshToken);
@@ -34,7 +34,6 @@ export function useLogin() {
     },
   });
 }
-
 export function useRegister() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();

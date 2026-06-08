@@ -155,7 +155,7 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: "Invalid credentials" })
-  login(@Body(new ZodValidationPipe(LoginSchema)) dto: LoginDto) {
+  login(@Body(new ZodValidationPipe(LoginSchema)) dto: LoginDto & { turnstileToken: string | null }) {
     return this.authService.login(dto);
   }
 

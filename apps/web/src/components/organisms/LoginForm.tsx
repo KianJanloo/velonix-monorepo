@@ -8,12 +8,16 @@ import { Button } from "@/components/atoms/Button";
 import { LoginSchema, type LoginDto } from "@velonix/game-engine";
 import { useLogin } from "@/hooks/useAuth";
 import { GoogleButton } from "@/components/molecules/GoogleButton";
-import { Eye, EyeClosed } from 'lucide-react'
+import { Eye, EyeClosed } from "lucide-react";
 import Link from "next/link";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export function LoginForm() {
   const login = useLogin();
+  const isProduction = process.env.NODE_ENV === 'production';
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -23,8 +27,17 @@ export function LoginForm() {
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 
+  const onSubmit = (data: LoginDto) => {
+    if (isProduction && !turnstileToken) return; // Turnstile not yet solved
+    login.mutate({ ...data, turnstileToken: isProduction ? turnstileToken : null });
+  };
+
   return (
-    <form onSubmit={handleSubmit((data) => login.mutate(data))} noValidate className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      className="flex flex-col gap-4"
+    >
       <Input
         {...register("email")}
         label="Email"
@@ -62,12 +75,28 @@ export function LoginForm() {
           />
           <span className="text-xs text-soft-gray font-ui">Remember me</span>
         </label>
-        <Link href="/auth/forget-pass" className="text-xs text-emerald-glow hover:text-emerald-bright transition-colors font-ui">
+        <Link
+          href="/auth/forget-pass"
+          className="text-xs text-emerald-glow hover:text-emerald-bright transition-colors font-ui"
+        >
           Forgot password?
         </Link>
       </div>
 
-      <Button type="submit" variant="primary" isLoading={isSubmitting || login.isPending} className="w-full mt-2">
+      {isProduction && <Turnstile
+        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+        onSuccess={setTurnstileToken}
+        onExpire={() => setTurnstileToken(null)}
+        onError={() => setTurnstileToken(null)}
+      />}
+
+      <Button
+        type="submit"
+        variant="primary"
+        isLoading={isSubmitting || login.isPending}
+        disabled={isProduction && !turnstileToken}
+        className="w-full mt-2"
+      >
         Sign In
       </Button>
 
