@@ -87,7 +87,7 @@ export function Navbar() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-crimson-flame hover:text-crimson-bright"
+                      className="text-royal-gold hover:text-royal-gold bg-royal-gold/10 hover:bg-royal-gold/20 border-royal-gold/20 hover:border-royal-gold/40"
                     >
                       Admin
                     </Button>

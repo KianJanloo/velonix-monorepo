@@ -46,10 +46,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const SidebarBody = (
     <>
       <div className="h-14 border-b border-warm-wood flex items-center px-5 gap-2 shrink-0">
-        <div className="w-6 h-6 rounded-md bg-crimson-flame/20 border border-crimson-flame/40 flex items-center justify-center">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1 3h3l-2.5 2 1 3L6 7.5 3.5 9l1-3L2 4h3z" fill="currentColor" className="text-crimson-flame" /></svg>
+        <div className="w-6 h-6 rounded-md bg-royal-gold/20 border border-royal-gold/40 flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1 3h3l-2.5 2 1 3L6 7.5 3.5 9l1-3L2 4h3z" fill="currentColor" className="text-royal-gold" /></svg>
         </div>
-        <span className="font-display text-xs font-bold tracking-[0.1em] text-crimson-flame uppercase">Admin</span>
+        <span className="font-display text-xs font-bold tracking-[0.1em] text-royal-gold uppercase">Admin</span>
       </div>
       <nav className="flex-1 p-2 overflow-y-auto">
         {NAV.map(({ href, label, icon }) => {
@@ -101,7 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span className="text-parchment-mid text-sm font-ui truncate">
             <span className="hidden sm:inline">Signed in as </span>
             <span className="text-parchment-light font-semibold">{user.displayName}</span>
-            <span className="ml-2 text-2xs bg-crimson-ghost border border-crimson-flame/30 text-crimson-flame px-1.5 py-0.5 rounded-full">Admin</span>
+            <span className="ml-2 text-2xs bg-crimson-ghost border border-royal-gold/30 text-royal-gold px-1.5 py-0.5 rounded-full">Admin</span>
           </span>
         </header>
         <main className="flex-1 p-4 sm:p-6 min-w-0">{children}</main>

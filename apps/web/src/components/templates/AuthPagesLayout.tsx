@@ -24,7 +24,7 @@ export default function AuthPagesLayout({
     }
   }, [accessToken, router]);
   return (
-    <div className="min-h-screen bg-deep-void flex items-center justify-center px-4">
+    <div className="min-h-screen bg-deep-void flex items-center justify-center px-4 my-8">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
