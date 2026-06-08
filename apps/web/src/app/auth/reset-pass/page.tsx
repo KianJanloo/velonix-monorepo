@@ -4,14 +4,11 @@ import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
 import { Suspense } from "react";
 import Link from "next/dist/client/link";
 
-export const metadata: Metadata = { title: "Sign In" };
+export const metadata: Metadata = { title: "Reset Password" };
 
-export default function LoginPage() {
+export default function ResetPassPage() {
   return (
-    <AuthPagesLayout
-      card_name="Reset Password"
-      header_information="Reset your password and login again."
-    >
+    <AuthPagesLayout card_name="Reset Password">
       <Suspense
         fallback={
           <div className="h-40 flex items-center justify-center">
@@ -25,7 +22,7 @@ export default function LoginPage() {
         <p className="text-soft-gray text-sm font-ui">
           Would you like to change your email?{" "}
           <Link
-            href="/auth/login"
+            href="/auth/forget-pass"
             className="text-emerald-glow hover:text-emerald-bright transition-colors"
           >
             Update your email

@@ -8,10 +8,7 @@ export const metadata: Metadata = { title: "Sign In" };
 
 export default function LoginPage() {
   return (
-    <AuthPagesLayout
-      card_name="Sign In"
-      header_information="Welcome back to the table"
-    >
+    <AuthPagesLayout card_name="Sign In">
       <Suspense
         fallback={
           <div className="h-40 flex items-center justify-center">

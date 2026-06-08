@@ -34,6 +34,8 @@ import {
   type LoginDto,
   type ForgetPassDto,
   type ResetPassDto,
+  RegisterCompleteSchema,
+  RegisterCompleteDto,
 } from "@velonix/game-engine";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
@@ -59,6 +61,17 @@ class RegisterBodyDto {
   password!: string;
 }
 
+class RegisterCompleteBodyDto {
+  @ApiProperty({ example: "alice@example.com" })
+  email!: string;
+
+  @ApiProperty({ description: "The verification token sent for email" })
+  token!: string;
+
+  @ApiProperty({ example: "At3F2s" })
+  code!: string;
+}
+
 class LoginBodyDto {
   @ApiProperty({ example: "alice@example.com" })
   email!: string;
@@ -82,7 +95,7 @@ class resetPassBodyDto {
   @ApiProperty({ example: "S3cur3P@ss" })
   newPassword!: string;
 
-  @ApiProperty({ description: "The refresh token issued at login" })
+  @ApiProperty({ description: "The verification token sent for email" })
   token!: string;
 
   @ApiProperty({ example: "At3F2s" })
@@ -143,6 +156,22 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Post("register/complete")
+  @Version("1")
+  @Throttle(AUTH_THROTTLE)
+  @ApiOperation({ summary: "Complete user registration" })
+  @ApiBody({ type: RegisterCompleteBodyDto })
+  @ApiResponse({
+    status: 201,
+    description: "Account created",
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 409, description: "Email or username already in use" })
+  @ApiResponse({ status: 400, description: "Validation error" })
+  completeRegister(@Body(new ZodValidationPipe(RegisterCompleteSchema)) dto: RegisterCompleteDto) {
+    return this.authService.completeRegister(dto);
+  }
+
   @Post("login")
   @Version("1")
   @Throttle(AUTH_THROTTLE)
@@ -155,7 +184,10 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: "Invalid credentials" })
-  login(@Body(new ZodValidationPipe(LoginSchema)) dto: LoginDto & { turnstileToken: string | null }) {
+  login(
+    @Body(new ZodValidationPipe(LoginSchema))
+    dto: LoginDto & { turnstileToken: string | null },
+  ) {
     return this.authService.login(dto);
   }
 
@@ -189,9 +221,7 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: "Invalid code or token" })
-  resetPass(
-    @Body(new ZodValidationPipe(ResetPassSchema)) dto: ResetPassDto,
-  ) {
+  resetPass(@Body(new ZodValidationPipe(ResetPassSchema)) dto: ResetPassDto) {
     return this.authService.resetPass(dto);
   }
 

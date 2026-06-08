@@ -10,7 +10,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
-  OneToMany,
   BeforeInsert,
   BeforeUpdate,
 } from "typeorm";
@@ -82,11 +81,26 @@ export class UserEntity {
   @Column({
     name: "email_verification_token",
     type: "varchar",
-    length: 128,
     nullable: true,
     select: false,
   })
-  emailVerificationToken!: string | null;
+  emailVerificationTokenHash!: string | null;
+
+  @Column({
+    name: "email_verification_code_",
+    type: "varchar",
+    nullable: true,
+    select: false,
+  })
+  emailVerificationCodeHash!: string | null;
+
+  @Column({
+    name: "email_verification_expires_at",
+    type: "timestamptz",
+    nullable: true,
+    select: false,
+  })
+  emailVerificationExpiresAt!: Date | null;
 
   @Column({
     name: "password_reset_token",

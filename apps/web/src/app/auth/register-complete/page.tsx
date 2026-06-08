@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { RegisterForm } from "@/components/organisms/RegisterForm";
 import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
+import { RegisterCompleteForm } from "@/components/organisms/RegisterCompleteForm";
 
 export const metadata: Metadata = { title: "Create Account" };
 
-export default function RegisterPage() {
+export default function RegisterCompletePage() {
   return (
     <AuthPagesLayout card_name="Create Account">
-      <RegisterForm />
+      <RegisterCompleteForm />
       <div className="mt-6 text-center">
         <p className="text-soft-gray text-sm font-ui">
           Already have an account?{" "}

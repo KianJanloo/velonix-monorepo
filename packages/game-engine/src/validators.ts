@@ -80,14 +80,11 @@ export const CreateGameSchema = BaseCreateGameSchema.refine(
   {
     message: "Minimum player count cannot exceed maximum",
     path: ["playerCountMin"],
-  }
-).refine(
-  (data) => data.playtimeMin <= data.playtimeMax,
-  {
-    message: "Minimum playtime cannot exceed maximum",
-    path: ["playtimeMin"],
-  }
-);
+  },
+).refine((data) => data.playtimeMin <= data.playtimeMax, {
+  message: "Minimum playtime cannot exceed maximum",
+  path: ["playtimeMin"],
+});
 
 export const UpdateGameSchema = BaseCreateGameSchema.partial().extend({
   // Studio editor state — arbitrary JSON snapshot of components/board design
@@ -100,23 +97,24 @@ export const UpdateGameSchema = BaseCreateGameSchema.partial().extend({
   hasTrial: z.boolean().optional(),
 });
 
-export const SetGamePricingSchema = z.object({
-  isFree: z.boolean(),
-  priceUsd: z.number().int().min(99).max(9999).optional().nullable(),
-  hasTrial: z.boolean().default(false),
-}).refine(
-  (data) => data.isFree || (data.priceUsd !== undefined && data.priceUsd !== null),
-  {
-    message: "Paid games must have a price",
-    path: ["priceUsd"],
-  }
-).refine(
-  (data) => !data.hasTrial || !data.isFree,
-  {
+export const SetGamePricingSchema = z
+  .object({
+    isFree: z.boolean(),
+    priceUsd: z.number().int().min(99).max(9999).optional().nullable(),
+    hasTrial: z.boolean().default(false),
+  })
+  .refine(
+    (data) =>
+      data.isFree || (data.priceUsd !== undefined && data.priceUsd !== null),
+    {
+      message: "Paid games must have a price",
+      path: ["priceUsd"],
+    },
+  )
+  .refine((data) => !data.hasTrial || !data.isFree, {
     message: "Free games cannot have a trial",
     path: ["hasTrial"],
-  }
-);
+  });
 
 // ---------------------------------------------------------------------------
 // GAME COMPONENTS
@@ -137,7 +135,7 @@ export const CreateComponentSchema = z.object({
   gameId: UUIDSchema,
   name: z.string().min(1).max(64).trim(),
   type: ComponentTypeSchema,
-  width: z.number().positive().max(600),    // mm — max A2 paper width
+  width: z.number().positive().max(600), // mm — max A2 paper width
   height: z.number().positive().max(600),
   quantity: z.number().int().min(1).max(1000).default(1),
 });
@@ -154,7 +152,7 @@ export const RegisterSchema = z.object({
     .max(32, "Username cannot exceed 32 characters")
     .regex(
       /^[a-zA-Z0-9_-]+$/,
-      "Username can only contain letters, numbers, underscores, and hyphens"
+      "Username can only contain letters, numbers, underscores, and hyphens",
     )
     .toLowerCase()
     .trim(),
@@ -171,6 +169,12 @@ export const RegisterSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number"),
 });
 
+export const RegisterCompleteSchema = z.object({
+  email: z.string().email("Invalid email address").toLowerCase().trim(),
+  token: z.string().min(1, "Invalid token"),
+  code: z.string().length(6, "Code must be 6 characters"),
+});
+
 export const LoginSchema = z.object({
   email: z.string().email().toLowerCase().trim(),
   password: z.string().min(1),
@@ -184,14 +188,20 @@ export const ForgetPassSchema = z.object({
 export const ResetPassSchema = z.object({
   email: z.string().email().toLowerCase().trim(),
   code: z.string().length(6),
-  token: z.string().length(128),
+  token: z.string().min(1, "Invalid token"),
   newPassword: z.string().min(1),
 });
 
 export const UpdateProfileSchema = z.object({
   displayName: z.string().min(2).max(64).trim().optional(),
   bio: z.string().max(500).trim().nullable().optional(),
-  avatarUrl: z.string().url("Must be a valid URL").max(512).nullable().optional().or(z.literal("")),
+  avatarUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .max(512)
+    .nullable()
+    .optional()
+    .or(z.literal("")),
 });
 
 // ---------------------------------------------------------------------------
@@ -209,7 +219,14 @@ export const MarketplaceFiltersSchema = z.object({
   tags: z.array(z.string()).max(5).optional(),
   search: z.string().max(100).trim().optional(),
   sort: z
-    .enum(["newest", "popular", "top_rated", "price_asc", "price_desc", "most_sold"])
+    .enum([
+      "newest",
+      "popular",
+      "top_rated",
+      "price_asc",
+      "price_desc",
+      "most_sold",
+    ])
     .default("newest"),
   page: z.number().int().min(1).default(1),
   perPage: z.number().int().min(1).max(48).default(24),
@@ -235,6 +252,7 @@ export type UpdateGameDto = z.infer<typeof UpdateGameSchema>;
 export type SetGamePricingDto = z.infer<typeof SetGamePricingSchema>;
 export type CreateComponentDto = z.infer<typeof CreateComponentSchema>;
 export type RegisterDto = z.infer<typeof RegisterSchema>;
+export type RegisterCompleteDto = z.infer<typeof RegisterCompleteSchema>;
 export type LoginDto = z.infer<typeof LoginSchema>;
 export type ForgetPassDto = z.infer<typeof ForgetPassSchema>;
 export type ResetPassDto = z.infer<typeof ResetPassSchema>;

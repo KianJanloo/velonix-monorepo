@@ -5,12 +5,22 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { apiClient, ApiError } from "@/lib/apiClient";
 import { useAuthStore, type AuthUser } from "@/stores/authStore";
-import type { ForgetPassDto, LoginDto, RegisterDto, ResetPassDto } from "@velonix/game-engine";
+import type {
+  ForgetPassDto,
+  LoginDto,
+  RegisterCompleteDto,
+  RegisterDto,
+  ResetPassDto,
+} from "@velonix/game-engine";
 
 interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   user: AuthUser;
+}
+
+interface TokenResponse {
+  token: string;
 }
 
 const API_ROOT =
@@ -30,19 +40,46 @@ export function useLogin() {
       router.push(next && next.startsWith("/") ? next : "/dashboard");
     },
     onError: (err) => {
-      toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
+      toast.error(
+        err instanceof ApiError
+          ? err.message
+          : "Something went wrong. Try again.",
+      );
     },
   });
 }
+
 export function useRegister() {
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const { setToken, setRegisterEmail } = useAuthStore();
   const router = useRouter();
 
   return useMutation({
     mutationFn: (dto: RegisterDto) =>
-      apiClient.post<AuthResponse>("/auth/register", dto),
+      apiClient.post<TokenResponse>("/auth/register", dto),
+    onSuccess: ({ token }, variables) => {
+      setToken(token);
+      setRegisterEmail(variables.email);
+      router.push("/auth/register-complete");
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
+    },
+  });
+}
+
+export function useRegisterComplete() {
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const setToken = useAuthStore((s) => s.setToken);
+  const setRegisterEmail = useAuthStore((s) => s.setRegisterEmail);
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (dto: RegisterCompleteDto) =>
+      apiClient.post<AuthResponse>("/auth/register/complete", dto),
     onSuccess: ({ accessToken, refreshToken, user }) => {
       setAuth(user, accessToken, refreshToken);
+      setToken(null);
+      setRegisterEmail(null);
       router.push("/dashboard");
     },
     onError: (err) => {
@@ -53,12 +90,15 @@ export function useRegister() {
 
 export function useForgetPass() {
   const router = useRouter();
+  const { setToken, setResetEmail } = useAuthStore();
 
   return useMutation({
     mutationFn: (dto: ForgetPassDto) =>
-      apiClient.post<AuthResponse>("/auth/forget-pass", dto),
-    onSuccess: () => {
-      toast.success('Verification Code sent for your email.')
+      apiClient.post<{ token: string }>("/auth/forget-pass", dto),
+    onSuccess: ({ token }, variables) => {
+      setToken(token);
+      setResetEmail(variables.email);
+      toast.success("Verification code sent to your email.");
       router.push("/auth/reset-pass");
     },
     onError: (err) => {
@@ -69,11 +109,15 @@ export function useForgetPass() {
 
 export function useResetPass() {
   const router = useRouter();
+  const setToken = useAuthStore((s) => s.setToken);
+  const setResetEmail = useAuthStore((s) => s.setResetEmail);
 
   return useMutation({
     mutationFn: (dto: ResetPassDto) =>
-      apiClient.post<AuthResponse>("/auth/reset-pass", dto),
+      apiClient.post("/auth/reset-pass", dto),
     onSuccess: () => {
+      setToken(null);
+      setResetEmail(null);
       router.push("/auth/login");
     },
     onError: (err) => {

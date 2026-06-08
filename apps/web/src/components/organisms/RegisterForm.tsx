@@ -64,7 +64,7 @@ export function RegisterForm() {
         />
         <button
           type="button"
-          onClick={() => setShowPassword(!showPassword)}
+          onClick={() => setShowPassword((p) => !p)}
           className="absolute right-3 top-9 text-soft-gray hover:text-emerald-glow transition-colors"
         >
           {showPassword ? <EyeClosed size={16} /> : <Eye size={16} />}
@@ -76,12 +76,19 @@ export function RegisterForm() {
         isLoading={isSubmitting || register_.isPending}
         className="w-full mt-2"
       >
-        Create Account — Free
+        Send Verification Email
       </Button>
       <GoogleButton label="Sign up with Google" />
       <p className="text-2xs text-soft-gray-dark font-ui text-center">
-        By creating an account you agree to our Terms of Service and Privacy
-        Policy.
+        By creating an account you agree to our{" "}
+        <a className="text-emerald-glow font-bold" href="/terms">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a className="text-emerald-glow font-bold" href="/privacy">
+          Privacy Policy
+        </a>
+        .
       </p>
     </form>
   );

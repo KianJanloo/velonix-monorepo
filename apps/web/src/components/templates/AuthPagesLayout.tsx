@@ -8,11 +8,9 @@ import { VelonixLogo } from "../atoms";
 
 export default function AuthPagesLayout({
   children,
-  header_information,
   card_name,
 }: {
   children: React.ReactNode;
-  header_information: string;
   card_name: string;
 }) {
   const router = useRouter();
@@ -24,7 +22,7 @@ export default function AuthPagesLayout({
     }
   }, [accessToken, router]);
   return (
-    <div className="min-h-screen bg-deep-void flex items-center justify-center px-4 my-8">
+    <div className="min-h-screen bg-deep-void flex items-center justify-center px-4 my-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
@@ -34,9 +32,6 @@ export default function AuthPagesLayout({
               VELONIX
             </span>
           </Link>
-          <p className="text-soft-gray text-sm mt-3 font-ui">
-            {header_information}
-          </p>
         </div>
 
         {/* Card */}

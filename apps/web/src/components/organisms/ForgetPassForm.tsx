@@ -6,11 +6,9 @@ import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
 import { ForgetPassDto, ForgetPassSchema } from "@velonix/game-engine";
 import { useForgetPass } from "@/hooks/useAuth";
-import { useAuthStore } from "@/stores/authStore";
 
 export function ForgetPassForm() {
   const forgetPass = useForgetPass();
-  const { setResetEmail } = useAuthStore();
 
   const {
     register,
@@ -23,10 +21,7 @@ export function ForgetPassForm() {
 
   return (
     <form
-      onSubmit={handleSubmit((data) => {
-        forgetPass.mutate(data);
-        setResetEmail(data.email);
-      })}
+      onSubmit={handleSubmit((data) => forgetPass.mutate(data))}
       noValidate
       className="flex flex-col gap-4"
     >
@@ -39,7 +34,6 @@ export function ForgetPassForm() {
         error={!!errors.email}
         errorMessage={errors.email?.message}
       />
-
       <Button
         type="submit"
         variant="primary"

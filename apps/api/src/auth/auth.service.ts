@@ -11,6 +11,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { UserEntity } from "../users/user.entity";
 import { SettingsService } from "../settings/settings.service";
 import type {
@@ -18,7 +19,9 @@ import type {
   LoginDto,
   ForgetPassDto,
   ResetPassDto,
+  RegisterCompleteDto,
 } from "@velonix/game-engine";
+import { MailService } from "../mail/mail.service";
 
 interface JwtPayload {
   sub: string;
@@ -43,6 +46,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly settings: SettingsService,
+    private readonly mailService: MailService,
   ) {}
 
   // ── Registration / Login ────────────────────────────────────────────────
@@ -57,7 +61,10 @@ export class AuthService {
     const exists = await this.userRepo.findOne({
       where: [{ email: dto.email }, { username: dto.username }],
     });
-    if (exists) {
+    if (exists && !exists.isEmailVerified) {
+      await this.userRepo.delete(exists.id);
+    }
+    if (exists && exists.isEmailVerified) {
       throw new ConflictException(
         exists.email === dto.email
           ? "An account with this email already exists."
@@ -75,7 +82,75 @@ export class AuthService {
       passwordHash,
     });
 
+    const code = this.generateCode();
+    const token = this.generateToken();
+
+    user.emailVerificationCodeHash = await bcrypt.hash(code, rounds);
+    user.emailVerificationTokenHash = await bcrypt.hash(token, rounds);
+    user.emailVerificationExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await this.userRepo.save(user);
+
+    await this.mailService.sendPasswordReset({
+      to: user.email,
+      code,
+      expiresInMinutes: 15,
+    });
+
+    return {
+      message:
+        "Account created. Please check your email for a verification code.",
+      token,
+    };
+  }
+
+  async completeRegister(dto: RegisterCompleteDto) {
+    const user = await this.userRepo.findOne({
+      where: { email: dto.email },
+      select: {
+        emailVerificationCodeHash: true,
+        emailVerificationTokenHash: true,
+        emailVerificationExpiresAt: true,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    if (
+      !user.emailVerificationExpiresAt ||
+      user.emailVerificationExpiresAt < new Date()
+    ) {
+      throw new BadRequestException("Verification code has expired");
+    }
+
+    const isCodeValid = await bcrypt.compare(
+      dto.code,
+      user.emailVerificationCodeHash ?? "",
+    );
+    if (!isCodeValid) {
+      throw new BadRequestException("Invalid verification code");
+    }
+
+    const isTokenValid = await bcrypt.compare(
+      dto.token,
+      user.emailVerificationTokenHash ?? "",
+    );
+    if (!isTokenValid) {
+      throw new UnauthorizedException("Invalid verification token");
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationCodeHash = null;
+    user.emailVerificationTokenHash = null;
+    user.emailVerificationExpiresAt = null;
     const saved = await this.userRepo.save(user);
+
+    await this.mailService.sendWelcome({
+      to: saved.email,
+      displayName: saved.displayName ?? saved.username,
+    });
+
     return this.issueTokens(saved);
   }
 
@@ -111,7 +186,7 @@ export class AuthService {
   }
 
   async verifyTurnstile(token: string): Promise<void> {
-    const res = await fetch(
+    const res = (await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
       {
         method: "POST",
@@ -120,7 +195,7 @@ export class AuthService {
           response: token,
         }),
       },
-    ) as any;
+    )) as any;
     const { success } = await res.json();
     if (!success) throw new UnauthorizedException("Bot check failed.");
   }
@@ -144,26 +219,23 @@ export class AuthService {
 
     const code = this.generateCode();
     const token = this.generateToken();
-    const tokenWithCode = `${token}?code=${code}`;
     const rounds = this.config.get<number>("app.bcryptRounds") ?? 12;
 
     user.passwordResetTokenHash = await bcrypt.hash(token, rounds);
     user.passwordResetCodeHash = await bcrypt.hash(code, rounds);
     user.passwordResetExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    // Sending email function:
-    // await this.mailerService.sendMail({
-    //   to: user.email,
-    //   subject: "Password Reset Code",
-    //   text: `Your password reset code is: ${code}. It expires in 15 minutes.`,
-    // });
+    await this.mailService.sendPasswordReset({
+      to: user.email,
+      code,
+      expiresInMinutes: 15,
+    });
 
     await this.userRepo.save(user);
 
     return {
       message: "Verification code sent to your email",
-      // mock
-      tokenWithCode,
+      token,
     };
   }
 
@@ -361,8 +433,8 @@ export class AuthService {
   }
 
   private generateToken(): string {
-    const array = new Uint8Array(96); // 96 bytes → 128 base64 chars
-    crypto.getRandomValues(array);
-    return btoa(String.fromCharCode(...array)).slice(0, 128);
+    // Use Node crypto to produce a URL-safe-ish random token.
+    // 96 bytes -> base64 length ~128 chars; slice to 128 for consistency.
+    return randomBytes(96).toString("base64").slice(0, 128);
   }
 }

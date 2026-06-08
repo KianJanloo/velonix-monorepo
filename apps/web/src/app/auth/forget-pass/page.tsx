@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ForgetPassForm } from "@/components/organisms/ForgetPassForm";
 import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
+import Link from "next/link";
 
-export const metadata: Metadata = { title: "Sign In" };
+export const metadata: Metadata = { title: "Forget Password" };
 
-export default function LoginPage() {
+export default function ForgetPassPage() {
   return (
-    <AuthPagesLayout
-      card_name="Forget Password"
-      header_information="Forgetting password? No worry"
-    >
+    <AuthPagesLayout card_name="Forget Password">
       <Suspense
         fallback={
           <div className="h-40 flex items-center justify-center">
@@ -19,6 +17,17 @@ export default function LoginPage() {
         }
       >
         <ForgetPassForm />
+        <div className="mt-6 text-center">
+          <p className="text-soft-gray text-sm font-ui">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="text-emerald-glow hover:text-emerald-bright transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
       </Suspense>
     </AuthPagesLayout>
   );

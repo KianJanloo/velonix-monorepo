@@ -9,13 +9,21 @@ import { useResetPass } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { Eye, EyeClosed } from "lucide-react";
 import { Input } from "@/components/atoms/Input";
-import { getResetEmail, useAuthStore } from "@/stores/authStore";
+import { getResetEmail, getToken } from "@/stores/authStore";
+import { useRouter } from "next/navigation";
 
 export function ResetPassForm() {
   const resetPass = useResetPass();
   const [showPassword, setShowPassword] = useState(false);
   const resetEmail = getResetEmail();
-  const { setResetEmail } = useAuthStore();
+  const token = getToken();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!resetEmail || !token) {
+      router.replace("/auth/forget-pass");
+    }
+  }, [resetEmail, token, router]);
 
   const {
     register,
@@ -29,18 +37,15 @@ export function ResetPassForm() {
   });
 
   useEffect(() => {
-    const token = sessionStorage.getItem("resetToken");
     if (token) setValue("token", token);
     if (resetEmail) setValue("email", resetEmail);
-  }, [setValue]);
+  }, [token, resetEmail, setValue]);
+
+  if (!resetEmail || !token) return null;
 
   return (
     <form
-      onSubmit={handleSubmit((data) => {
-        resetPass.mutate(data);
-        sessionStorage.removeItem("resetToken");
-        setResetEmail(null);
-      })}
+      onSubmit={handleSubmit((data) => resetPass.mutate(data))}
       noValidate
       className="flex flex-col gap-4"
     >
@@ -59,7 +64,6 @@ export function ResetPassForm() {
           />
         )}
       />
-
       <div className="relative">
         <Input
           {...register("newPassword")}
@@ -78,7 +82,6 @@ export function ResetPassForm() {
           {showPassword ? <EyeClosed size={16} /> : <Eye size={16} />}
         </button>
       </div>
-
       <Button
         type="submit"
         variant="primary"

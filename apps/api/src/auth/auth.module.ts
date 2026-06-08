@@ -10,12 +10,14 @@ import { LocalStrategy } from "./strategies/local.strategy";
 import { GoogleStrategy } from "./strategies/google.strategy";
 import { UserEntity } from "../users/user.entity";
 import { SettingsModule } from "../settings/settings.module";
+import { MailModule } from "../mail/mail.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity]),
     SettingsModule,
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
