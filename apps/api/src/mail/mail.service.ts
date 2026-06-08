@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Resend } from "resend";
+import * as nodemailer from "nodemailer";
 
 interface SendMailOptions {
   to: string;
@@ -10,20 +10,38 @@ interface SendMailOptions {
 
 @Injectable()
 export class MailService {
-  private readonly resend: Resend;
+  private readonly transporter: nodemailer.Transporter;
   private readonly from: string;
   private readonly logger = new Logger(MailService.name);
 
   constructor(private readonly config: ConfigService) {
-    this.resend = new Resend(this.config.get<string>("RESEND_API_KEY"));
+    this.transporter = nodemailer.createTransport({
+      host: this.config.get<string>("RESEND_SMTP_HOST"),
+      port: this.config.get<string>("RESEND_SMTP_PORT") ?? 587,
+      secure: this.config.get<string>("RESEND_SMTP_SECURE") === "true",
+      auth: {
+        user: this.config.get<string>("RESEND_SMTP_USER"),
+        pass: this.config.get<string>("RESEND_SMTP_PASS"),
+      },
+    } as any);
+
     this.from = `${this.config.get("EMAIL_FROM_NAME") ?? "Velonix"} <${this.config.get("EMAIL_FROM") ?? "noreply@velonix.gg"}>`;
   }
 
   // ── Send ─────────────────────────────────────────────────────────────────
 
   private async send(opts: SendMailOptions): Promise<void> {
+    console.log({
+      host: this.config.get<string>("RESEND_SMTP_HOST"),
+      port: this.config.get<string>("RESEND_SMTP_PORT") ?? 587,
+      secure: this.config.get<string>("RESEND_SMTP_SECURE") === "true",
+      auth: {
+        user: this.config.get<string>("RESEND_SMTP_USER"),
+        pass: this.config.get<string>("RESEND_SMTP_PASS"),
+      },
+    });
     try {
-      await this.resend.emails.send({
+      await this.transporter.sendMail({
         from: this.from,
         to: opts.to,
         subject: opts.subject,
