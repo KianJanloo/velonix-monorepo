@@ -124,6 +124,10 @@ export function PropertiesPanel({
   canvasW = CANVAS_W_MM,
 
   canvasH = CANVAS_H_MM,
+
+  pages = [],
+
+  onNavigate,
 }: {
   comp: CanvasComp;
 
@@ -140,6 +144,10 @@ export function PropertiesPanel({
   canvasW?: number;
 
   canvasH?: number;
+
+  pages?: { id: string; name: string }[];
+
+  onNavigate?: (pageId: string) => void;
 }) {
   const [lockAspect, setLockAspect] = useState(false);
 
@@ -368,9 +376,61 @@ export function PropertiesPanel({
         />
       </div>
 
-      <div className="h-px bg-warm-wood" />
+      {/* Page link */}
 
-      {/* Arrange */}
+      {pages.length > 1 && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <SectionLabel>Link to page</SectionLabel>
+
+            {comp.linkToPageId && (
+              <button
+                title="Remove link"
+                onClick={() => onChange({ linkToPageId: undefined })}
+                className="text-[10px] font-ui text-soft-gray-dark hover:text-crimson-flame px-1.5 py-0.5 rounded hover:bg-crimson-ghost"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+
+          <select
+            value={comp.linkToPageId ?? ""}
+            onChange={(e) =>
+              onChange({
+                linkToPageId: e.target.value || undefined,
+              })
+            }
+            className="w-full bg-rich-wood-mid border border-warm-wood rounded-lg px-2 py-1.5 text-2xs font-ui text-parchment-light outline-none focus:border-emerald-glow"
+          >
+            <option value="">— No link —</option>
+
+            {pages.map((p) => (
+              <option key={p.id} value={p.id} disabled={p.id === comp.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+
+          {comp.linkToPageId && onNavigate && (
+            <button
+              onClick={() => onNavigate(comp.linkToPageId!)}
+              className="mt-1.5 w-full py-1.5 rounded-lg bg-emerald-ghost border border-emerald-glow/30 text-emerald-glow text-2xs font-ui hover:bg-emerald-glow hover:text-deep-void transition-colors"
+            >
+              ⇢ Go to{" "}
+              {pages.find((p) => p.id === comp.linkToPageId)?.name ?? "page"}
+            </button>
+          )}
+
+          {comp.linkToPageId && (
+            <p className="mt-1 text-[10px] text-soft-gray-dark font-ui leading-tight">
+              Ctrl+click this component to jump to the linked page.
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="h-px bg-warm-wood" />
 
       <div>
         <SectionLabel>Arrange</SectionLabel>

@@ -187,6 +187,8 @@ export interface CompViewProps {
   onRotateStart: (e: ReactPointerEvent, comp: CanvasComp) => void;
   onTextChange: (id: string, text: string) => void;
   onContextMenu?: (e: ReactMouseEvent, comp: CanvasComp) => void;
+  /** When set, Ctrl+clicking this component jumps to the linked page. */
+  onNavigateToPage?: (pageId: string) => void;
 }
 
 export type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
@@ -212,16 +214,27 @@ export function CompView({
   onRotateStart,
   onTextChange,
   onContextMenu,
+  onNavigateToPage,
 }: CompViewProps) {
   const px = (mm: number) => safeNum(mm, 0) * MM_TO_PX;
   const isCircle = isCircleType(comp.type);
   const w = px(comp.width),
     h = px(comp.height);
+  const hasLink = !!comp.linkToPageId && !!onNavigateToPage;
 
   return (
     <div
-      onPointerDown={(e) => editable && onPointerDown(e, comp)}
+      onPointerDown={(e) => {
+        // Ctrl+click on a linked component navigates; normal click selects/moves.
+        if (hasLink && e.ctrlKey) {
+          e.stopPropagation();
+          onNavigateToPage!(comp.linkToPageId!);
+          return;
+        }
+        if (editable) onPointerDown(e, comp);
+      }}
       onContextMenu={(e) => onContextMenu?.(e, comp)}
+      title={hasLink ? `Ctrl+click → go to linked page` : undefined}
       style={{
         position: "absolute",
         left: px(comp.x),
@@ -231,7 +244,13 @@ export function CompView({
         transform: `rotate(${comp.rotation}deg)`,
         transformOrigin: "center",
         opacity: comp.opacity / 100,
-        cursor: comp.locked ? "not-allowed" : editable ? "move" : "default",
+        cursor: comp.locked
+          ? "not-allowed"
+          : hasLink
+            ? "pointer"
+            : editable
+              ? "move"
+              : "default",
         display: comp.visible ? "block" : "none",
       }}
     >
@@ -293,6 +312,36 @@ export function CompView({
             {comp.text}
           </div>
         ))}
+
+      {/* Page-link badge — visible whenever the component has a linkToPageId */}
+      {hasLink && (
+        <div
+          className="absolute pointer-events-none z-10"
+          style={{
+            top: -8,
+            right: -8,
+            background: "#3ddc97",
+            border: "1.5px solid #0a0a0a",
+            borderRadius: "50%",
+            width: 16,
+            height: 16,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          title="Linked to another page"
+        >
+          <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+            <path
+              d="M2 4.5h5M5 2.5l2 2-2 2"
+              stroke="#0a0a0a"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      )}
 
       {/* Selection outline (all selected, incl. group members) */}
       {selected && (

@@ -68,6 +68,12 @@ export interface CanvasComp {
   image?: string;
   /** When set, this component belongs to a group and moves with its siblings. */
   groupId?: string;
+  /**
+   * Page-link: when set, Ctrl+clicking this component in the editor jumps to
+   * the target page. Renders a ⇢ badge on the component so designers can see
+   * connections at a glance.
+   */
+  linkToPageId?: string;
 }
 
 // Rendering predicates shared by the editor canvas and previews.
