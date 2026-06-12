@@ -73,7 +73,7 @@ export interface CanvasComp {
    * the target page. Renders a ⇢ badge on the component so designers can see
    * connections at a glance.
    */
-  linkToPageId?: string;
+  linkToPageId?: string | undefined;
 }
 
 // Rendering predicates shared by the editor canvas and previews.

@@ -2,17 +2,9 @@
 
 import { useState } from "react";
 
-import {
-  CANVAS_W_MM,
-  CANVAS_H_MM,
-  isCircleType,
-  COMP_ICONS,
-} from "../core";
+import { CANVAS_W_MM, CANVAS_H_MM, isCircleType, COMP_ICONS } from "../core";
 
-import type {
-  CompType,
-  CanvasComp,
-} from "../core";
+import type { CompType, CanvasComp } from "../core";
 
 import {
   SectionLabel,
@@ -470,4 +462,3 @@ export function PropertiesPanel({
     </div>
   );
 }
-
