@@ -31,6 +31,21 @@ export function EditorPagesBar({ ed }: { ed: StudioEditor }) {
     effectiveReadOnly,
   } = ed;
 
+  // Build a set of page IDs that have at least one incoming link from any page.
+  const linkedPageIds = new Set<string>(
+    pages.flatMap((p) =>
+      p.components
+        .map((c) => c.linkToPageId)
+        .filter((id): id is string => !!id),
+    ),
+  );
+
+  // Count outgoing links per page (how many components on this page link elsewhere).
+  const outgoingLinkCount: Record<string, number> = {};
+  for (const p of pages) {
+    outgoingLinkCount[p.id] = p.components.filter((c) => !!c.linkToPageId).length;
+  }
+
   return (
     <>
       {/* Pages bar — switch / add / rename / resize canvases */}
@@ -67,7 +82,7 @@ export function EditorPagesBar({ ed }: { ed: StudioEditor }) {
                 />
               ) : (
                 <span
-                  className="text-2xs font-ui whitespace-nowrap"
+                  className="text-2xs font-ui whitespace-nowrap flex items-center gap-1"
                   onDoubleClick={(e) => {
                     e.stopPropagation();
 
@@ -75,6 +90,57 @@ export function EditorPagesBar({ ed }: { ed: StudioEditor }) {
                   }}
                 >
                   {p.name}
+                  {/* Incoming-link indicator: another component links to this page */}
+                  {linkedPageIds.has(p.id) && (
+                    <span
+                      title="Another component links here"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        background: "rgba(61,220,151,0.25)",
+                        border: "1px solid rgba(61,220,151,0.5)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <svg width="7" height="7" viewBox="0 0 7 7" fill="none">
+                        <path
+                          d="M1.5 3.5h4M4 1.5l1.5 2-1.5 2"
+                          stroke="#3ddc97"
+                          strokeWidth="1.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  )}
+                  {/* Outgoing-link indicator: this page has components that link elsewhere */}
+                  {(outgoingLinkCount[p.id] ?? 0) > 0 && (
+                    <span
+                      title={`${outgoingLinkCount[p.id]} linked component${outgoingLinkCount[p.id] === 1 ? "" : "s"}`}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minWidth: 14,
+                        height: 12,
+                        borderRadius: 6,
+                        background: "rgba(245,196,81,0.2)",
+                        border: "1px solid rgba(245,196,81,0.4)",
+                        color: "#f5c451",
+                        fontSize: 8,
+                        fontFamily: "monospace",
+                        fontWeight: 700,
+                        padding: "0 3px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {outgoingLinkCount[p.id]}⇢
+                    </span>
+                  )}
                 </span>
               )}
 

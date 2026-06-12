@@ -77,6 +77,8 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
     openCanvasMenu,
     toolCursor,
     reversed,
+    pages,
+    switchPage,
   } = ed;
 
   return (
@@ -269,6 +271,11 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   onRotateStart={onRotateStart}
                   onContextMenu={openCompMenu}
                   onTextChange={(id, text) => updateComp(id, { text }, false)}
+                  onNavigateToPage={c.linkToPageId ? (pageId) => {
+                    const target = pages.find((p) => p.id === pageId);
+                    switchPage(pageId);
+                    toast.success(`Jumped to "${target?.name ?? "page"}"`);
+                  } : undefined}
                 />
               ))}
             </div>
@@ -282,7 +289,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
 
           <div className="absolute bottom-3 right-3 text-2xs text-soft-gray-dark font-ui bg-rich-wood-dark/70 rounded px-2 py-1 pointer-events-none hidden lg:block">
             drag to box-select · shift-click to add · ⌘G group / ⌘⇧G ungroup ·
-            right-click for menu
+            ctrl+click linked component to jump page · right-click for menu
           </div>
 
           {/* Panel collapse toggles (desktop) */}
@@ -390,6 +397,8 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   multiCount={selectionIds.length}
                   canvasW={canvasW}
                   canvasH={canvasH}
+                  pages={pages}
+                  onNavigate={(pageId) => switchPage(pageId)}
                   onChange={(p) => updateComp(selectedComp.id, p, false)}
                   onDup={duplicateSelected}
                   onDel={deleteSelected}
