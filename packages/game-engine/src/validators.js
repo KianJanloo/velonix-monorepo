@@ -5,8 +5,8 @@
  * Used both client-side (form validation) and server-side (API DTO validation).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateReviewSchema = exports.MarketplaceFiltersSchema = exports.UpdateProfileSchema = exports.ResetPassSchema = exports.ForgetPassSchema = exports.RegisterCompleteSchema = exports.LoginSchema = exports.RegisterSchema = exports.CreateComponentSchema = exports.ComponentTypeSchema = exports.SetGamePricingSchema = exports.UpdateGameSchema = exports.CreateGameSchema = exports.GameComplexitySchema = exports.GameCategorySchema = exports.SemVerSchema = exports.HexColorSchema = exports.UUIDSchema = void 0;
-const zod_1 = require("zod");
+exports.CreateReviewSchema = exports.MarketplaceFiltersSchema = exports.UpdateProfileSchema = exports.ResetPassSchema = exports.ForgetPassSchema = exports.LoginSchema = exports.RegisterCompleteSchema = exports.RegisterSchema = exports.CreateComponentSchema = exports.ComponentTypeSchema = exports.SetGamePricingSchema = exports.UpdateGameSchema = exports.CreateGameSchema = exports.GameComplexitySchema = exports.GameCategorySchema = exports.SemVerSchema = exports.HexColorSchema = exports.UUIDSchema = void 0;
+var zod_1 = require("zod");
 // ---------------------------------------------------------------------------
 // SHARED PRIMITIVES
 // ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ exports.GameComplexitySchema = zod_1.z.enum([
     "medium_heavy",
     "heavy",
 ]);
-const BaseCreateGameSchema = zod_1.z.object({
+var BaseCreateGameSchema = zod_1.z.object({
     title: zod_1.z
         .string()
         .min(2, "Title must be at least 2 characters")
@@ -68,10 +68,10 @@ const BaseCreateGameSchema = zod_1.z.object({
     minAge: zod_1.z.number().int().min(2).max(18).default(8),
     language: zod_1.z.string().length(2).default("en"),
 });
-exports.CreateGameSchema = BaseCreateGameSchema.refine((data) => data.playerCountMin <= data.playerCountMax, {
+exports.CreateGameSchema = BaseCreateGameSchema.refine(function (data) { return data.playerCountMin <= data.playerCountMax; }, {
     message: "Minimum player count cannot exceed maximum",
     path: ["playerCountMin"],
-}).refine((data) => data.playtimeMin <= data.playtimeMax, {
+}).refine(function (data) { return data.playtimeMin <= data.playtimeMax; }, {
     message: "Minimum playtime cannot exceed maximum",
     path: ["playtimeMin"],
 });
@@ -85,14 +85,19 @@ exports.UpdateGameSchema = BaseCreateGameSchema.partial().extend({
     priceUsd: zod_1.z.number().int().min(0).max(99999).nullable().optional(),
     hasTrial: zod_1.z.boolean().optional(),
 });
-exports.SetGamePricingSchema = zod_1.z.object({
+exports.SetGamePricingSchema = zod_1.z
+    .object({
     isFree: zod_1.z.boolean(),
     priceUsd: zod_1.z.number().int().min(99).max(9999).optional().nullable(),
     hasTrial: zod_1.z.boolean().default(false),
-}).refine((data) => data.isFree || (data.priceUsd !== undefined && data.priceUsd !== null), {
+})
+    .refine(function (data) {
+    return data.isFree || (data.priceUsd !== undefined && data.priceUsd !== null);
+}, {
     message: "Paid games must have a price",
     path: ["priceUsd"],
-}).refine((data) => !data.hasTrial || !data.isFree, {
+})
+    .refine(function (data) { return !data.hasTrial || !data.isFree; }, {
     message: "Free games cannot have a trial",
     path: ["hasTrial"],
 });
@@ -163,7 +168,13 @@ exports.ResetPassSchema = zod_1.z.object({
 exports.UpdateProfileSchema = zod_1.z.object({
     displayName: zod_1.z.string().min(2).max(64).trim().optional(),
     bio: zod_1.z.string().max(500).trim().nullable().optional(),
-    avatarUrl: zod_1.z.string().url("Must be a valid URL").max(512).nullable().optional().or(zod_1.z.literal("")),
+    avatarUrl: zod_1.z
+        .string()
+        .url("Must be a valid URL")
+        .max(512)
+        .nullable()
+        .optional()
+        .or(zod_1.z.literal("")),
 });
 // ---------------------------------------------------------------------------
 // MARKETPLACE FILTERS
@@ -179,7 +190,14 @@ exports.MarketplaceFiltersSchema = zod_1.z.object({
     tags: zod_1.z.array(zod_1.z.string()).max(5).optional(),
     search: zod_1.z.string().max(100).trim().optional(),
     sort: zod_1.z
-        .enum(["newest", "popular", "top_rated", "price_asc", "price_desc", "most_sold"])
+        .enum([
+        "newest",
+        "popular",
+        "top_rated",
+        "price_asc",
+        "price_desc",
+        "most_sold",
+    ])
         .default("newest"),
     page: zod_1.z.number().int().min(1).default(1),
     perPage: zod_1.z.number().int().min(1).max(48).default(24),
@@ -193,4 +211,3 @@ exports.CreateReviewSchema = zod_1.z.object({
     title: zod_1.z.string().max(120).trim().optional(),
     body: zod_1.z.string().max(2000).trim().optional(),
 });
-//# sourceMappingURL=validators.js.map

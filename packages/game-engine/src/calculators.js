@@ -3,6 +3,15 @@
  * @velonix/game-engine — Calculators
  * Pure functions for pricing, commission, and grid math.
  */
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.STANDARD_CARD_SIZES = exports.COMPLEXITY_PRICE_ANCHORS = void 0;
 exports.calculateCommission = calculateCommission;
@@ -17,7 +26,7 @@ exports.pxToMm = pxToMm;
 exports.bumpPatch = bumpPatch;
 exports.bumpMinor = bumpMinor;
 exports.bumpMajor = bumpMajor;
-const types_1 = require("@velonix/types");
+var types_1 = require("@velonix/types");
 // ---------------------------------------------------------------------------
 // PRICING & COMMISSION
 // ---------------------------------------------------------------------------
@@ -30,14 +39,14 @@ const types_1 = require("@velonix/types");
  * // => { salePrice: 999, platformFee: 170, creatorEarnings: 829, commissionRate: 17 }
  */
 function calculateCommission(salePriceUsd, creatorTier) {
-    const commissionRate = types_1.SUBSCRIPTION_LIMITS[creatorTier].commissionRate;
-    const platformFee = Math.ceil((salePriceUsd * commissionRate) / 100);
-    const creatorEarnings = salePriceUsd - platformFee;
+    var commissionRate = types_1.SUBSCRIPTION_LIMITS[creatorTier].commissionRate;
+    var platformFee = Math.ceil((salePriceUsd * commissionRate) / 100);
+    var creatorEarnings = salePriceUsd - platformFee;
     return {
         salePrice: salePriceUsd,
-        platformFee,
-        creatorEarnings,
-        commissionRate,
+        platformFee: platformFee,
+        creatorEarnings: creatorEarnings,
+        commissionRate: commissionRate,
     };
 }
 /**
@@ -56,18 +65,18 @@ function bundleDiscountRate(itemCount) {
 }
 /** Applies the bundle discount to a subtotal, returning cents. */
 function calculateBundlePricing(itemPricesUsd) {
-    const subtotal = itemPricesUsd.reduce((s, p) => s + p, 0);
-    const rate = bundleDiscountRate(itemPricesUsd.length);
-    const discount = Math.round((subtotal * rate) / 100);
-    return { subtotal, discount, total: subtotal - discount, rate };
+    var subtotal = itemPricesUsd.reduce(function (s, p) { return s + p; }, 0);
+    var rate = bundleDiscountRate(itemPricesUsd.length);
+    var discount = Math.round((subtotal * rate) / 100);
+    return { subtotal: subtotal, discount: discount, total: subtotal - discount, rate: rate };
 }
 /**
  * Calculates the monthly potential earnings for display on the pricing page.
  */
 function projectMonthlyEarnings(pricePerGameUsd, estimatedSalesPerMonth, tier) {
-    const gross = pricePerGameUsd * estimatedSalesPerMonth;
-    const { platformFee } = calculateCommission(pricePerGameUsd, tier);
-    const totalFees = platformFee * estimatedSalesPerMonth;
+    var gross = pricePerGameUsd * estimatedSalesPerMonth;
+    var platformFee = calculateCommission(pricePerGameUsd, tier).platformFee;
+    var totalFees = platformFee * estimatedSalesPerMonth;
     return {
         grossRevenue: gross,
         netRevenue: gross - totalFees,
@@ -89,15 +98,16 @@ exports.COMPLEXITY_PRICE_ANCHORS = {
     heavy: 1299,
 };
 function median(values) {
-    const sorted = [...values].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
+    var _a, _b, _c;
+    var sorted = __spreadArray([], values, true).sort(function (a, b) { return a - b; });
+    var mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 === 0
-        ? Math.round(((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2)
-        : (sorted[mid] ?? 0);
+        ? Math.round((((_a = sorted[mid - 1]) !== null && _a !== void 0 ? _a : 0) + ((_b = sorted[mid]) !== null && _b !== void 0 ? _b : 0)) / 2)
+        : ((_c = sorted[mid]) !== null && _c !== void 0 ? _c : 0);
 }
 /** Round a price to the nearest "psychological" .99 ending, min $0.99. */
 function roundToCharm(cents) {
-    const dollars = Math.max(1, Math.round(cents / 100));
+    var dollars = Math.max(1, Math.round(cents / 100));
     return dollars * 100 - 1;
 }
 /**
@@ -111,11 +121,11 @@ function roundToCharm(cents) {
  *  - Returns a charm-priced suggestion plus a low/high range and rationale.
  */
 function suggestGamePrice(complexity, comparables) {
-    const anchor = exports.COMPLEXITY_PRICE_ANCHORS[complexity];
-    const priced = comparables.filter((c) => c.priceUsd > 0);
+    var anchor = exports.COMPLEXITY_PRICE_ANCHORS[complexity];
+    var priced = comparables.filter(function (c) { return c.priceUsd > 0; });
     // Prefer same-complexity comps; fall back to same-category comps.
-    const sameComplexity = priced.filter((c) => c.complexity === complexity);
-    const pool = sameComplexity.length >= 3 ? sameComplexity : priced;
+    var sameComplexity = priced.filter(function (c) { return c.complexity === complexity; });
+    var pool = sameComplexity.length >= 3 ? sameComplexity : priced;
     if (pool.length === 0) {
         return {
             suggestedUsd: anchor,
@@ -124,18 +134,18 @@ function suggestGamePrice(complexity, comparables) {
             sampleSize: 0,
             basis: "baseline",
             rationale: [
-                `No comparable paid ${complexity.replace("_", " ")} games yet — using a baseline for this complexity.`,
+                "No comparable paid ".concat(complexity.replace("_", " "), " games yet \u2014 using a baseline for this complexity."),
             ],
         };
     }
-    const prices = pool.map((c) => c.priceUsd);
-    const marketMedian = median(prices);
+    var prices = pool.map(function (c) { return c.priceUsd; });
+    var marketMedian = median(prices);
     // Market weight grows with sample size, capped at 0.8 (always keep some anchor pull).
-    const marketWeight = Math.min(0.8, pool.length / 10);
-    const blended = marketMedian * marketWeight + anchor * (1 - marketWeight);
-    const suggested = roundToCharm(blended);
-    const lo = Math.min(...prices);
-    const hi = Math.max(...prices);
+    var marketWeight = Math.min(0.8, pool.length / 10);
+    var blended = marketMedian * marketWeight + anchor * (1 - marketWeight);
+    var suggested = roundToCharm(blended);
+    var lo = Math.min.apply(Math, prices);
+    var hi = Math.max.apply(Math, prices);
     return {
         suggestedUsd: suggested,
         rangeUsd: {
@@ -146,8 +156,8 @@ function suggestGamePrice(complexity, comparables) {
         sampleSize: pool.length,
         basis: "market",
         rationale: [
-            `Based on ${pool.length} similar published ${pool === sameComplexity ? complexity.replace("_", " ") + " " : ""}game${pool.length === 1 ? "" : "s"}.`,
-            `Market median is $${(marketMedian / 100).toFixed(2)}; blended with the ${complexity.replace("_", " ")} complexity baseline of $${(anchor / 100).toFixed(2)}.`,
+            "Based on ".concat(pool.length, " similar published ").concat(pool === sameComplexity ? complexity.replace("_", " ") + " " : "", "game").concat(pool.length === 1 ? "" : "s", "."),
+            "Market median is $".concat((marketMedian / 100).toFixed(2), "; blended with the ").concat(complexity.replace("_", " "), " complexity baseline of $").concat((anchor / 100).toFixed(2), "."),
         ],
     };
 }
@@ -155,15 +165,17 @@ function suggestGamePrice(complexity, comparables) {
  * Generates pixel coordinates for a rectangular grid.
  * Used to position components on the board canvas.
  */
-function generateSquareGrid(cols, rows, cellSizePx, offsetX = 0, offsetY = 0) {
-    const cells = [];
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
+function generateSquareGrid(cols, rows, cellSizePx, offsetX, offsetY) {
+    if (offsetX === void 0) { offsetX = 0; }
+    if (offsetY === void 0) { offsetY = 0; }
+    var cells = [];
+    for (var row = 0; row < rows; row++) {
+        for (var col = 0; col < cols; col++) {
             cells.push({
                 x: offsetX + col * cellSizePx,
                 y: offsetY + row * cellSizePx,
-                row,
-                col,
+                row: row,
+                col: col,
             });
         }
     }
@@ -175,17 +187,19 @@ function generateSquareGrid(cols, rows, cellSizePx, offsetX = 0, offsetY = 0) {
  */
 function generateHexGrid(radius, // grid radius in hex cells
 hexSizePx, // center-to-vertex distance in pixels
-offsetX = 0, offsetY = 0) {
-    const cells = [];
-    const w = Math.sqrt(3) * hexSizePx;
-    const h = 2 * hexSizePx;
-    for (let q = -radius; q <= radius; q++) {
-        const r1 = Math.max(-radius, -q - radius);
-        const r2 = Math.min(radius, -q + radius);
-        for (let r = r1; r <= r2; r++) {
-            const x = offsetX + w * (q + r / 2);
-            const y = offsetY + h * (3 / 4) * r;
-            cells.push({ x, y, q, r });
+offsetX, offsetY) {
+    if (offsetX === void 0) { offsetX = 0; }
+    if (offsetY === void 0) { offsetY = 0; }
+    var cells = [];
+    var w = Math.sqrt(3) * hexSizePx;
+    var h = 2 * hexSizePx;
+    for (var q = -radius; q <= radius; q++) {
+        var r1 = Math.max(-radius, -q - radius);
+        var r2 = Math.min(radius, -q + radius);
+        for (var r = r1; r <= r2; r++) {
+            var x = offsetX + w * (q + r / 2);
+            var y = offsetY + h * (3 / 4) * r;
+            cells.push({ x: x, y: y, q: q, r: r });
         }
     }
     return cells;
@@ -208,31 +222,35 @@ exports.STANDARD_CARD_SIZES = {
 /**
  * Converts mm measurements to px at the given DPI.
  */
-function mmToPx(mm, dpi = 96) {
+function mmToPx(mm, dpi) {
+    if (dpi === void 0) { dpi = 96; }
     return (mm / 25.4) * dpi;
 }
-function pxToMm(px, dpi = 96) {
+function pxToMm(px, dpi) {
+    if (dpi === void 0) { dpi = 96; }
     return (px / dpi) * 25.4;
 }
 // ---------------------------------------------------------------------------
 // SEMANTIC VERSION UTILS
 // ---------------------------------------------------------------------------
 function bumpPatch(version) {
-    const parts = version.split(".").map(Number);
+    var _a;
+    var parts = version.split(".").map(Number);
     if (parts.length !== 3)
         return version;
-    return `${parts[0]}.${parts[1]}.${(parts[2] ?? 0) + 1}`;
+    return "".concat(parts[0], ".").concat(parts[1], ".").concat(((_a = parts[2]) !== null && _a !== void 0 ? _a : 0) + 1);
 }
 function bumpMinor(version) {
-    const parts = version.split(".").map(Number);
+    var _a;
+    var parts = version.split(".").map(Number);
     if (parts.length !== 3)
         return version;
-    return `${parts[0]}.${(parts[1] ?? 0) + 1}.0`;
+    return "".concat(parts[0], ".").concat(((_a = parts[1]) !== null && _a !== void 0 ? _a : 0) + 1, ".0");
 }
 function bumpMajor(version) {
-    const parts = version.split(".").map(Number);
+    var _a;
+    var parts = version.split(".").map(Number);
     if (parts.length !== 3)
         return version;
-    return `${(parts[0] ?? 0) + 1}.0.0`;
+    return "".concat(((_a = parts[0]) !== null && _a !== void 0 ? _a : 0) + 1, ".0.0");
 }
-//# sourceMappingURL=calculators.js.map
