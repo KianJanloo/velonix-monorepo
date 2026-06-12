@@ -5,7 +5,7 @@
  * Used both client-side (form validation) and server-side (API DTO validation).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateReviewSchema = exports.MarketplaceFiltersSchema = exports.UpdateProfileSchema = exports.LoginSchema = exports.RegisterSchema = exports.CreateComponentSchema = exports.ComponentTypeSchema = exports.SetGamePricingSchema = exports.UpdateGameSchema = exports.CreateGameSchema = exports.GameComplexitySchema = exports.GameCategorySchema = exports.SemVerSchema = exports.HexColorSchema = exports.UUIDSchema = void 0;
+exports.CreateReviewSchema = exports.MarketplaceFiltersSchema = exports.UpdateProfileSchema = exports.ResetPassSchema = exports.ForgetPassSchema = exports.RegisterCompleteSchema = exports.LoginSchema = exports.RegisterSchema = exports.CreateComponentSchema = exports.ComponentTypeSchema = exports.SetGamePricingSchema = exports.UpdateGameSchema = exports.CreateGameSchema = exports.GameComplexitySchema = exports.GameCategorySchema = exports.SemVerSchema = exports.HexColorSchema = exports.UUIDSchema = void 0;
 const zod_1 = require("zod");
 // ---------------------------------------------------------------------------
 // SHARED PRIMITIVES
@@ -141,10 +141,24 @@ exports.RegisterSchema = zod_1.z.object({
         .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
         .regex(/[0-9]/, "Password must contain at least one number"),
 });
+exports.RegisterCompleteSchema = zod_1.z.object({
+    email: zod_1.z.string().email("Invalid email address").toLowerCase().trim(),
+    token: zod_1.z.string().min(1, "Invalid token"),
+    code: zod_1.z.string().length(6, "Code must be 6 characters"),
+});
 exports.LoginSchema = zod_1.z.object({
     email: zod_1.z.string().email().toLowerCase().trim(),
     password: zod_1.z.string().min(1),
     rememberMe: zod_1.z.boolean().default(false),
+});
+exports.ForgetPassSchema = zod_1.z.object({
+    email: zod_1.z.string().email().toLowerCase().trim(),
+});
+exports.ResetPassSchema = zod_1.z.object({
+    email: zod_1.z.string().email().toLowerCase().trim(),
+    code: zod_1.z.string().length(6),
+    token: zod_1.z.string().min(1, "Invalid token"),
+    newPassword: zod_1.z.string().min(1),
 });
 exports.UpdateProfileSchema = zod_1.z.object({
     displayName: zod_1.z.string().min(2).max(64).trim().optional(),

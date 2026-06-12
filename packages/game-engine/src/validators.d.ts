@@ -228,6 +228,19 @@ export declare const RegisterSchema: z.ZodObject<{
     email: string;
     displayName: string;
 }>;
+export declare const RegisterCompleteSchema: z.ZodObject<{
+    email: z.ZodString;
+    token: z.ZodString;
+    code: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    token: string;
+    code: string;
+}, {
+    email: string;
+    token: string;
+    code: string;
+}>;
 export declare const LoginSchema: z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
@@ -240,6 +253,29 @@ export declare const LoginSchema: z.ZodObject<{
     password: string;
     email: string;
     rememberMe?: boolean | undefined;
+}>;
+export declare const ForgetPassSchema: z.ZodObject<{
+    email: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+}, {
+    email: string;
+}>;
+export declare const ResetPassSchema: z.ZodObject<{
+    email: z.ZodString;
+    code: z.ZodString;
+    token: z.ZodString;
+    newPassword: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    code: string;
+    token: string;
+    newPassword: string;
+}, {
+    email: string;
+    code: string;
+    token: string;
+    newPassword: string;
 }>;
 export declare const UpdateProfileSchema: z.ZodObject<{
     displayName: z.ZodOptional<z.ZodString>;
@@ -315,7 +351,10 @@ export type UpdateGameDto = z.infer<typeof UpdateGameSchema>;
 export type SetGamePricingDto = z.infer<typeof SetGamePricingSchema>;
 export type CreateComponentDto = z.infer<typeof CreateComponentSchema>;
 export type RegisterDto = z.infer<typeof RegisterSchema>;
+export type RegisterCompleteDto = z.infer<typeof RegisterCompleteSchema>;
 export type LoginDto = z.infer<typeof LoginSchema>;
+export type ForgetPassDto = z.infer<typeof ForgetPassSchema>;
+export type ResetPassDto = z.infer<typeof ResetPassSchema>;
 export type UpdateProfileDto = z.infer<typeof UpdateProfileSchema>;
 export type MarketplaceFiltersDto = z.infer<typeof MarketplaceFiltersSchema>;
 export type CreateReviewDto = z.infer<typeof CreateReviewSchema>;
