@@ -82,7 +82,7 @@ export interface CanvasComp {
    * the target page. Renders a ⇢ badge on the component so designers can see
    * connections at a glance.
    */
-  linkToPageId?: string;
+  linkToPageId?: string | undefined;
   /** Number of dots / pips for dice-like components. */
   dotCount?: number;
   /** Inner fill colour (e.g. die pips, spinner needle, bag interior). */
