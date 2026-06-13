@@ -43,7 +43,16 @@ export type CompType =
   | "hex"
   | "marker"
   | "deck"
-  | "note";
+  | "note"
+  // ── Extended component palette ────────────────────────────────────────────
+  | "bag"
+  | "standee"
+  | "spinner"
+  | "track"
+  | "sand_timer"
+  | "line"
+  | "spiral"
+  | "custom";
 
 export interface CanvasComp {
   id: string;
@@ -73,17 +82,27 @@ export interface CanvasComp {
    * the target page. Renders a ⇢ badge on the component so designers can see
    * connections at a glance.
    */
-  linkToPageId?: string | undefined;
+  linkToPageId?: string;
+  /** Number of dots / pips for dice-like components. */
+  dotCount?: number;
+  /** Inner fill colour (e.g. die pips, spinner needle, bag interior). */
+  innerColor?: string;
+  /** Number of spinner segments / track spaces. */
+  segments?: number;
+  /** User-defined label shown inside a "custom" component. */
+  customLabel?: string;
+  /** Line thickness used by the line component (mm). */
+  lineWeight?: number;
 }
 
 // Rendering predicates shared by the editor canvas and previews.
-const CIRCLE_TYPES: CompType[] = ["token", "coin", "marker"];
-const SILHOUETTE_TYPES: CompType[] = ["pawn", "meeple", "hex"];
+const CIRCLE_TYPES: CompType[] = ["token", "coin", "marker", "spinner"];
+const SILHOUETTE_TYPES: CompType[] = ["pawn", "meeple", "hex", "bag", "standee", "sand_timer"];
 export const isCircleType = (t: CompType) => CIRCLE_TYPES.includes(t);
 export const isSilhouetteType = (t: CompType) => SILHOUETTE_TYPES.includes(t);
 /** Types whose body has no fill/border box (drawn as SVG silhouette or plain text). */
 export const isChromeless = (t: CompType) =>
-  isSilhouetteType(t) || t === "text";
+  t === "text" || t === "line" || t === "spiral";
 
 /** A page is one editable canvas (board, player board, card sheet, …). */
 export interface StudioPage {
@@ -473,6 +492,81 @@ export const TYPE_DEFAULTS: Record<CompType, Partial<CanvasComp>> = {
     cornerRadius: 2,
     textColor: "#3a2f12",
   },
+  // ── Extended types ─────────────────────────────────────────────────────────
+  bag: {
+    width: 48,
+    height: 60,
+    fill: "#7c5cff",
+    stroke: "#0a0a0a",
+    strokeWidth: 1,
+    cornerRadius: 0,
+    innerColor: "#5a3ecc",
+  },
+  standee: {
+    width: 30,
+    height: 50,
+    fill: "#ff3b5c",
+    stroke: "#0a0a0a",
+    strokeWidth: 1,
+    cornerRadius: 0,
+    innerColor: "#cc1a35",
+  },
+  spinner: {
+    width: 60,
+    height: 60,
+    fill: "#1c1a2e",
+    stroke: "#f5c451",
+    strokeWidth: 2,
+    cornerRadius: 0,
+    innerColor: "#ff3b5c",
+    segments: 6,
+  },
+  track: {
+    width: 200,
+    height: 30,
+    fill: "#1a2535",
+    stroke: "#f5c451",
+    strokeWidth: 1,
+    cornerRadius: 4,
+    innerColor: "#3ddc97",
+    segments: 10,
+  },
+  sand_timer: {
+    width: 24,
+    height: 40,
+    fill: "#f5c451",
+    stroke: "#0a0a0a",
+    strokeWidth: 1,
+    cornerRadius: 0,
+    innerColor: "#e8a012",
+  },
+  line: {
+    width: 120,
+    height: 4,
+    fill: "#f5c451",
+    stroke: "transparent",
+    strokeWidth: 0,
+    cornerRadius: 2,
+    lineWeight: 2,
+  },
+  spiral: {
+    width: 160,
+    height: 160,
+    fill: "transparent",
+    stroke: "#f5c451",
+    strokeWidth: 2,
+    cornerRadius: 0,
+    segments: 24,
+  },
+  custom: {
+    width: 60,
+    height: 60,
+    fill: "#3ddc97",
+    stroke: "#0a0a0a",
+    strokeWidth: 1,
+    cornerRadius: 8,
+    customLabel: "Custom",
+  },
 };
 
 export function makeComp(type: CompType, x: number, y: number): CanvasComp {
@@ -493,6 +587,14 @@ export function makeComp(type: CompType, x: number, y: number): CanvasComp {
     marker: "Marker",
     deck: "Deck",
     note: "Note",
+    bag: "Bag",
+    standee: "Standee",
+    spinner: "Spinner",
+    track: "Track",
+    sand_timer: "Sand Timer",
+    line: "Line",
+    spiral: "Spiral",
+    custom: "Custom",
   };
   return {
     id: `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -513,6 +615,7 @@ export function makeComp(type: CompType, x: number, y: number): CanvasComp {
     height: 60,
     ...(type === "text" ? { text: "New Title" } : {}),
     ...(type === "note" ? { text: "Note" } : {}),
+    ...(type === "custom" ? { customLabel: "Custom" } : {}),
     ...d,
   } as CanvasComp;
 }

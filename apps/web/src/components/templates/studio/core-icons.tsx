@@ -198,6 +198,160 @@ export const COMP_ICONS: Record<CompType, ReactNode> = {
       />
     </svg>
   ),
+  // ── Extended types ──────────────────────────────────────────────────────────
+  bag: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path
+        d="M4 4c0-1.1.9-2 2-2s2 .9 2 2"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+      <path
+        d="M2 4.5h8l-.7 6H2.7z"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4.5 6.5c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </svg>
+  ),
+  standee: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path
+        d="M6 1.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+        stroke="currentColor"
+        strokeWidth="1.1"
+      />
+      <path
+        d="M4 5h4l.5 4H7.5L7 7.5h-2L4.5 9H3.5z"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 10.5h6"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  spinner: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1" />
+      <path
+        d="M6 6l3-3"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
+      <circle cx="6" cy="6" r="1" fill="currentColor" />
+      <path
+        d="M6 1v1M11 6h-1M6 11v-1M1 6h1"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="round"
+        opacity="0.4"
+      />
+    </svg>
+  ),
+  track: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <rect
+        x="0.5"
+        y="4"
+        width="11"
+        height="4"
+        rx="1"
+        stroke="currentColor"
+        strokeWidth="1.1"
+      />
+      <path
+        d="M3 4v4M6 4v4M9 4v4"
+        stroke="currentColor"
+        strokeWidth="1"
+        opacity="0.5"
+      />
+    </svg>
+  ),
+  sand_timer: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path
+        d="M2.5 1.5h7M2.5 10.5h7"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M3 1.5L6 6l-3 4.5M9 1.5L6 6l3 4.5"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4.5 8.5h3"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </svg>
+  ),
+  line: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path
+        d="M1.5 6h9"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  spiral: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path
+        d="M6 6c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2c0-2.2-1.8-4-4-4"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M6 6c0 2.2 1.8 4 4 4"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </svg>
+  ),
+  custom: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <rect
+        x="1"
+        y="1"
+        width="10"
+        height="10"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeDasharray="2 1.5"
+      />
+      <path
+        d="M6 4v4M4 6h4"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
 };
 
 // ── Tools ─────────────────────────────────────────────────────────────────────
