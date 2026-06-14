@@ -259,3 +259,110 @@ export type ResetPassDto = z.infer<typeof ResetPassSchema>;
 export type UpdateProfileDto = z.infer<typeof UpdateProfileSchema>;
 export type MarketplaceFiltersDto = z.infer<typeof MarketplaceFiltersSchema>;
 export type CreateReviewDto = z.infer<typeof CreateReviewSchema>;
+
+// ---------------------------------------------------------------------------
+// RULE ENGINE SCHEMAS
+// ---------------------------------------------------------------------------
+
+export const RuleConditionSubjectSchema = z.enum([
+  "score",
+  "round",
+  "turn_count",
+  "dice_result",
+  "player_count",
+  "card_count",
+  "counter",
+]);
+
+export const RuleConditionOperatorSchema = z.enum([
+  "eq",
+  "neq",
+  "gt",
+  "gte",
+  "lt",
+  "lte",
+  "between",
+  "is_multiple_of",
+]);
+
+export const RuleConditionSchema = z.object({
+  id: z.string(),
+  subject: RuleConditionSubjectSchema,
+  counterKey: z.string().optional(),
+  operator: RuleConditionOperatorSchema,
+  value: z.number(),
+  value2: z.number().optional(),
+  negate: z.boolean().optional(),
+});
+
+export const RuleActionTypeSchema = z.enum([
+  "draw_cards",
+  "gain_points",
+  "lose_points",
+  "move_spaces",
+  "roll_dice",
+  "extra_turn",
+  "skip_turn",
+  "end_game",
+  "set_counter",
+  "flip_component",
+  "navigate_page",
+  "eliminate_player",
+  "shuffle_deck",
+  "custom",
+]);
+
+export const RuleTargetSchema = z.enum([
+  "current",
+  "each",
+  "all",
+  "next",
+  "previous",
+  "winner",
+  "loser",
+]);
+
+export const RuleActionSchema = z.object({
+  id: z.string(),
+  type: RuleActionTypeSchema,
+  target: RuleTargetSchema.optional(),
+  amount: z.number().optional(),
+  value: z.string().optional(),
+  pageId: z.string().optional(),
+  counterKey: z.string().optional(),
+});
+
+export const GameRuleSchema = z.object({
+  id: z.string(),
+  trigger: z.enum([
+    "turn_start",
+    "turn_end",
+    "card_played",
+    "token_moved",
+    "dice_rolled",
+    "score_changed",
+    "round_start",
+    "round_end",
+    "player_eliminated",
+    "game_start",
+    "game_end",
+  ]),
+  description: z.string().max(500),
+  priority: z.number().int().min(0).max(999).optional(),
+  conditions: z.array(RuleConditionSchema).optional(),
+  actions: z.array(RuleActionSchema).optional(),
+  // Legacy single-action fields kept for backward compat
+  action: RuleActionTypeSchema.optional(),
+  params: z.object({
+    amount: z.number().optional(),
+    target: RuleTargetSchema.optional(),
+    value: z.string().optional(),
+  }).optional(),
+  enabled: z.boolean().optional(),
+});
+
+export const GameRulesArraySchema = z.array(GameRuleSchema).max(200);
+
+export type RuleConditionDto = z.infer<typeof RuleConditionSchema>;
+export type RuleActionDto    = z.infer<typeof RuleActionSchema>;
+export type GameRuleDto      = z.infer<typeof GameRuleSchema>;

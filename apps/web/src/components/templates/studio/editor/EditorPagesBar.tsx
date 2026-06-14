@@ -216,7 +216,7 @@ function PageSearchPopover({
   return (
     <div
       ref={popoverRef}
-      className="absolute bottom-full left-0 mb-1 w-72 bg-rich-wood-dark border border-warm-wood rounded-xl shadow-2xl z-50 overflow-hidden"
+      className="absolute left-0 top-full mb-1 w-72 bg-rich-wood-dark border border-warm-wood rounded-xl shadow-2xl z-50 overflow-hidden"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-warm-wood/60">

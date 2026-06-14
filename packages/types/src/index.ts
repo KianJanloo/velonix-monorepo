@@ -166,6 +166,88 @@ export interface UserPublicProfile {
 }
 
 // ---------------------------------------------------------------------------
+// RULE ENGINE
+// ---------------------------------------------------------------------------
+
+export type RuleConditionSubject =
+  | "score"
+  | "round"
+  | "turn_count"
+  | "dice_result"
+  | "player_count"
+  | "card_count"
+  | "counter";
+
+export type RuleConditionOperator =
+  | "eq"
+  | "neq"
+  | "gt"
+  | "gte"
+  | "lt"
+  | "lte"
+  | "between"
+  | "is_multiple_of";
+
+export interface RuleCondition {
+  subject: RuleConditionSubject;
+  operator: RuleConditionOperator;
+  value: number;
+  value2?: number;
+  negate?: boolean;
+  counterKey?: string;
+}
+
+export type RuleTarget =
+  | "current"
+  | "all"
+  | "next"
+  | "previous";
+
+export type RuleActionType =
+  | "draw_cards"
+  | "gain_points"
+  | "lose_points"
+  | "move_spaces"
+  | "roll_dice"
+  | "extra_turn"
+  | "skip_turn"
+  | "end_game"
+  | "set_counter"
+  | "flip_component"
+  | "navigate_page"
+  | "eliminate_player"
+  | "shuffle_deck"
+  | "custom";
+
+export interface RuleAction {
+  id: string;
+  type: RuleActionType;
+  target?: RuleTarget;
+  amount?: number;
+  value?: string;
+  counterKey?: string;
+  pageId?: string;
+}
+
+export interface GameRule {
+  id: string;
+  name: string;
+  trigger: string;
+  enabled?: boolean;
+  priority?: number;
+  conditions?: RuleCondition[];
+  actions?: RuleAction[];
+
+  // legacy support
+  action?: RuleActionType;
+  params?: {
+    target?: RuleTarget;
+    amount?: number;
+    value?: string;
+  };
+}
+
+// ---------------------------------------------------------------------------
 // COMPONENT MARKETPLACE (buy/sell reusable studio assets)
 // ---------------------------------------------------------------------------
 

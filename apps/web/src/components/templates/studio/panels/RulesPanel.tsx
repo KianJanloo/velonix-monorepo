@@ -1,14 +1,15 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import Link from "next/link";
-
-import { useState } from "react";
 
 import {
   RULE_TRIGGERS,
   RULE_TARGETS,
   RULE_ACTIONS,
   RULE_TEMPLATES,
+  RULE_CONDITION_SUBJECTS,
+  RULE_CONDITION_OPERATORS,
   ruleActionDef,
   buildRuleDescription,
 } from "../core";
@@ -17,429 +18,691 @@ import type {
   RuleTrigger,
   RuleActionType,
   RuleTarget,
-  RuleParams,
+  // RuleParamss,
   GameRule,
+  RuleCondition,
+  RuleConditionSubject,
+  RuleConditionOperator,
+  RuleAction,
 } from "../core";
 
 import {
-  Stepper,
+  // Stepper,
+  SectionLabel,
 } from "./controls";
 
-export function RulesPanel({
-  hasEngine,
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-  rules,
+let _id = 0;
+const uid = () => `rc-${++_id}-${Date.now()}`;
 
-  onAdd,
+function blankCondition(): RuleCondition {
+  return {
+    id: uid(),
+    subject: "score",
+    operator: "gte",
+    value: 0,
+    negate: false,
+  };
+}
 
-  onUpdate,
+function blankAction(): RuleAction {
+  return { id: uid(), type: "gain_points", target: "current", amount: 1 };
+}
 
+// ── Condition row ─────────────────────────────────────────────────────────────
+
+function ConditionRow({
+  c,
+  onChange,
   onDelete,
 }: {
-  hasEngine: boolean;
-
-  rules: GameRule[];
-
-  onAdd: (rule: Omit<GameRule, "id">) => void;
-
-  onUpdate: (id: string, patch: Partial<GameRule>) => void;
-
-  onDelete: (id: string) => void;
+  c: RuleCondition;
+  onChange: (patch: Partial<RuleCondition>) => void;
+  onDelete: () => void;
 }) {
-  const [trigger, setTrigger] = useState<RuleTrigger>("turn_start");
-
-  const [action, setAction] = useState<RuleActionType>("draw_cards");
-
-  const [amount, setAmount] = useState(1);
-
-  const [target, setTarget] = useState<RuleTarget>("current");
-
-  const [value, setValue] = useState("");
-
-  const def = ruleActionDef(action)!;
-
-  const triggerLabel = (t: RuleTrigger) =>
-    RULE_TRIGGERS.find((x) => x.value === t)?.short ?? t;
-
-  const draftParams: RuleParams = {
-    ...(def.hasAmount ? { amount } : {}),
-
-    ...(def.hasTarget ? { target } : {}),
-
-    ...(def.hasValue ? { value } : {}),
-  };
-
-  const preview = buildRuleDescription(action, draftParams);
-
-  const canAdd = !def.hasValue || value.trim().length > 0;
-
-  function chooseAction(a: RuleActionType) {
-    setAction(a);
-
-    setAmount(ruleActionDef(a)?.defaultAmount ?? 1);
-  }
-
-  function add() {
-    if (!canAdd) return;
-
-    onAdd({
-      trigger,
-
-      action,
-
-      params: draftParams,
-
-      description: preview,
-
-      enabled: true,
-    });
-
-    setValue("");
-  }
-
-  if (!hasEngine) {
-    return (
-      <div className="space-y-3">
-        <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider">
-          Rule Engine
-        </p>
-
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <div className="w-10 h-10 rounded-full bg-[rgba(245,196,81,0.1)] border border-royal-gold/30 flex items-center justify-center">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              className="text-royal-gold"
-            >
-              <rect
-                x="3"
-                y="8"
-                width="12"
-                height="8"
-                rx="1.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-
-              <path
-                d="M6 8V5.5a3 3 0 016 0V8"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-            </svg>
-          </div>
-
-          <p className="text-2xs text-soft-gray font-ui leading-relaxed">
-            The visual rule engine is available on{" "}
-            <span className="text-royal-gold font-semibold">Pro</span> and{" "}
-            <span className="text-royal-gold font-semibold">Studio</span>.
-          </p>
-
-          <Link
-            href="/pricing"
-            className="w-full py-2 rounded-lg bg-royal-gold/10 border border-royal-gold/30 text-royal-gold text-2xs font-ui font-semibold hover:bg-royal-gold/20"
-          >
-            Upgrade →
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const activeCount = rules.filter((r) => r.enabled !== false).length;
+  const op = RULE_CONDITION_OPERATORS.find((o) => o.value === c.operator);
+  const needsBetween = c.operator === "between";
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-wider">
-          Rule Engine
-        </p>
+    <div className="group flex flex-col gap-1.5 p-2 rounded-lg bg-rich-wood-mid border border-warm-wood/40">
+      {/* Subject + Negate row */}
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={() => onChange({ negate: !c.negate })}
+          title={c.negate ? "NOT (click to remove)" : "Add NOT"}
+          className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors ${
+            c.negate
+              ? "border-crimson-flame/60 text-crimson-flame bg-crimson-ghost"
+              : "border-warm-wood text-soft-gray-dark hover:border-soft-gray"
+          }`}
+        >
+          NOT
+        </button>
+        <select
+          value={c.subject}
+          onChange={(e) =>
+            onChange({ subject: e.target.value as RuleConditionSubject })
+          }
+          className="flex-1 bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow"
+        >
+          {RULE_CONDITION_SUBJECTS.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+        {c.subject === "counter" && (
+          <input
+            value={c.counterKey ?? ""}
+            onChange={(e) => onChange({ counterKey: e.target.value })}
+            placeholder="counter key"
+            className="w-20 bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow"
+          />
+        )}
+        <button
+          onClick={onDelete}
+          className="opacity-0 group-hover:opacity-100 text-soft-gray-dark hover:text-crimson-flame transition-opacity text-xs px-0.5"
+        >
+          ×
+        </button>
+      </div>
 
-        {rules.length > 0 && (
-          <span className="text-[10px] text-soft-gray-dark font-ui">
-            {activeCount}/{rules.length} active
-          </span>
+      {/* Operator + Value row */}
+      <div className="flex items-center gap-1.5">
+        <select
+          value={c.operator}
+          onChange={(e) =>
+            onChange({ operator: e.target.value as RuleConditionOperator })
+          }
+          className="flex-1 bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow"
+        >
+          {RULE_CONDITION_OPERATORS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.symbol} {o.label}
+            </option>
+          ))}
+        </select>
+        <input
+          type="number"
+          value={c.value}
+          onChange={(e) => onChange({ value: Number(e.target.value) })}
+          className="w-16 bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow text-center"
+        />
+        {needsBetween && (
+          <>
+            <span className="text-soft-gray-dark text-[10px]">and</span>
+            <input
+              type="number"
+              value={c.value2 ?? 0}
+              onChange={(e) => onChange({ value2: Number(e.target.value) })}
+              className="w-16 bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow text-center"
+            />
+          </>
         )}
       </div>
 
-      {/* Visual WHEN → THEN builder */}
+      {/* Human-readable preview */}
+      <p className="text-[10px] text-soft-gray-dark font-ui italic">
+        {c.negate ? "NOT " : ""}
+        {RULE_CONDITION_SUBJECTS.find((s) => s.value === c.subject)?.label}{" "}
+        {op?.label} {c.value}
+        {needsBetween ? ` and ${c.value2 ?? 0}` : ""}
+      </p>
+    </div>
+  );
+}
 
-      <div className="rounded-xl border border-warm-wood/50 bg-warm-wood/15 overflow-hidden">
-        {/* WHEN */}
+// ── Action row ────────────────────────────────────────────────────────────────
 
-        <div className="p-2.5 border-b border-warm-wood/40">
-          <span className="text-[10px] font-ui font-bold text-cyan-spark uppercase tracking-[0.12em]">
-            When
+function ActionRow({
+  a,
+  onChange,
+  onDelete,
+  pages,
+}: {
+  a: RuleAction;
+  onChange: (patch: Partial<RuleAction>) => void;
+  onDelete: () => void;
+  pages?: { id: string; name: string }[];
+}) {
+  const def = ruleActionDef(a.type);
+
+  return (
+    <div className="group flex flex-col gap-1.5 p-2 rounded-lg bg-[rgba(61,220,151,0.05)] border border-emerald-glow/20">
+      {/* Action type */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-emerald-glow text-[10px] font-ui font-semibold shrink-0">
+          THEN
+        </span>
+        <select
+          value={a.type}
+          onChange={(e) => onChange({ type: e.target.value as RuleActionType })}
+          className="flex-1 bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow"
+        >
+          {RULE_ACTIONS.map((r) => (
+            <option key={r.type} value={r.type}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={onDelete}
+          className="opacity-0 group-hover:opacity-100 text-soft-gray-dark hover:text-crimson-flame transition-opacity text-xs px-0.5"
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Target */}
+      {def?.hasTarget && (
+        <select
+          value={a.target ?? "current"}
+          onChange={(e) => onChange({ target: e.target.value as RuleTarget })}
+          className="w-full bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow"
+        >
+          {RULE_TARGETS.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+      )}
+
+      {/* Amount */}
+      {def?.hasAmount && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-soft-gray-dark font-ui shrink-0">
+            {def.amountLabel ?? "Amount"}
           </span>
-
-          <select
-            className="v-input text-xs mt-1"
-            value={trigger}
-            onChange={(e) => setTrigger(e.target.value as RuleTrigger)}
-          >
-            {RULE_TRIGGERS.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+          <input
+            type="number"
+            value={a.amount ?? 1}
+            min={0}
+            onChange={(e) => onChange({ amount: Number(e.target.value) })}
+            className="w-16 bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow text-center"
+          />
         </div>
+      )}
 
-        {/* THEN */}
+      {/* Page link for navigate_page */}
+      {a.type === "navigate_page" && pages && pages.length > 0 && (
+        <select
+          value={a.pageId ?? ""}
+          onChange={(e) =>
+            onChange({
+              pageId: e.target.value,
+              value: pages.find((p) => p.id === e.target.value)?.name!,
+            })
+          }
+          className="w-full bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow"
+        >
+          <option value="">— Select page —</option>
+          {pages.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      )}
 
-        <div className="p-2.5 space-y-2">
-          <span className="text-[10px] font-ui font-bold text-emerald-glow uppercase tracking-[0.12em]">
-            Then
+      {/* Value string */}
+      {def?.hasValue && a.type !== "navigate_page" && (
+        <input
+          value={a.value ?? ""}
+          onChange={(e) => onChange({ value: e.target.value })}
+          placeholder={def.valuePlaceholder ?? "Value…"}
+          className="w-full bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs font-ui text-parchment-light outline-none focus:border-emerald-glow"
+        />
+      )}
+
+      {/* Counter key for set_counter */}
+      {a.type === "set_counter" && (
+        <input
+          value={a.counterKey ?? ""}
+          onChange={(e) => onChange({ counterKey: e.target.value })}
+          placeholder="Counter name"
+          className="w-full bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow"
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Rule card ─────────────────────────────────────────────────────────────────
+
+function RuleCard({
+  rule,
+  expanded,
+  onToggleExpand,
+  onUpdate,
+  onDelete,
+  onDuplicate,
+  pages,
+}: {
+  rule: GameRule;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  onUpdate: (patch: Partial<GameRule>) => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+  pages?: { id: string; name: string }[];
+}) {
+  const enabled = rule.enabled !== false;
+  const trigger = RULE_TRIGGERS.find((t) => t.value === rule.trigger);
+  const conditions = rule.conditions ?? [];
+  const actions = rule.actions ?? [];
+
+  const addCondition = () =>
+    onUpdate({ conditions: [...conditions, blankCondition()] });
+  const updateCondition = (id: string, patch: Partial<RuleCondition>) =>
+    onUpdate({
+      conditions: conditions.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+    });
+  const deleteCondition = (id: string) =>
+    onUpdate({ conditions: conditions.filter((c) => c.id !== id) });
+
+  const addAction = () => onUpdate({ actions: [...actions, blankAction()] });
+  const updateAction = (id: string, patch: Partial<RuleAction>) =>
+    onUpdate({
+      actions: actions.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+    });
+  const deleteAction = (id: string) =>
+    onUpdate({ actions: actions.filter((a) => a.id !== id) });
+
+  return (
+    <div
+      className={`rounded-xl border transition-colors ${
+        enabled
+          ? "border-warm-wood/60 bg-warm-wood/10"
+          : "border-warm-wood/25 bg-transparent opacity-55"
+      }`}
+    >
+      {/* Header */}
+      <div className="flex flex-col items-center gap-2 px-2.5 py-2">
+        {/* Trigger badge */}
+        <button
+          onClick={onToggleExpand}
+          className="flex items-center gap-1 min-w-0 flex-1"
+        >
+          <span className="text-[11px] shrink-0">{trigger?.icon ?? "⚡"}</span>
+          <span className="text-[10px] font-ui font-semibold text-royal-gold uppercase tracking-wider shrink-0">
+            {trigger?.short ?? rule.trigger}
           </span>
-
-          <select
-            className="v-input text-xs"
-            value={action}
-            onChange={(e) => chooseAction(e.target.value as RuleActionType)}
-          >
-            {RULE_ACTIONS.map((a) => (
-              <option key={a.type} value={a.type}>
-                {a.label}
-              </option>
-            ))}
-          </select>
-
-          {(def.hasAmount || def.hasTarget) && (
-            <div className="grid grid-cols-2 gap-2">
-              {def.hasAmount && (
-                <Stepper
-                  label={def.amountLabel ?? "Amount"}
-                  value={amount}
-                  min={1}
-                  max={99}
-                  onChange={setAmount}
-                />
-              )}
-
-              {def.hasTarget && (
-                <label className="block">
-                  <span className="text-2xs text-soft-gray-dark font-ui block mb-1">
-                    Who
-                  </span>
-
-                  <select
-                    className="v-input text-xs !py-2"
-                    value={target}
-                    onChange={(e) => setTarget(e.target.value as RuleTarget)}
-                  >
-                    {RULE_TARGETS.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-            </div>
+          {conditions.length > 0 && (
+            <span className="text-[10px] font-ui text-soft-gray-dark shrink-0">
+              · {conditions.length} cond{conditions.length > 1 ? "s" : ""}
+            </span>
           )}
-
-          {def.hasValue && (
-            <input
-              className="v-input text-xs"
-              placeholder={def.valuePlaceholder}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
+          {actions.length > 0 && (
+            <span className="ml-auto text-[10px] font-ui text-emerald-glow/70 shrink-0">
+              {actions.length} action{actions.length > 1 ? "s" : ""}
+            </span>
           )}
-        </div>
+        </button>
 
-        {/* Live preview */}
-
-        <div className="px-2.5 pb-2.5">
-          <div className="rounded-lg bg-deep-void/60 border border-warm-wood/40 px-2.5 py-2">
-            <p className="text-[10px] text-soft-gray-dark font-ui uppercase tracking-wider mb-0.5">
-              Preview
-            </p>
-
-            <p className="text-2xs text-parchment-light font-ui leading-relaxed">
-              <span className="text-cyan-spark font-semibold">
-                {triggerLabel(trigger)}:{" "}
-              </span>
-
-              {preview}
-            </p>
-          </div>
-
+        {/* Enable toggle */}
+        <div className="flex gap-2 w-full py-2">
+          {/* Priority badge */}
+          <span className="text-[10px] font-mono text-soft-gray-dark shrink-0">
+            #{rule.priority ?? 50}
+          </span>
           <button
-            onClick={add}
-            disabled={!canAdd}
-            className="w-full mt-2 py-2 rounded-lg bg-emerald-ghost border border-emerald-glow/20 text-emerald-glow text-2xs font-ui font-semibold hover:bg-emerald-glow hover:text-deep-void transition-all disabled:opacity-40"
+            title={enabled ? "Disable" : "Enable"}
+            onClick={() => onUpdate({ enabled: !enabled })}
+            className={`relative w-7 h-4 rounded-full transition-colors shrink-0 ${enabled ? "bg-emerald-glow" : "bg-warm-wood"}`}
           >
-            + Add Rule
+            <span
+              className={`absolute top-0.5 w-3 h-3 rounded-full bg-deep-void transition-all ${enabled ? "left-3.5" : "left-0.5"}`}
+            />
+          </button>
+
+          {/* Duplicate */}
+          <button
+            onClick={onDuplicate}
+            className="p-1 rounded text-soft-gray-dark hover:text-parchment-light hover:bg-warm-wood opacity-60 hover:opacity-100 transition-opacity"
+            title="Duplicate"
+          >
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+              <rect
+                x="3.5"
+                y="3.5"
+                width="6"
+                height="6"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="1.1"
+              />
+              <path
+                d="M2.5 8V2.5h5.5"
+                stroke="currentColor"
+                strokeWidth="1.1"
+              />
+            </svg>
+          </button>
+
+          {/* Delete */}
+          <button
+            onClick={onDelete}
+            className="p-1 rounded text-soft-gray-dark hover:text-crimson-flame hover:bg-crimson-flame/10 opacity-60 hover:opacity-100 transition-opacity"
+            title="Delete"
+          >
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+              <path
+                d="M2.5 3.5h7M5 3.5V2.5h2v1M3.5 3.5l.4 6h4.2l.4-6"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         </div>
       </div>
 
-      {/* Starter templates */}
+      {/* Description */}
+      <div className="px-2.5 pb-2">
+        <textarea
+          rows={2}
+          value={rule.description}
+          onChange={(e) => onUpdate({ description: e.target.value })}
+          placeholder="Describe what this rule does…"
+          className="w-full bg-transparent text-2xs text-parchment-mid font-ui resize-none outline-none leading-relaxed placeholder-soft-gray-dark"
+        />
+      </div>
 
-      {rules.length === 0 && (
-        <div>
-          <p className="text-[10px] text-soft-gray-dark font-ui uppercase tracking-[0.1em] mb-1.5">
-            Quick templates
-          </p>
-
-          <div className="flex flex-wrap gap-1.5">
-            {RULE_TEMPLATES.map((t) => (
-              <button
-                key={t.label}
-                onClick={() =>
-                  onAdd({
-                    trigger: t.trigger,
-
-                    action: t.action,
-
-                    params: t.params,
-
-                    description: buildRuleDescription(t.action, t.params),
-
-                    enabled: true,
-                  })
+      {/* Expanded editor */}
+      {expanded && (
+        <div className="border-t border-warm-wood/40 px-2.5 py-3 space-y-3">
+          {/* Trigger + Priority */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <p className="text-[10px] font-ui text-soft-gray-dark mb-1">
+                Trigger
+              </p>
+              <select
+                value={rule.trigger}
+                onChange={(e) =>
+                  onUpdate({ trigger: e.target.value as RuleTrigger })
                 }
-                className="px-2 py-1 rounded-md text-[10px] font-ui font-semibold bg-warm-wood/40 text-soft-gray hover:text-parchment-light hover:bg-warm-wood"
+                className="w-full bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1.5 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow"
               >
-                + {t.label}
-              </button>
-            ))}
+                {RULE_TRIGGERS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.icon} {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <p className="text-[10px] font-ui text-soft-gray-dark mb-1">
+                Priority (0=first)
+              </p>
+              <input
+                type="number"
+                value={rule.priority ?? 50}
+                min={0}
+                max={999}
+                onChange={(e) => onUpdate({ priority: Number(e.target.value) })}
+                className="w-full bg-rich-wood-dark border border-warm-wood rounded px-1.5 py-1.5 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow"
+              />
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Rules list */}
-
-      {rules.length === 0 ? (
-        <p className="text-2xs text-soft-gray-dark font-ui text-center py-2">
-          No rules yet. Build one above.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {rules.map((rule, idx) => {
-            const enabled = rule.enabled !== false;
-
-            return (
-              <div
-                key={rule.id}
-                className={`rounded-lg border group transition-colors ${enabled ? "border-warm-wood" : "border-warm-wood/40 opacity-55"}`}
+          {/* Conditions */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-ui font-semibold text-soft-gray uppercase tracking-wider">
+                IF (all must pass)
+              </p>
+              <button
+                onClick={addCondition}
+                className="text-[10px] font-ui text-emerald-glow hover:text-emerald-bright px-1.5 py-0.5 rounded hover:bg-emerald-ghost transition-colors"
               >
-                <div className="flex items-center gap-1.5 px-2.5 pt-2">
-                  <div className="flex items-center gap-1 min-w-0 flex-1">
-                    <span className="text-[10px] font-ui font-bold text-cyan-spark bg-[rgba(0,229,255,0.1)] px-1.5 py-0.5 rounded shrink-0">
-                      {triggerLabel(rule.trigger)}
-                    </span>
-
-                    <svg
-                      width="10"
-                      height="10"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                      className="text-soft-gray-dark shrink-0"
-                    >
-                      <path
-                        d="M2 6h7M6.5 3l3 3-3 3"
-                        stroke="currentColor"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-
-                    {rule.action && (
-                      <span className="text-[10px] font-ui font-semibold text-emerald-glow bg-emerald-ghost px-1.5 py-0.5 rounded truncate min-w-0">
-                        {ruleActionDef(rule.action)?.label ?? rule.action}
-                      </span>
+                + Condition
+              </button>
+            </div>
+            {conditions.length === 0 ? (
+              <p className="text-[10px] text-soft-gray-dark font-ui italic">
+                No conditions — rule always fires on trigger
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {conditions.map((c, i) => (
+                  <div key={c.id}>
+                    {i > 0 && (
+                      <p className="text-[10px] text-royal-gold/70 font-ui font-semibold text-center py-0.5">
+                        AND
+                      </p>
                     )}
+                    <ConditionRow
+                      c={c}
+                      onChange={(patch) => updateCondition(c.id, patch)}
+                      onDelete={() => deleteCondition(c.id)}
+                    />
                   </div>
-
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <button
-                      title={enabled ? "Disable" : "Enable"}
-                      onClick={() => onUpdate(rule.id, { enabled: !enabled })}
-                      className={`relative w-7 h-4 rounded-full transition-colors shrink-0 ${enabled ? "bg-emerald-glow" : "bg-warm-wood"}`}
-                    >
-                      <span
-                        className={`absolute top-0.5 w-3 h-3 rounded-full bg-deep-void transition-all ${enabled ? "left-3.5" : "left-0.5"}`}
-                      />
-                    </button>
-
-                    <button
-                      title="Duplicate"
-                      onClick={() => onAdd({ ...rule })}
-                      className="p-1 rounded text-soft-gray-dark hover:text-parchment-light hover:bg-warm-wood-light opacity-60 group-hover:opacity-100 transition-opacity"
-                    >
-                      <svg
-                        width="11"
-                        height="11"
-                        viewBox="0 0 12 12"
-                        fill="none"
-                      >
-                        <rect
-                          x="3.5"
-                          y="3.5"
-                          width="6"
-                          height="6"
-                          rx="1"
-                          stroke="currentColor"
-                          strokeWidth="1.1"
-                        />
-
-                        <path
-                          d="M2.5 8V2.5h5.5"
-                          stroke="currentColor"
-                          strokeWidth="1.1"
-                        />
-                      </svg>
-                    </button>
-
-                    <button
-                      title="Delete"
-                      onClick={() => onDelete(rule.id)}
-                      className="p-1 rounded text-soft-gray-dark hover:text-crimson-flame hover:bg-crimson-flame/10 opacity-60 group-hover:opacity-100 transition-opacity"
-                    >
-                      <svg
-                        width="11"
-                        height="11"
-                        viewBox="0 0 12 12"
-                        fill="none"
-                      >
-                        <path
-                          d="M2.5 3.5h7M5 3.5V2.5h2v1M3.5 3.5l.4 6h4.2l.4-6"
-                          stroke="currentColor"
-                          strokeWidth="1"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                <textarea
-                  className="w-full bg-transparent text-2xs text-parchment-mid font-ui resize-none outline-none px-2.5 pb-2 pt-1.5 leading-relaxed"
-                  rows={2}
-                  value={rule.description}
-                  placeholder="Describe what happens…"
-                  onChange={(e) =>
-                    onUpdate(rule.id, { description: e.target.value })
-                  }
-                />
-
-                {idx === rules.length - 1 && (
-                  <div className="px-2.5 pb-1.5 text-[10px] text-soft-gray-dark font-ui">
-                    Edit the text to fine-tune wording.
-                  </div>
-                )}
+                ))}
               </div>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Actions */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-ui font-semibold text-soft-gray uppercase tracking-wider">
+                THEN (run in order)
+              </p>
+              <button
+                onClick={addAction}
+                className="text-[10px] font-ui text-emerald-glow hover:text-emerald-bright px-1.5 py-0.5 rounded hover:bg-emerald-ghost transition-colors"
+              >
+                + Action
+              </button>
+            </div>
+            {actions.length === 0 ? (
+              <p className="text-[10px] text-soft-gray-dark font-ui italic">
+                No actions — add at least one
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {actions.map((a) => (
+                  <ActionRow
+                    key={a.id}
+                    a={a}
+                    onChange={(patch) => updateAction(a.id, patch)}
+                    onDelete={() => deleteAction(a.id)}
+                    pages={pages!}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
 }
 
+// ── Main panel ────────────────────────────────────────────────────────────────
+
+export function RulesPanel({
+  hasEngine,
+  rules,
+  onAdd,
+  onUpdate,
+  onDelete,
+  pages,
+}: {
+  hasEngine: boolean;
+  rules: GameRule[];
+  onAdd: (rule: Omit<GameRule, "id">) => void;
+  onUpdate: (id: string, patch: Partial<GameRule>) => void;
+  onDelete: (id: string) => void;
+  pages?: { id: string; name: string }[];
+}) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [filterTrigger, setFilterTrigger] = useState<RuleTrigger | "all">(
+    "all",
+  );
+
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const addFromTemplate = (tpl: (typeof RULE_TEMPLATES)[number]) => {
+    const conditions: RuleCondition[] = (tpl.conditions ?? []).map((c) => ({
+      ...c,
+      id: uid(),
+    }));
+    const actions: RuleAction[] = [
+      {
+        id: uid(),
+        type: tpl.action,
+        target: tpl.params.target ?? "current",
+        amount: tpl.params.amount ?? 1,
+        value: tpl.params.value!,
+      },
+    ];
+    onAdd({
+      trigger: tpl.trigger,
+      description: buildRuleDescription(tpl.action, tpl.params),
+      priority: 50,
+      conditions,
+      actions,
+      action: tpl.action,
+      params: tpl.params,
+      enabled: true,
+    });
+  };
+
+  const addBlank = () => {
+    onAdd({
+      trigger: "turn_start",
+      description: "",
+      priority: 50,
+      conditions: [],
+      actions: [blankAction()],
+      enabled: true,
+    });
+  };
+
+  const filteredRules =
+    filterTrigger === "all"
+      ? rules
+      : rules.filter((r) => r.trigger === filterTrigger);
+
+  const sortedRules = [...filteredRules].sort(
+    (a, b) => (a.priority ?? 50) - (b.priority ?? 50),
+  );
+
+  return (
+    <div className="p-3 space-y-4">
+      {/* Engine gate */}
+      {!hasEngine && (
+        <div className="rounded-xl bg-[rgba(245,196,81,0.08)] border border-[rgba(245,196,81,0.3)] p-3">
+          <p className="text-2xs font-ui text-royal-gold font-semibold mb-1">
+            Rule Engine — Pro
+          </p>
+          <p className="text-[10px] text-soft-gray font-ui mb-2">
+            Upgrade to run rules automatically in playtest with full condition
+            evaluation.
+          </p>
+          <Link
+            href="/pricing"
+            className="text-[10px] font-ui font-bold text-royal-gold hover:text-parchment-light transition-colors"
+          >
+            Upgrade →
+          </Link>
+        </div>
+      )}
+
+      {/* Templates */}
+      <div>
+        <SectionLabel>Quick-add templates</SectionLabel>
+        <div className="grid grid-cols-1 gap-1">
+          {RULE_TEMPLATES.map((tpl) => (
+            <button
+              key={tpl.label}
+              onClick={() => addFromTemplate(tpl)}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-dashed border-warm-wood/60 text-left hover:border-emerald-glow/40 hover:bg-warm-wood/20 transition-colors group"
+            >
+              <span className="text-[11px]">
+                {RULE_TRIGGERS.find((t) => t.value === tpl.trigger)?.icon}
+              </span>
+              <span className="text-2xs font-ui text-soft-gray group-hover:text-parchment-light flex-1">
+                {tpl.label}
+              </span>
+              <span className="text-[10px] font-ui text-emerald-glow opacity-0 group-hover:opacity-100 transition-opacity">
+                + Add
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-px bg-warm-wood/40" />
+
+      {/* Filter + Add */}
+      <div className="flex items-center gap-2">
+        <select
+          value={filterTrigger}
+          onChange={(e) =>
+            setFilterTrigger(e.target.value as RuleTrigger | "all")
+          }
+          className="flex-1 bg-rich-wood-mid border border-warm-wood rounded-lg px-2 py-1.5 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow"
+        >
+          <option value="all">All triggers ({rules.length})</option>
+          {RULE_TRIGGERS.map((t) => {
+            const count = rules.filter((r) => r.trigger === t.value).length;
+            return (
+              <option key={t.value} value={t.value}>
+                {t.icon} {t.short} ({count})
+              </option>
+            );
+          })}
+        </select>
+        <button
+          onClick={addBlank}
+          className="px-3 py-1.5 rounded-lg bg-emerald-glow text-deep-void text-2xs font-ui font-bold hover:bg-emerald-bright transition-colors shrink-0"
+        >
+          + Rule
+        </button>
+      </div>
+
+      {/* Rule list */}
+      {sortedRules.length === 0 ? (
+        <div className="text-center py-6">
+          <p className="text-soft-gray-dark text-2xs font-ui">
+            {filterTrigger === "all"
+              ? "No rules yet. Add one above or use a template."
+              : "No rules for this trigger."}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {sortedRules.map((rule) => (
+            <RuleCard
+              key={rule.id}
+              rule={rule}
+              expanded={expandedId === rule.id}
+              onToggleExpand={() => toggleExpand(rule.id)}
+              onUpdate={(patch) => onUpdate(rule.id, patch)}
+              onDelete={() => onDelete(rule.id)}
+              onDuplicate={() =>
+                onAdd({ ...rule, priority: (rule.priority ?? 50) + 1 })
+              }
+              pages={pages!}
+            />
+          ))}
+        </div>
+      )}
+
+      {rules.length > 0 && (
+        <p className="text-[10px] text-soft-gray-dark font-ui text-center">
+          {rules.filter((r) => r.enabled !== false).length}/{rules.length} rules
+          active · sorted by priority
+        </p>
+      )}
+    </div>
+  );
+}

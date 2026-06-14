@@ -639,6 +639,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 onDelete={(id) =>
                   setRules((rs) => rs.filter((r) => r.id !== id))
                 }
+                pages={pages}
               />
             )}
           </div>

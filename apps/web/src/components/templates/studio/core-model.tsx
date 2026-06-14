@@ -160,6 +160,11 @@ export type RuleTrigger =
   | "card_played"
   | "token_moved"
   | "dice_rolled"
+  | "score_changed"
+  | "round_start"
+  | "round_end"
+  | "player_eliminated"
+  | "game_start"
   | "game_end";
 
 export type RuleActionType =
@@ -171,9 +176,62 @@ export type RuleActionType =
   | "extra_turn"
   | "skip_turn"
   | "end_game"
+  | "set_counter"
+  | "flip_component"
+  | "navigate_page"
+  | "eliminate_player"
+  | "shuffle_deck"
   | "custom";
 
-export type RuleTarget = "current" | "each" | "all" | "next";
+export type RuleTarget = "current" | "each" | "all" | "next" | "previous" | "winner" | "loser";
+
+// ── Condition system ──────────────────────────────────────────────────────────
+
+export type RuleConditionSubject =
+  | "score"
+  | "round"
+  | "turn_count"
+  | "dice_result"
+  | "player_count"
+  | "card_count"
+  | "counter";
+
+export type RuleConditionOperator =
+  | "eq"   // equal
+  | "neq"  // not equal
+  | "gt"   // greater than
+  | "gte"  // greater than or equal
+  | "lt"   // less than
+  | "lte"  // less than or equal
+  | "between"
+  | "is_multiple_of";
+
+export interface RuleCondition {
+  id: string;
+  subject: RuleConditionSubject;
+  /** For subject=counter: the counter key to read */
+  counterKey?: string;
+  operator: RuleConditionOperator;
+  value: number;
+  /** For operator=between: the upper bound */
+  value2?: number;
+  /** Invert the condition */
+  negate?: boolean;
+}
+
+// ── Action system ─────────────────────────────────────────────────────────────
+
+export interface RuleAction {
+  id: string;
+  type: RuleActionType;
+  target?: RuleTarget;
+  amount?: number;
+  value?: string;
+  /** For navigate_page: the page id to navigate to */
+  pageId?: string;
+  /** For set_counter: the counter key */
+  counterKey?: string;
+}
 
 export interface RuleParams {
   amount?: number;
@@ -184,9 +242,15 @@ export interface RuleParams {
 export interface GameRule {
   id: string;
   trigger: RuleTrigger;
-  /** Human-readable summary — also shown on the marketplace "How to play" section. */
+  /** Human-readable summary shown on marketplace and playtest HUD. */
   description: string;
-  /** Structured action (newer rules). Older rules may only carry `description`. */
+  /** Execution priority — lower runs first. */
+  priority?: number;
+  /** Structured conditions (ALL must pass for the rule to fire). */
+  conditions?: RuleCondition[];
+  /** Structured actions executed when trigger fires and conditions pass. */
+  actions?: RuleAction[];
+  /** Legacy single action (older rules). */
   action?: RuleActionType;
   params?: RuleParams;
   enabled?: boolean;
@@ -196,17 +260,19 @@ export const RULE_TRIGGERS: {
   value: RuleTrigger;
   label: string;
   short: string;
+  icon: string;
 }[] = [
-  { value: "turn_start", label: "On turn start", short: "Turn start" },
-  { value: "turn_end", label: "On turn end", short: "Turn end" },
-  {
-    value: "card_played",
-    label: "When a card is played",
-    short: "Card played",
-  },
-  { value: "token_moved", label: "When a token moves", short: "Token moved" },
-  { value: "dice_rolled", label: "When dice are rolled", short: "Dice rolled" },
-  { value: "game_end", label: "Win / end condition", short: "Game end" },
+  { value: "turn_start",        label: "On turn start",          short: "Turn start",    icon: "▶" },
+  { value: "turn_end",          label: "On turn end",            short: "Turn end",      icon: "■" },
+  { value: "round_start",       label: "On round start",         short: "Round start",   icon: "◎" },
+  { value: "round_end",         label: "On round end",           short: "Round end",     icon: "◉" },
+  { value: "card_played",       label: "When a card is played",  short: "Card played",   icon: "🃏" },
+  { value: "token_moved",       label: "When a token moves",     short: "Token moved",   icon: "♟" },
+  { value: "dice_rolled",       label: "When dice are rolled",   short: "Dice rolled",   icon: "🎲" },
+  { value: "score_changed",     label: "When score changes",     short: "Score change",  icon: "★" },
+  { value: "player_eliminated", label: "When a player is out",   short: "Player out",    icon: "✕" },
+  { value: "game_start",        label: "On game start",          short: "Game start",    icon: "⚑" },
+  { value: "game_end",          label: "Win / end condition",    short: "Game end",      icon: "🏆" },
 ];
 
 export const RULE_TARGETS: {
@@ -214,10 +280,34 @@ export const RULE_TARGETS: {
   label: string;
   sentence: string;
 }[] = [
-  { value: "current", label: "Current player", sentence: "the current player" },
-  { value: "each", label: "Each player", sentence: "each player" },
-  { value: "all", label: "All players", sentence: "all players" },
-  { value: "next", label: "Next player", sentence: "the next player" },
+  { value: "current",  label: "Current player",  sentence: "the current player"  },
+  { value: "each",     label: "Each player",     sentence: "each player"          },
+  { value: "all",      label: "All players",     sentence: "all players"          },
+  { value: "next",     label: "Next player",     sentence: "the next player"      },
+  { value: "previous", label: "Previous player", sentence: "the previous player"  },
+  { value: "winner",   label: "Winner",          sentence: "the winner"           },
+  { value: "loser",    label: "Loser",           sentence: "the loser"            },
+];
+
+export const RULE_CONDITION_SUBJECTS: { value: RuleConditionSubject; label: string }[] = [
+  { value: "score",        label: "Score"        },
+  { value: "round",        label: "Round number" },
+  { value: "turn_count",   label: "Turn count"   },
+  { value: "dice_result",  label: "Dice result"  },
+  { value: "player_count", label: "Player count" },
+  { value: "card_count",   label: "Cards in hand"},
+  { value: "counter",      label: "Counter"      },
+];
+
+export const RULE_CONDITION_OPERATORS: { value: RuleConditionOperator; label: string; symbol: string }[] = [
+  { value: "eq",            label: "equals",            symbol: "="  },
+  { value: "neq",           label: "not equal to",      symbol: "≠"  },
+  { value: "gt",            label: "greater than",      symbol: ">"  },
+  { value: "gte",           label: "at least",          symbol: "≥"  },
+  { value: "lt",            label: "less than",         symbol: "<"  },
+  { value: "lte",           label: "at most",           symbol: "≤"  },
+  { value: "between",       label: "between",           symbol: "↔"  },
+  { value: "is_multiple_of",label: "multiple of",       symbol: "%"  },
 ];
 
 interface RuleActionDef {
@@ -317,6 +407,45 @@ export const RULE_ACTIONS: RuleActionDef[] = [
       `The game ends when ${p.value?.trim() || "a win condition is met"}.`,
   },
   {
+    type: "set_counter",
+    label: "Set counter",
+    hasAmount: true,
+    amountLabel: "Value",
+    defaultAmount: 0,
+    hasTarget: true,
+    hasValue: true,
+    valuePlaceholder: "Counter name",
+    describe: (p) =>
+      `Set ${p.value?.trim() || "counter"} to ${p.amount ?? 0} for ${targetSentence(p.target)}.`,
+  },
+  {
+    type: "flip_component",
+    label: "Flip component",
+    hasValue: true,
+    valuePlaceholder: "Component name or ID",
+    describe: (p) => `Flip ${p.value?.trim() || "component"} face-down/up.`,
+  },
+  {
+    type: "navigate_page",
+    label: "Go to page",
+    hasValue: true,
+    valuePlaceholder: "Page name",
+    describe: (p) => `Navigate to ${p.value?.trim() || "linked page"}.`,
+  },
+  {
+    type: "eliminate_player",
+    label: "Eliminate player",
+    hasTarget: true,
+    describe: (p) => `${cap(targetSentence(p.target))} is eliminated.`,
+  },
+  {
+    type: "shuffle_deck",
+    label: "Shuffle deck",
+    hasValue: true,
+    valuePlaceholder: "Deck name",
+    describe: (p) => `Shuffle ${p.value?.trim() || "the deck"}.`,
+  },
+  {
     type: "custom",
     label: "Custom effect…",
     hasValue: true,
@@ -342,6 +471,7 @@ export const RULE_TEMPLATES: {
   trigger: RuleTrigger;
   action: RuleActionType;
   params: RuleParams;
+  conditions?: Omit<RuleCondition, "id">[];
 }[] = [
   {
     label: "Draw 1 at turn start",
@@ -357,9 +487,31 @@ export const RULE_TEMPLATES: {
   },
   {
     label: "Win at 30 points",
-    trigger: "game_end",
+    trigger: "score_changed",
     action: "end_game",
     params: { value: "a player reaches 30 points" },
+    conditions: [{ subject: "score", operator: "gte", value: 30, negate: false }],
+  },
+  {
+    label: "Skip turn if score < 0",
+    trigger: "turn_start",
+    action: "skip_turn",
+    params: { target: "current" },
+    conditions: [{ subject: "score", operator: "lt", value: 0, negate: false }],
+  },
+  {
+    label: "Extra turn on 6",
+    trigger: "dice_rolled",
+    action: "extra_turn",
+    params: { target: "current" },
+    conditions: [{ subject: "dice_result", operator: "eq", value: 6, negate: false }],
+  },
+  {
+    label: "Gain 5 on round 3+",
+    trigger: "round_start",
+    action: "gain_points",
+    params: { amount: 5, target: "all" },
+    conditions: [{ subject: "round", operator: "gte", value: 3, negate: false }],
   },
 ];
 

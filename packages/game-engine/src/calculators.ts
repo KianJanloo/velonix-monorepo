@@ -325,3 +325,224 @@ export function bumpMajor(version: string): string {
   if (parts.length !== 3) return version;
   return `${(parts[0] ?? 0) + 1}.0.0`;
 }
+
+// ---------------------------------------------------------------------------
+// RULE ENGINE — Condition evaluator & Action executor
+// ---------------------------------------------------------------------------
+
+import type {
+  RuleCondition,
+  // RuleConditionSubject,
+  RuleConditionOperator,
+  RuleAction,
+  RuleActionType,
+  RuleTarget,
+  GameRule,
+} from "@velonix/types";
+
+// ── Game context (read by conditions) ────────────────────────────────────────
+
+export interface RuleGameContext {
+  /** Current player's score. */
+  score: number;
+  /** Current round number (1-based). */
+  round: number;
+  /** Total turns taken since game start. */
+  turnCount: number;
+  /** Most recent dice roll result. */
+  diceResult: number;
+  /** Number of active (non-eliminated) players. */
+  playerCount: number;
+  /** Current player's card count. */
+  cardCount: number;
+  /** Named counters (arbitrary key-value). */
+  counters: Record<string, number>;
+}
+
+// ── Condition evaluation ──────────────────────────────────────────────────────
+
+function readSubject(ctx: RuleGameContext, c: RuleCondition): number {
+  switch (c.subject) {
+    case "score":        return ctx.score;
+    case "round":        return ctx.round;
+    case "turn_count":   return ctx.turnCount;
+    case "dice_result":  return ctx.diceResult;
+    case "player_count": return ctx.playerCount;
+    case "card_count":   return ctx.cardCount;
+    case "counter":      return ctx.counters[c.counterKey ?? ""] ?? 0;
+    default:             return 0;
+  }
+}
+
+function applyOperator(
+  lhs: number,
+  op: RuleConditionOperator,
+  rhs: number,
+  rhs2?: number,
+): boolean {
+  switch (op) {
+    case "eq":            return lhs === rhs;
+    case "neq":           return lhs !== rhs;
+    case "gt":            return lhs > rhs;
+    case "gte":           return lhs >= rhs;
+    case "lt":            return lhs < rhs;
+    case "lte":           return lhs <= rhs;
+    case "between":       return lhs >= rhs && lhs <= (rhs2 ?? rhs);
+    case "is_multiple_of": return rhs !== 0 && lhs % rhs === 0;
+    default:              return false;
+  }
+}
+
+/**
+ * Evaluates a single RuleCondition against the provided game context.
+ * Returns `true` if the condition passes (after applying optional negation).
+ */
+export function evaluateCondition(
+  condition: RuleCondition,
+  ctx: RuleGameContext,
+): boolean {
+  const lhs = readSubject(ctx, condition);
+  const result = applyOperator(lhs, condition.operator, condition.value, condition.value2);
+  return condition.negate ? !result : result;
+}
+
+/**
+ * Evaluates ALL conditions for a rule (AND logic).
+ * Returns `true` if the rule should fire (all conditions pass, or no conditions set).
+ */
+export function evaluateRuleConditions(
+  rule: GameRule,
+  ctx: RuleGameContext,
+): boolean {
+  if (!rule.conditions || rule.conditions.length === 0) return true;
+  return rule.conditions.every((c: any) => evaluateCondition(c, ctx));
+}
+
+// ── Action result ─────────────────────────────────────────────────────────────
+
+export interface RuleActionResult {
+  type: RuleActionType;
+  target: RuleTarget;
+  /** For point/space/counter actions. */
+  amount?: number;
+  /** For navigate_page. */
+  pageId?: string;
+  /** For set_counter / flip_component. */
+  key?: string;
+  /** For custom / end_game. */
+  message?: string;
+  /** Roll result when type=roll_dice. */
+  roll?: number;
+}
+
+/**
+ * Executes a single RuleAction and returns a structured result describing
+ * what happened. Pure function — callers apply the result to their own state.
+ */
+export function executeRuleAction(action: RuleAction): RuleActionResult {
+  const target = action.target ?? "current";
+  const amount = action.amount ?? 1;
+
+  switch (action.type) {
+    case "draw_cards":
+      return { type: "draw_cards", target, amount };
+
+    case "gain_points":
+      return { type: "gain_points", target, amount };
+
+    case "lose_points":
+      return { type: "lose_points", target, amount: -Math.abs(amount) };
+
+    case "move_spaces":
+      return { type: "move_spaces", target, amount };
+
+    case "roll_dice": {
+      const sides = Math.max(2, amount);
+      const roll = 1 + Math.floor(Math.random() * sides);
+      return { type: "roll_dice", target, amount: sides, roll };
+    }
+
+    case "extra_turn":
+      return { type: "extra_turn", target };
+
+    case "skip_turn":
+      return { type: "skip_turn", target };
+
+    case "end_game":
+      return { type: "end_game", target: "all", message: action.value ?? "Game over." };
+
+    case "set_counter":
+      return { type: "set_counter", target, amount, key: action.counterKey ?? action.value ?? "counter" };
+
+    case "flip_component":
+      return { type: "flip_component", target: "all", key: action.value ?? "" };
+
+    case "navigate_page":
+      return { type: "navigate_page", target: "all", pageId: action.pageId ?? action.value ?? "" };
+
+    case "eliminate_player":
+      return { type: "eliminate_player", target };
+
+    case "shuffle_deck":
+      return { type: "shuffle_deck", target: "all", key: action.value ?? "deck" };
+
+    case "custom":
+      return { type: "custom", target, message: action.value ?? "Custom effect." };
+
+    default:
+      return { type: "custom", target, message: "Unknown action." };
+  }
+}
+
+/**
+ * Evaluates all actions for a rule and returns the full list of results.
+ * Also handles the legacy single-action format for backward compatibility.
+ */
+export function executeRuleActions(rule: GameRule): RuleActionResult[] {
+  // New structured actions array
+  if (rule.actions && rule.actions.length > 0) {
+    return rule.actions.map(executeRuleAction);
+  }
+
+  // Legacy single action fallback
+  if (rule.action) {
+    const legacyAction: RuleAction = {
+      id: `legacy-${rule.id}`,
+      type: rule.action,
+      target: rule.params?.target ?? "current",
+      amount: rule.params?.amount ?? 1,
+      value: rule.params?.value,
+    };
+    return [executeRuleAction(legacyAction)];
+  }
+
+  return [];
+}
+
+/**
+ * Full rule evaluation pipeline: checks enabled → evaluates conditions → executes actions.
+ * Returns null if the rule does not fire, or the action results if it does.
+ */
+export function processRule(
+  rule: GameRule,
+  ctx: RuleGameContext,
+): RuleActionResult[] | null {
+  if (rule.enabled === false) return null;
+  if (!evaluateRuleConditions(rule, ctx)) return null;
+  return executeRuleActions(rule);
+}
+
+/**
+ * Process all rules for a given trigger, sorted by priority (lower = first).
+ * Returns a flat list of all action results from rules that fired.
+ */
+export function processTrigger(
+  rules: GameRule[],
+  trigger: GameRule["trigger"],
+  ctx: RuleGameContext,
+): RuleActionResult[] {
+  return rules
+    .filter((r) => r.trigger === trigger && r.enabled !== false)
+    .sort((a, b) => (a.priority ?? 50) - (b.priority ?? 50))
+    .flatMap((r) => processRule(r, ctx) ?? []);
+}
