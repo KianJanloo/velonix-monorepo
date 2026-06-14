@@ -383,6 +383,8 @@ export function useStudioEditorState(gameId: string) {
       assets?: string[];
 
       guide?: GameGuide;
+
+      drawingStrokes?: import("../core").DrawingStroke[];
     } | null;
 
     if (Array.isArray(data?.pages) && data!.pages.length > 0) {
@@ -434,6 +436,11 @@ export function useStudioEditorState(gameId: string) {
     if (Array.isArray(data?.assets)) setAssets(data!.assets);
 
     if (data?.guide) setGuide({ ...EMPTY_GUIDE, ...data.guide });
+
+    // Restore drawing strokes saved in the previous session
+    if (Array.isArray(data?.drawingStrokes) && data!.drawingStrokes!.length > 0) {
+      data!.drawingStrokes!.forEach((s) => draw.applyRemoteStroke(s));
+    }
   }, [game, firstPageId]);
 
   // ── Dirty tracking ─────────────────────────────────────────────────────────
@@ -469,10 +476,16 @@ export function useStudioEditorState(gameId: string) {
       if (broadcastTimerRef.current) clearTimeout(broadcastTimerRef.current);
 
       broadcastTimerRef.current = setTimeout(() => {
-        collabBroadcastRef.current?.({ pages, rules, assets, guide });
+        collabBroadcastRef.current?.({
+          pages,
+          rules,
+          assets,
+          guide,
+          drawingStrokes: draw.strokes,
+        });
       }, 250);
     }
-  }, [pages, rules, assets, guide, markDirty]);
+  }, [pages, rules, assets, guide, draw.strokes, markDirty]);
 
 
 

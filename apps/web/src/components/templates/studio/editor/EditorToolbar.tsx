@@ -6,10 +6,6 @@ import {
   PresenceAvatar,
 } from "../dialogs";
 
-import {
-  TOOLS,
-} from "../core";
-
 import type { StudioEditor } from "./useStudioEditor";
 
 export function EditorToolbar({ ed }: { ed: StudioEditor }) {
@@ -28,8 +24,6 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
     resetZoom,
     zoomPercent,
     plan,
-    activeTool,
-    setActiveTool,
     setGuideOpen,
     pastRef,
     futureRef,
@@ -74,21 +68,6 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
         <span className="text-2xs text-soft-gray font-ui truncate max-w-[120px] hidden sm:block mr-1 shrink-0">
           {game?.title ?? (isNew ? "New Game" : gameId.slice(0, 8))}
         </span>
-
-        <div className="w-px h-5 bg-warm-wood mx-0.5 shrink-0" />
-
-        {TOOLS.map((t) => (
-          <button
-            key={t.id}
-            title={t.label}
-            onClick={() => { setActiveTool(t.id); ed.draw?.setDrawTool(null); }}
-            className={`v-tool-btn shrink-0 ${activeTool === t.id && !ed.draw?.activeTool ? "active" : ""}`}
-          >
-            {t.icon}
-          </button>
-        ))}
-
-        <div className="w-px h-5 bg-warm-wood mx-0.5 shrink-0" />
 
         {/* ── Drawing tools ── */}
         {ed.draw && (

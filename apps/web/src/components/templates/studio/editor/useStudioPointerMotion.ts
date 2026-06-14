@@ -144,7 +144,7 @@ export function useStudioPointerMotion(S: StudioState) {
     storeZoom,
     pages,
     setPages,
-    canvasSizeRef: _canvasSizeRef,
+    canvasSizeRef,
     componentsRef,
     setMarquee,
     setComponentsRaw,
@@ -163,6 +163,8 @@ export function useStudioPointerMotion(S: StudioState) {
     pendingRemoteRef,
     collabBroadcastRef,
     readOnlyRef,
+    drawBroadcastRef,
+    draw,
     setMultiIds,
     dragRef,
   } = S;
@@ -240,9 +242,16 @@ export function useStudioPointerMotion(S: StudioState) {
           spacingGuidesRef.current = [];
         }
       } else if (dr.kind === "resize" && dr.compId) {
-        const dx = (e.clientX - dr.sx) / (z * MM_TO_PX);
+        const rawDx = (e.clientX - dr.sx) / (z * MM_TO_PX);
+        const rawDy = (e.clientY - dr.sy) / (z * MM_TO_PX);
 
-        const dy = (e.clientY - dr.sy) / (z * MM_TO_PX);
+        // Rotate the screen-space delta into the component's local space
+        // so resizing works correctly for any rotation angle.
+        const rad = ((dr.orot ?? 0) * Math.PI) / 180;
+        const cosA = Math.cos(-rad);
+        const sinA = Math.sin(-rad);
+        const dx = rawDx * cosA - rawDy * sinA;
+        const dy = rawDx * sinA + rawDy * cosA;
 
         const h = dr.handle!;
 
@@ -254,14 +263,19 @@ export function useStudioPointerMotion(S: StudioState) {
 
         if (h.includes("w")) {
           ow = dr.ow - dx;
-
-          ox = dr.ox + dx;
+          // Shift origin in rotated local space, then re-project to world space
+          const shiftX = dx * Math.cos(rad) - 0 * Math.sin(rad);
+          const shiftY = dx * Math.sin(rad) + 0 * Math.cos(rad);
+          ox = dr.ox + shiftX;
+          oy = dr.oy + shiftY;
         }
 
         if (h.includes("n")) {
           oh = dr.oh - dy;
-
-          oy = dr.oy + dy;
+          const shiftX = 0 * Math.cos(rad) - dy * Math.sin(rad);
+          const shiftY = 0 * Math.sin(rad) + dy * Math.cos(rad);
+          ox = dr.ox + shiftX;
+          oy = dr.oy + shiftY;
         }
 
         ow = Math.max(8, ow);
@@ -441,6 +455,7 @@ export function useStudioPointerMotion(S: StudioState) {
     connected: collabConnected,
 
     broadcast,
+    broadcastDraw,
   } = useStudioCollab({
     gameId,
 
@@ -448,10 +463,13 @@ export function useStudioPointerMotion(S: StudioState) {
 
     onRemoteUpdate: applyRemoteSnapshot,
 
-    getSnapshot: () => ({ pages, rules, assets, guide }),
+    onRemoteDraw: draw?.applyRemoteStroke,
+    onRemoteDrawClear: draw?.applyRemoteClear,
+    getSnapshot: () => ({ pages, rules, assets, guide, drawingStrokes: draw?.strokes ?? [] }),
   });
 
   collabBroadcastRef.current = collabEnabled ? broadcast : null;
+  drawBroadcastRef.current = collabEnabled ? broadcastDraw : null;
 
   const effectiveReadOnly = readOnly || liveRole === "viewer";
 
@@ -480,4 +498,3 @@ export function useStudioPointerMotion(S: StudioState) {
     spacingGuidesRef,
     altActiveRef,
   };
-}

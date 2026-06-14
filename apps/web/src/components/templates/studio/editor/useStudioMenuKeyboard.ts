@@ -51,6 +51,7 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
     canUngroup,
     isNew,
     gameId,
+    draw,
   } = S;
 
   const {
@@ -478,6 +479,7 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
       assets,
 
       guide,
+      drawingStrokes: draw?.strokes ?? [],
     } as unknown as Record<string, unknown>);
   }, [isNew, saveNow, pages, rules, assets, guide]);
 
@@ -500,6 +502,7 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
       assets,
 
       guide,
+      drawingStrokes: draw?.strokes ?? [],
     } as unknown as Record<string, unknown>);
 
     router.push(`/studio/${gameId}/publish`);

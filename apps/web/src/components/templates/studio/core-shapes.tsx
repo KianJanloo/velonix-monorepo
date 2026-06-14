@@ -230,8 +230,22 @@ export function ShapeInner({ comp }: { comp: CanvasComp }) {
     );
   }
   if (comp.type === "line") {
-    // Line renders as a plain filled bar — the container IS the line.
-    return null;
+    // Line: render a centred filled bar using the fill colour and lineWeight.
+    const thickness = Math.max(1, comp.lineWeight ?? 2);
+    return (
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+          height: thickness,
+          backgroundColor: safeColor(comp.fill, "#f5c451"),
+          borderRadius: thickness / 2,
+        }}
+      />
+    );
   }
   if (comp.type === "spiral") {
     // Archimedes spiral path drawn as SVG
@@ -358,7 +372,7 @@ export interface CompViewProps {
   onTextChange: (id: string, text: string) => void;
   onContextMenu?: (e: ReactMouseEvent, comp: CanvasComp) => void;
   /** When set, Ctrl+clicking this component jumps to the linked page. */
-  onNavigateToPage?: ((pageId: string) => void) | undefined;
+  onNavigateToPage?: (pageId: string) => void;
 }
 
 export type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
@@ -432,7 +446,7 @@ export function CompView({
           backgroundColor: (isChromeless(comp.type) || isSilhouetteType(comp.type))
             ? "transparent"
             : safeColor(comp.fill, "#1a2535"),
-          backgroundImage: comp.image ? `url("${comp.image}")` : undefined,
+          backgroundImage: comp.image && !isChromeless(comp.type) ? `url("${comp.image}")` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
           border: (isChromeless(comp.type) || isSilhouetteType(comp.type))
