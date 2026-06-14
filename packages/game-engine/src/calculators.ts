@@ -511,7 +511,7 @@ export function executeRuleActions(rule: GameRule): RuleActionResult[] {
       type: rule.action,
       target: rule.params?.target ?? "current",
       amount: rule.params?.amount ?? 1,
-      value: rule.params?.value,
+      value: rule.params?.value!,
     };
     return [executeRuleAction(legacyAction)];
   }
