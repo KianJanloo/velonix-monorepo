@@ -155,9 +155,7 @@ export function useStudioActions(S: StudioState) {
   // ── Grouping ────────────────────────────────────────────────────────────────
 
   // These read the live selection (selectionRef) and operate on the live
-
   // component list via a functional update, so they stay correct regardless of
-
   // when they were bound (e.g. from the keyboard handler).
 
   const groupSelection = useCallback(() => {
@@ -180,11 +178,78 @@ export function useStudioActions(S: StudioState) {
 
       futureRef.current = [];
 
-      return prev.map((c) => (set.has(c.id) ? { ...c, groupId: gid } : c));
+      // Detect if all selected components share the same existing groupId —
+      // if so, we are nesting that group into a new parent group.
+      // const existingGroupIds = Array.from(
+      //  new Set(ids.map((id) => prev.find((c) => c.id === id)?.groupId).filter(Boolean) as string[])
+      // );
+
+      return prev.map((c) => {
+        if (!set.has(c.id)) return c;
+
+        const updated = { ...c, groupId: gid };
+
+        // If this component already had a groupId, preserve it as parentGroupId
+        // so the nested group hierarchy is recorded.
+        if (c.groupId && c.groupId !== gid) {
+          updated.parentGroupId = c.groupId;
+        }
+
+        return updated;
+      });
     });
 
     setMultiIds([]); // selection now derives from the group
   }, [setComponentsRaw]);
+
+  /**
+   * Rotate all components in a group by a given angle delta (degrees).
+   * Rotates each component's position around the group's bounding-box centre,
+   * and adds the delta to each component's own rotation.
+   */
+  const rotateGroup = useCallback(
+    (groupId: string, angleDeg: number) => {
+      setComponentsRaw((prev) => {
+        const members = prev.filter((c) => c.groupId === groupId);
+        if (members.length === 0) return prev;
+
+        pastRef.current.push(prev);
+        futureRef.current = [];
+
+        // Compute group bounding-box centre
+        const minX = Math.min(...members.map((c) => c.x));
+        const minY = Math.min(...members.map((c) => c.y));
+        const maxX = Math.max(...members.map((c) => c.x + c.width));
+        const maxY = Math.max(...members.map((c) => c.y + c.height));
+        const cx = (minX + maxX) / 2;
+        const cy = (minY + maxY) / 2;
+
+        const rad = (angleDeg * Math.PI) / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
+        return prev.map((c) => {
+          if (c.groupId !== groupId) return c;
+
+          // Rotate the component's own centre around the group centre
+          const compCx = c.x + c.width / 2;
+          const compCy = c.y + c.height / 2;
+          const dx = compCx - cx;
+          const dy = compCy - cy;
+          const newCx = cx + dx * cos - dy * sin;
+          const newCy = cy + dx * sin + dy * cos;
+
+          return {
+            ...c,
+            x: Math.round(newCx - c.width / 2),
+            y: Math.round(newCy - c.height / 2),
+            rotation: Math.round(((c.rotation + angleDeg) % 360 + 360) % 360),
+          };
+        });
+      });
+    },
+    [setComponentsRaw],
+  );
 
   const ungroupById = useCallback(
     (groupId: string) => {
@@ -518,6 +583,7 @@ export function useStudioActions(S: StudioState) {
     groupSelection,
     ungroupById,
     ungroupSelection,
+    rotateGroup,
     moveZ,
     insertAssetComponents,
     getSelectionPayload,

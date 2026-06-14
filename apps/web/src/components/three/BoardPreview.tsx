@@ -85,9 +85,9 @@ export function BoardPreview({
     scene.background = new THREE.Color(0x0a0a0a);
     scene.fog = new THREE.Fog(0x0a0a0a, 14, 22);
 
-    const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
-    camera.position.set(0, 5.5, 6.5);
-    camera.lookAt(0, 0.2, 0);
+    const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
+    camera.position.set(0, 6, 7.5);
+    camera.lookAt(0, 0.5, 0);
 
     // ── Lights ─────────────────────────────────────────────────────────────
     scene.add(new THREE.AmbientLight(0xffe4b0, 0.4));
@@ -242,42 +242,57 @@ export function BoardPreview({
       ];
     }
 
-    // ── Mouse orbit ────────────────────────────────────────────────────────
+    // ── Custom orbit controls (mouse + touch, r128-safe) ─────────────────
     let autoRotY = 0;
     let isDragging = false;
     let lastX = 0;
-    let phi = Math.PI / 4;
+    let lastY = 0;
+    let phi   = Math.PI / 3.8;   // ~47° tilt — shows both top and front face
     let theta = 0;
-    const radius = 8.5;
+    const radius = 9.5;
 
     function updateCamera() {
       camera.position.x = radius * Math.sin(phi) * Math.sin(theta);
-      camera.position.y = radius * Math.cos(phi) + 0.2;
+      camera.position.y = radius * Math.cos(phi) + 0.4;
       camera.position.z = radius * Math.sin(phi) * Math.cos(theta);
-      camera.lookAt(0, 0.2, 0);
+      camera.lookAt(0, 0.4, 0);
     }
 
     if (!disableControls && !flythrough) {
-      mount.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        lastX = e.clientX;
-      });
-      mount.addEventListener("mouseup", () => {
-        isDragging = false;
-      });
-      mount.addEventListener("mousemove", (e) => {
+      const onMouseDown = (e: MouseEvent) => { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
+      const onMouseUp   = () => { isDragging = false; };
+      const onMouseMove = (e: MouseEvent) => {
         if (!isDragging) return;
         theta -= (e.clientX - lastX) * 0.005;
-        lastX = e.clientX;
-      });
-      mount.addEventListener(
-        "wheel",
-        (e) => {
-          phi = Math.max(0.3, Math.min(Math.PI / 2.1, phi + e.deltaY * 0.002));
-          updateCamera();
-        },
-        { passive: true },
-      );
+        phi = Math.max(0.22, Math.min(Math.PI / 2.05, phi + (e.clientY - lastY) * 0.005));
+        lastX = e.clientX; lastY = e.clientY;
+        updateCamera();
+      };
+
+      // Touch orbit
+      let lastTouchX = 0, lastTouchY = 0;
+      const onTouchStart = (e: TouchEvent) => {
+        if (e.touches.length === 1) { lastTouchX = e.touches[0]!.clientX; lastTouchY = e.touches[0]!.clientY; isDragging = true; }
+      };
+      const onTouchMove = (e: TouchEvent) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        theta -= (e.touches[0]!.clientX - lastTouchX) * 0.006;
+        phi = Math.max(0.22, Math.min(Math.PI / 2.05, phi + (e.touches[0]!.clientY - lastTouchY) * 0.006));
+        lastTouchX = e.touches[0]!.clientX; lastTouchY = e.touches[0]!.clientY;
+        updateCamera();
+      };
+      const onTouchEnd = () => { isDragging = false; };
+
+      mount.addEventListener("mousedown", onMouseDown);
+      mount.addEventListener("mouseup", onMouseUp);
+      mount.addEventListener("mousemove", onMouseMove);
+      mount.addEventListener("touchstart", onTouchStart, { passive: true });
+      mount.addEventListener("touchmove", onTouchMove, { passive: true });
+      mount.addEventListener("touchend", onTouchEnd);
+      mount.addEventListener("wheel", (e) => {
+        phi = Math.max(0.22, Math.min(Math.PI / 2.05, phi + e.deltaY * 0.002));
+        updateCamera();
+      }, { passive: true });
     }
 
     // ── Animate (paused when off-screen or tab hidden) ───────────────────────
@@ -433,7 +448,7 @@ export function BoardPreview({
       {!disableControls && !flythrough && (
         <div className="absolute bottom-6 right-6 z-20 pointer-events-none">
           <p className="text-soft-gray text-2xs font-ui tracking-wider uppercase opacity-60">
-            Drag to rotate
+            Drag / touch to orbit · scroll to tilt
           </p>
         </div>
       )}

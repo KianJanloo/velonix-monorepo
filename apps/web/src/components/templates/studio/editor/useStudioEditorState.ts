@@ -48,6 +48,8 @@ import type {
   ResizeHandle,
 } from "../core";
 
+import { useDrawingTool } from "./useDrawingTool";
+
 export function useStudioEditorState(gameId: string) {
   const isNew = gameId === "new";
 
@@ -307,6 +309,11 @@ export function useStudioEditorState(gameId: string) {
 
   const collabBroadcastRef = useRef<((snapshot: unknown) => void) | null>(null);
 
+  /** Separate broadcast ref for drawing events (studio:draw / studio:draw-clear). */
+  const drawBroadcastRef = useRef<((event: string, payload: unknown) => void) | null>(null);
+
+  const draw = useDrawingTool(drawBroadcastRef.current);
+
   const readOnlyRef = useRef(false);
 
   const selectedComp = components.find((c) => c.id === selectedId) ?? null;
@@ -517,6 +524,7 @@ export function useStudioEditorState(gameId: string) {
     setShareOpen, tutorialOpen, setTutorialOpen, marketOpen, setMarketOpen, moreOpen,
     setMoreOpen, menu, setMenu, applyingRemoteRef, pendingRemoteRef, broadcastTimerRef,
     collabBroadcastRef, readOnlyRef, selectedComp, inPreview, isPlaytest, multiIds, setMultiIds,
+    draw, drawBroadcastRef,
     selectionIds, selectionRef, selectedGroupIds, canGroup, canUngroup, hydratedRef,
     suppressDirtyRef, mountedRef,
   };

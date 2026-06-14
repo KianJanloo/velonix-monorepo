@@ -2,9 +2,17 @@
 
 import { useState } from "react";
 
-import { CANVAS_W_MM, CANVAS_H_MM, isCircleType, COMP_ICONS } from "../core";
+import {
+  CANVAS_W_MM,
+  CANVAS_H_MM,
+  isCircleType,
+  COMP_ICONS,
+} from "../core";
 
-import type { CompType, CanvasComp } from "../core";
+import type {
+  CompType,
+  CanvasComp,
+} from "../core";
 
 import {
   SectionLabel,
@@ -48,30 +56,27 @@ const SIZE_PRESETS: Partial<
 
 export function GroupBar({
   count,
-
   canGroup,
-
   canUngroup,
-
   onGroup,
-
   onUngroup,
+  hasNestedGroups,
 }: {
   count: number;
-
   canGroup: boolean;
-
   canUngroup: boolean;
-
   onGroup: () => void;
-
   onUngroup: () => void;
+  hasNestedGroups?: boolean;
 }) {
   return (
     <div className="rounded-lg border border-[rgba(124,92,255,0.3)] bg-[rgba(124,92,255,0.08)] p-2.5">
       <div className="flex items-center justify-between mb-2">
         <span className="text-2xs font-ui font-semibold text-[#a78bff]">
           {count > 1 ? `${count} selected` : "Group"}
+          {hasNestedGroups && (
+            <span className="ml-1.5 text-[10px] text-royal-gold font-normal">⤷ nested</span>
+          )}
         </span>
 
         <span className="text-[10px] text-soft-gray-dark font-ui">
@@ -83,19 +88,26 @@ export function GroupBar({
         <button
           onClick={onGroup}
           disabled={!canGroup}
-          className="flex-1 py-1.5 rounded-lg bg-[rgba(124,92,255,0.15)] text-[#a78bff] text-2xs font-ui font-semibold hover:bg-[rgba(124,92,255,0.25)] disabled:opacity-30"
+          title={hasNestedGroups ? "Nest selected groups into a parent group" : "Group selected components"}
+          className="flex-1 py-1.5 rounded-lg bg-[rgba(124,92,255,0.15)] text-[#a78bff] text-2xs font-ui font-semibold hover:bg-[rgba(124,92,255,0.25)] disabled:opacity-30 transition-colors"
         >
-          Group
+          {hasNestedGroups ? "Nest groups" : "Group"}
         </button>
 
         <button
           onClick={onUngroup}
           disabled={!canUngroup}
-          className="flex-1 py-1.5 rounded-lg bg-warm-wood/50 text-soft-gray text-2xs font-ui font-semibold hover:text-parchment-light hover:bg-warm-wood disabled:opacity-30"
+          className="flex-1 py-1.5 rounded-lg bg-warm-wood/50 text-soft-gray text-2xs font-ui font-semibold hover:text-parchment-light hover:bg-warm-wood disabled:opacity-30 transition-colors"
         >
           Ungroup
         </button>
       </div>
+
+      {hasNestedGroups && (
+        <p className="mt-2 text-[10px] text-soft-gray-dark font-ui leading-tight">
+          Selection contains groups. Grouping again nests them inside a parent group.
+        </p>
+      )}
     </div>
   );
 }
@@ -462,3 +474,4 @@ export function PropertiesPanel({
     </div>
   );
 }
+

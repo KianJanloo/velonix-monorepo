@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 
@@ -25,6 +25,116 @@ import type {
 
 import type { StudioState } from "./useStudioEditorState";
 
+// ── Guide types ───────────────────────────────────────────────────────────────
+
+/** Standard snap / alignment guide line rendered across the full canvas. */
+export interface AlignGuide {
+  axis: "h" | "v";
+  pos: number; // mm
+  kind: "edge" | "center";
+}
+
+/**
+ * Spacing / distance guide shown when Alt is held while dragging.
+ * Renders a dimension line with an arrow and a pixel/mm label between
+ * the dragged component and its nearest neighbour on each side.
+ */
+export interface SpacingGuide {
+  /** Axis the gap is measured along. */
+  axis: "h" | "v";
+  /** Start of the gap (mm). */
+  start: number;
+  /** End of the gap (mm). */
+  end: number;
+  /**
+   * Perpendicular position where the dimension line sits (mm).
+   * For a horizontal gap this is the mid-Y; for vertical mid-X.
+   */
+  perp: number;
+  /** Gap in mm (already rounded). */
+  gapMm: number;
+  /** Gap in pixels at 1× zoom (already rounded). */
+  gapPx: number;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function computeSpacingGuides(
+  dragged: CanvasComp,
+  others: CanvasComp[],
+): SpacingGuide[] {
+  const guides: SpacingGuide[] = [];
+
+  const dL = dragged.x;
+  const dR = dragged.x + dragged.width;
+  const dT = dragged.y;
+  const dB = dragged.y + dragged.height;
+  const dMidY = dragged.y + dragged.height / 2;
+  const dMidX = dragged.x + dragged.width / 2;
+
+  // For each other component, compute horizontal and vertical gaps
+  let closestLeft = -Infinity;   // nearest right edge to our left
+  let closestRight = Infinity;   // nearest left edge to our right
+  let closestTop = -Infinity;    // nearest bottom edge above us
+  let closestBottom = Infinity;  // nearest top edge below us
+
+  for (const c of others) {
+    if (!c.visible) continue;
+    const cL = c.x, cR = c.x + c.width, cT = c.y, cB = c.y + c.height;
+
+    // Horizontal neighbours (vertically overlapping)
+    const vOverlap = dT < cB && dB > cT;
+    if (vOverlap) {
+      if (cR <= dL && cR > closestLeft) closestLeft = cR;
+      if (cL >= dR && cL < closestRight) closestRight = cL;
+    }
+
+    // Vertical neighbours (horizontally overlapping)
+    const hOverlap = dL < cR && dR > cL;
+    if (hOverlap) {
+      if (cB <= dT && cB > closestTop) closestTop = cB;
+      if (cT >= dB && cT < closestBottom) closestBottom = cT;
+    }
+  }
+
+  // Left gap
+  if (closestLeft > -Infinity) {
+    const gapMm = Math.max(0, Math.round(dL - closestLeft));
+    guides.push({
+      axis: "h", start: closestLeft, end: dL,
+      perp: dMidY, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+    });
+  }
+  // Right gap
+  if (closestRight < Infinity) {
+    const gapMm = Math.max(0, Math.round(closestRight - dR));
+    guides.push({
+      axis: "h", start: dR, end: closestRight,
+      perp: dMidY, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+    });
+  }
+  // Top gap
+  if (closestTop > -Infinity) {
+    const gapMm = Math.max(0, Math.round(dT - closestTop));
+    guides.push({
+      axis: "v", start: closestTop, end: dT,
+      perp: dMidX, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+    });
+  }
+  // Bottom gap
+  if (closestBottom < Infinity) {
+    const gapMm = Math.max(0, Math.round(closestBottom - dB));
+    guides.push({
+      axis: "v", start: dB, end: closestBottom,
+      perp: dMidX, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+    });
+  }
+
+  return guides;
+}
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
+
 export function useStudioPointerMotion(S: StudioState) {
   const {
     gameId,
@@ -34,7 +144,7 @@ export function useStudioPointerMotion(S: StudioState) {
     storeZoom,
     pages,
     setPages,
-    canvasSizeRef,
+    canvasSizeRef: _canvasSizeRef,
     componentsRef,
     setMarquee,
     setComponentsRaw,
@@ -57,11 +167,18 @@ export function useStudioPointerMotion(S: StudioState) {
     dragRef,
   } = S;
 
+  /** Spacing guides computed when Alt is held during a move drag. */
+  const spacingGuidesRef = useRef<SpacingGuide[]>([]);
+  /** Whether Alt is currently held (read by EditorBody each render frame). */
+  const altActiveRef = useRef(false);
+
   const onPointerMove = useCallback(
     (e: ReactPointerEvent) => {
       const dr = dragRef.current;
 
       if (!dr) return;
+
+      altActiveRef.current = e.altKey;
 
       const z = storeZoom;
 
@@ -69,6 +186,8 @@ export function useStudioPointerMotion(S: StudioState) {
         setPanX(dr.ox + (e.clientX - dr.sx));
 
         setPanY(dr.oy + (e.clientY - dr.sy));
+
+        spacingGuidesRef.current = [];
       } else if (dr.kind === "move" && dr.compId) {
         let nx = dr.ox + (e.clientX - dr.sx) / (z * MM_TO_PX);
 
@@ -80,9 +199,7 @@ export function useStudioPointerMotion(S: StudioState) {
           ny = Math.round(ny / GRID_MM) * GRID_MM;
         }
 
-        nx = Math.max(-50, Math.min(nx, canvasSizeRef.current.w));
 
-        ny = Math.max(-50, Math.min(ny, canvasSizeRef.current.h));
 
         if (dr.multi) {
           // Move the whole group/selection by the same delta as the primary.
@@ -108,6 +225,19 @@ export function useStudioPointerMotion(S: StudioState) {
                 : c,
             ),
           );
+        }
+
+        // Compute Alt spacing guides
+        if (e.altKey) {
+          const all = componentsRef.current;
+          const dragged = all.find((c) => c.id === dr.compId);
+          const moveIds = dr.multi ? dr.multi.map((m) => m.id) : [dr.compId];
+          const others = all.filter((c) => !moveIds.includes(c.id));
+          if (dragged) {
+            spacingGuidesRef.current = computeSpacingGuides(dragged, others);
+          }
+        } else {
+          spacingGuidesRef.current = [];
         }
       } else if (dr.kind === "resize" && dr.compId) {
         const dx = (e.clientX - dr.sx) / (z * MM_TO_PX);
@@ -155,6 +285,16 @@ export function useStudioPointerMotion(S: StudioState) {
               : c,
           ),
         );
+
+        // Show dimension guides on resize too when Alt held
+        if (e.altKey) {
+          const all = componentsRef.current;
+          const dragged = all.find((c) => c.id === dr.compId);
+          const others = all.filter((c) => c.id !== dr.compId);
+          if (dragged) spacingGuidesRef.current = computeSpacingGuides(dragged, others);
+        } else {
+          spacingGuidesRef.current = [];
+        }
       } else if (dr.kind === "rotate" && dr.compId) {
         const ang =
           (Math.atan2(e.clientY - dr.cyScreen, e.clientX - dr.cxScreen) * 180) /
@@ -170,6 +310,8 @@ export function useStudioPointerMotion(S: StudioState) {
             c.id === dr.compId ? { ...c, rotation: snapped } : c,
           ),
         );
+
+        spacingGuidesRef.current = [];
       } else if (dr.kind === "marquee") {
         // Draw the band (canvas-relative px) and select intersecting components.
 
@@ -205,6 +347,8 @@ export function useStudioPointerMotion(S: StudioState) {
         setMultiIds(hits);
 
         setSelectedId(hits.length ? hits[hits.length - 1]! : null);
+
+        spacingGuidesRef.current = [];
       }
     },
 
@@ -272,6 +416,10 @@ export function useStudioPointerMotion(S: StudioState) {
 
     dragRef.current = null;
 
+    altActiveRef.current = false;
+
+    spacingGuidesRef.current = [];
+
     if (wasMarquee) setMarquee(null);
 
     if (pendingRemoteRef.current) {
@@ -329,5 +477,7 @@ export function useStudioPointerMotion(S: StudioState) {
     broadcast,
     effectiveReadOnly,
     onWheel,
+    spacingGuidesRef,
+    altActiveRef,
   };
 }

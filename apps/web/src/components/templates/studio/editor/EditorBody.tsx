@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useCallback } from "react";
 import {
   toast,
 } from "sonner";
@@ -18,7 +19,11 @@ import {
   MM_TO_PX,
   GRID_MM,
   CompView,
+  groupBoundingBox,
 } from "../core";
+
+import { AlignmentGuides } from "./AlignmentGuides";
+import { DrawingLayer } from "./DrawingLayer";
 
 import type { StudioEditor } from "./useStudioEditor";
 
@@ -79,7 +84,24 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
     reversed,
     pages,
     switchPage,
+    spacingGuidesRef,
+    altActiveRef,
+    rotateGroup,
   } = ed;
+
+  // Force a re-render every pointer-move frame so spacing guides stay in sync
+  const [, forceGuideRender] = useState(0);
+
+  const wrappedPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      onPointerMove(e);
+      // Only force re-render when Alt is held (guides are visible)
+      if (e.altKey || altActiveRef.current) {
+        forceGuideRender((n) => n + 1);
+      }
+    },
+    [onPointerMove, altActiveRef],
+  );
 
   return (
     <>
@@ -172,7 +194,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
             backgroundColor: "#0c0c0c",
           }}
           onPointerDown={onCanvasPointerDown}
-          onPointerMove={onPointerMove}
+          onPointerMove={wrappedPointerMove}
           onPointerUp={onPointerUp}
           onPointerLeave={onPointerUp}
           onWheel={onWheel}
@@ -259,6 +281,147 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 {activePage.name} · {canvasW} × {canvasH} mm
               </div>
 
+              {/* Group bounding boxes — one frame per unique groupId */}
+              {(() => {
+                const groupMap = new Map<string, typeof components>();
+                for (const c of components) {
+                  if (!c.groupId || !c.visible) continue;
+                  if (!groupMap.has(c.groupId)) groupMap.set(c.groupId, []);
+                  groupMap.get(c.groupId)!.push(c);
+                }
+
+                const isGroupSelected = (gid: string) =>
+                  components.some((c) => c.groupId === gid && selectionIds.includes(c.id));
+
+                return Array.from(groupMap.entries()).map(([gid, members]) => {
+                  const bb = groupBoundingBox(members);
+                  if (!bb) return null;
+
+                  const selected = isGroupSelected(gid);
+                  const PAD = 4; // px padding around box
+                  const left = bb.x * MM_TO_PX - PAD;
+                  const top = bb.y * MM_TO_PX - PAD;
+                  const width = bb.w * MM_TO_PX + PAD * 2;
+                  const height = bb.h * MM_TO_PX + PAD * 2;
+
+                  // Detect nesting depth for colour
+                  const depth = members[0]?.parentGroupId ? 1 : 0;
+                  const borderColor = depth > 0
+                    ? "rgba(245,196,81,0.55)"   // gold for nested
+                    : "rgba(124,92,255,0.45)";  // violet for root
+
+                  return (
+                    <div
+                      key={gid}
+                      className="absolute pointer-events-none"
+                      style={{
+                        left,
+                        top,
+                        width,
+                        height,
+                        border: `1.5px dashed ${borderColor}`,
+                        borderRadius: 4,
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      {/* Group label */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: -18,
+                          left: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          pointerEvents: selected ? "auto" : "none",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 9,
+                            fontFamily: "var(--font-ui)",
+                            color: borderColor,
+                            background: "rgba(10,10,10,0.8)",
+                            padding: "1px 5px",
+                            borderRadius: 3,
+                            whiteSpace: "nowrap",
+                            userSelect: "none",
+                          }}
+                        >
+                          {depth > 0 ? "⤷ Nested group" : "Group"} · {members.length}
+                        </span>
+
+                        {/* Rotate group −15° / +15° buttons */}
+                        {selected && !effectiveReadOnly && (
+                          <>
+                            <button
+                              style={{
+                                fontSize: 9,
+                                fontFamily: "var(--font-ui)",
+                                color: borderColor,
+                                background: "rgba(10,10,10,0.85)",
+                                border: `1px solid ${borderColor}`,
+                                borderRadius: 3,
+                                padding: "1px 5px",
+                                cursor: "pointer",
+                                pointerEvents: "auto",
+                              }}
+                              title="Rotate group −15°"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onClick={(e) => { e.stopPropagation(); rotateGroup(gid, -15); }}
+                            >
+                              ↺ −15°
+                            </button>
+                            <button
+                              style={{
+                                fontSize: 9,
+                                fontFamily: "var(--font-ui)",
+                                color: borderColor,
+                                background: "rgba(10,10,10,0.85)",
+                                border: `1px solid ${borderColor}`,
+                                borderRadius: 3,
+                                padding: "1px 5px",
+                                cursor: "pointer",
+                                pointerEvents: "auto",
+                              }}
+                              title="Rotate group +15°"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onClick={(e) => { e.stopPropagation(); rotateGroup(gid, 15); }}
+                            >
+                              ↻ +15°
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Corner resize dots for visual feedback */}
+                      {selected && (
+                        <>
+                          {[
+                            { top: -3, left: -3 },
+                            { top: -3, right: -3 },
+                            { bottom: -3, left: -3 },
+                            { bottom: -3, right: -3 },
+                          ].map((style, i) => (
+                            <div
+                              key={i}
+                              style={{
+                                position: "absolute",
+                                width: 6,
+                                height: 6,
+                                borderRadius: "50%",
+                                background: borderColor,
+                                ...style,
+                              }}
+                            />
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+
               {components.map((c) => (
                 <CompView
                   key={c.id}
@@ -278,6 +441,42 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   } : undefined}
                 />
               ))}
+
+              {/* Alignment + spacing guides */}
+              <AlignmentGuides
+                guides={[]}
+                spacingGuides={spacingGuidesRef.current}
+                canvasW={canvasW}
+                canvasH={canvasH}
+                zoom={storeZoom}
+                altActive={altActiveRef.current}
+                draggedComp={
+                  altActiveRef.current && selectedComp
+                    ? { x: selectedComp.x, y: selectedComp.y, width: selectedComp.width, height: selectedComp.height }
+                    : null
+                }
+              />
+
+              {/* Collaborative drawing layer */}
+              {ed.draw && (
+                <DrawingLayer
+                  pageId={activePage.id}
+                  strokes={ed.draw.strokes}
+                  activeStroke={ed.draw.activeStroke}
+                  activeTool={ed.draw.activeTool}
+                  color={ed.draw.color}
+                  width={ed.draw.width}
+                  opacity={ed.draw.opacity}
+                  canvasW={canvasW * MM_TO_PX}
+                  canvasH={canvasH * MM_TO_PX}
+                  panX={panX}
+                  panY={panY}
+                  zoom={storeZoom}
+                  onPointerDown={ed.draw.onDrawPointerDown}
+                  onPointerMove={ed.draw.onDrawPointerMove}
+                  onPointerUp={ed.draw.onDrawPointerUp}
+                />
+              )}
             </div>
           </div>
 
@@ -288,8 +487,8 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
           </div>
 
           <div className="absolute bottom-3 right-3 text-2xs text-soft-gray-dark font-ui bg-rich-wood-dark/70 rounded px-2 py-1 pointer-events-none hidden lg:block">
-            drag to box-select · shift-click to add · ⌘G group / ⌘⇧G ungroup ·
-            ctrl+click linked component to jump page · right-click for menu
+            drag to box-select · shift+click to add · ⌘G group · ctrl+click link to jump ·{" "}
+            <span className="text-royal-gold/70">alt+drag = spacing guides</span> · right-click for menu
           </div>
 
           {/* Panel collapse toggles (desktop) */}
@@ -389,6 +588,9 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                     canUngroup={canUngroup}
                     onGroup={groupSelection}
                     onUngroup={ungroupSelection}
+                    hasNestedGroups={selectionIds.some(
+                      (id) => !!components.find((c) => c.id === id)?.groupId
+                    )}
                   />
                 )}
 

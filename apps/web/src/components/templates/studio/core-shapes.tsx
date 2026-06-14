@@ -587,3 +587,20 @@ export function CompView({
 
 // ── Previews ──────────────────────────────────────────────────────────────────
 
+
+// ── Group bounding box ────────────────────────────────────────────────────────
+
+/**
+ * Computes the axis-aligned bounding box (in mm) for a list of components
+ * that share a groupId. Used to render the group selection frame.
+ */
+export function groupBoundingBox(members: CanvasComp[]): {
+  x: number; y: number; w: number; h: number;
+} | null {
+  if (members.length === 0) return null;
+  const minX = Math.min(...members.map((c) => c.x));
+  const minY = Math.min(...members.map((c) => c.y));
+  const maxX = Math.max(...members.map((c) => c.x + c.width));
+  const maxY = Math.max(...members.map((c) => c.y + c.height));
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+}

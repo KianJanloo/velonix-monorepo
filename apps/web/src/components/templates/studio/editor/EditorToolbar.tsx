@@ -81,12 +81,133 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
           <button
             key={t.id}
             title={t.label}
-            onClick={() => setActiveTool(t.id)}
-            className={`v-tool-btn shrink-0 ${activeTool === t.id ? "active" : ""}`}
+            onClick={() => { setActiveTool(t.id); ed.draw?.setDrawTool(null); }}
+            className={`v-tool-btn shrink-0 ${activeTool === t.id && !ed.draw?.activeTool ? "active" : ""}`}
           >
             {t.icon}
           </button>
         ))}
+
+        <div className="w-px h-5 bg-warm-wood mx-0.5 shrink-0" />
+
+        {/* ── Drawing tools ── */}
+        {ed.draw && (
+          <>
+            {(
+              [
+                {
+                  id: "pencil" as const,
+                  label: "Pencil (draw freehand)",
+                  icon: (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M9.5 1.5l2 2-7 7-2.5.5.5-2.5 7-7z"
+                        stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                      <path d="M8 3l2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: "highlighter" as const,
+                  label: "Highlighter",
+                  icon: (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <rect x="2" y="4" width="9" height="5" rx="2"
+                        stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity="0.2" />
+                      <path d="M6.5 9v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: "arrow" as const,
+                  label: "Arrow",
+                  icon: (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M2 11L10 3M7 3h3v3"
+                        stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: "rect" as const,
+                  label: "Rectangle",
+                  icon: (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <rect x="2" y="2" width="9" height="9" rx="1.5"
+                        stroke="currentColor" strokeWidth="1.3" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: "eraser" as const,
+                  label: "Eraser",
+                  icon: (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M2 10l2.5-6.5 4.5 4.5L3.5 12H11"
+                        stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ),
+                },
+              ] as const
+            ).map((t) => (
+              <button
+                key={t.id}
+                title={t.label}
+                onClick={() => {
+                  if (ed.draw!.activeTool === t.id) {
+                    ed.draw!.setDrawTool(null);
+                  } else {
+                    ed.draw!.setDrawTool(t.id);
+                  }
+                }}
+                className={`v-tool-btn shrink-0 ${ed.draw.activeTool === t.id ? "active" : ""}`}
+              >
+                {t.icon}
+              </button>
+            ))}
+
+            {/* Draw colour swatch */}
+            {ed.draw.activeTool && ed.draw.activeTool !== "eraser" && (
+              <label
+                title="Drawing colour"
+                className="w-5 h-5 rounded-md border border-warm-wood cursor-pointer shrink-0 overflow-hidden"
+                style={{ background: ed.draw.color }}
+              >
+                <input
+                  type="color"
+                  value={ed.draw.color}
+                  onChange={(e) => ed.draw!.setDrawColor(e.target.value)}
+                  className="opacity-0 w-0 h-0"
+                />
+              </label>
+            )}
+
+            {/* Undo last stroke */}
+            <button
+              title="Undo last drawing stroke"
+              onClick={() => ed.draw!.undoLastStroke(ed.activePageId)}
+              className="v-tool-btn shrink-0"
+            >
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                <path d="M2 6.5A3.5 3.5 0 018 3h1.5" stroke="currentColor"
+                  strokeWidth="1.2" strokeLinecap="round" />
+                <path d="M2 3.5L2 6.5 5 6.5" stroke="currentColor"
+                  strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {/* Clear all drawing */}
+            <button
+              title="Clear all drawing on this page"
+              onClick={() => ed.draw!.clearStrokes(ed.activePageId)}
+              className="v-tool-btn shrink-0 text-crimson-flame/60 hover:text-crimson-flame"
+            >
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                <path d="M1.5 1.5l8 8M9.5 1.5l-8 8"
+                  stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+            </button>
+          </>
+        )}
 
         <div className="w-px h-5 bg-warm-wood mx-0.5 shrink-0" />
 

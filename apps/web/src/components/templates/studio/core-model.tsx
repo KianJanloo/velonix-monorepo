@@ -78,6 +78,12 @@ export interface CanvasComp {
   /** When set, this component belongs to a group and moves with its siblings. */
   groupId?: string;
   /**
+   * Nested-group support: when set, this component's groupId is itself a
+   * child of a parent group. Allows group-of-groups hierarchies.
+   * Value is the parent groupId string.
+   */
+  parentGroupId?: string;
+  /**
    * Page-link: when set, Ctrl+clicking this component in the editor jumps to
    * the target page. Renders a ⇢ badge on the component so designers can see
    * connections at a glance.
@@ -104,6 +110,29 @@ export const isSilhouetteType = (t: CompType) => SILHOUETTE_TYPES.includes(t);
 export const isChromeless = (t: CompType) =>
   t === "text" || t === "line" || t === "spiral";
 
+// ── Drawing layer ─────────────────────────────────────────────────────────────
+
+export type DrawingTool = "pencil" | "highlighter" | "eraser" | "arrow" | "rect";
+
+export interface DrawingStroke {
+  id: string;
+  tool: DrawingTool;
+  color: string;
+  width: number;
+  opacity: number;
+  /** SVG polyline points string "x1,y1 x2,y2 …" in canvas-px coordinates */
+  points: string;
+  /** For arrow/rect: start in px */
+  sx?: number;
+  sy?: number;
+  /** For arrow/rect: end in px */
+  ex?: number;
+  ey?: number;
+  authorId?: string;
+  pageId: string;
+  createdAt: number;
+}
+
 /** A page is one editable canvas (board, player board, card sheet, …). */
 export interface StudioPage {
   id: string;
@@ -111,6 +140,8 @@ export interface StudioPage {
   width: number; // mm
   height: number; // mm
   components: CanvasComp[];
+  /** Freehand drawing strokes synced over collab. */
+  drawingStrokes?: DrawingStroke[];
 }
 
 export const PAGE_MIN = 100;

@@ -145,6 +145,36 @@ export class StudioGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
+  /** Relay a single freehand drawing stroke to all peers. */
+  @SubscribeMessage("studio:draw")
+  async onDraw(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { gameId: string; stroke: unknown },
+  ) {
+    const d = client.data as SocketData;
+    if (!body?.gameId || !d?.userId) return;
+    if (!(await this.collaborators.canEdit(body.gameId, d.userId))) return;
+    client.to(roomOf(body.gameId)).emit("studio:draw", {
+      stroke: body.stroke,
+      authorId: d.userId,
+    });
+  }
+
+  /** Relay a clear-all-strokes event for a given page. */
+  @SubscribeMessage("studio:draw-clear")
+  async onDrawClear(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { gameId: string; pageId: string },
+  ) {
+    const d = client.data as SocketData;
+    if (!body?.gameId || !d?.userId) return;
+    if (!(await this.collaborators.canEdit(body.gameId, d.userId))) return;
+    client.to(roomOf(body.gameId)).emit("studio:draw-clear", {
+      pageId: body.pageId,
+      authorId: d.userId,
+    });
+  }
+
   private broadcastPresence(gameId: string) {
     const members = this.rooms.get(gameId);
     const list = members ? Array.from(members.values()) : [];
