@@ -372,7 +372,7 @@ export interface CompViewProps {
   onTextChange: (id: string, text: string) => void;
   onContextMenu?: (e: ReactMouseEvent, comp: CanvasComp) => void;
   /** When set, Ctrl+clicking this component jumps to the linked page. */
-  onNavigateToPage?: (pageId: string) => void;
+  onNavigateToPage?: ((pageId: string) => void) | undefined;
 }
 
 export type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";

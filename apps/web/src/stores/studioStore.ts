@@ -60,7 +60,7 @@ interface StudioState {
   // ── UI State ─────────────────────────────────────────────────────────────
   leftPanelVisible: boolean;
   rightPanelVisible: boolean;
-  leftPanelTab: "layers" | "components" | "assets";
+  leftPanelTab: "layers" | "components" | "assets" | "generator";
   rightPanelTab: "properties" | "styling" | "rules";
   isFullscreen: boolean;
   showGrid: boolean;

@@ -13,6 +13,7 @@ import {
   PartsPanel,
   AssetsPanel,
   RulesPanel,
+  GeneratorPanel,
 } from "../panels";
 
 import {
@@ -114,7 +115,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
           className={`${leftOpen ? "w-52" : "w-0"} bg-rich-wood-dark border-r border-warm-wood flex flex-col shrink-0 overflow-hidden transition-[width] duration-200 max-lg:absolute max-lg:z-30 max-lg:h-full`}
         >
           <div className="flex border-b border-warm-wood shrink-0">
-            {(["layers", "components", "assets"] as const).map((tab) => (
+            {(["layers", "components", "assets", "generator"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setLeftPanelTab(tab)}
@@ -124,7 +125,9 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   ? "Layers"
                   : tab === "components"
                     ? "Parts"
-                    : "Assets"}
+                    : tab === "assets"
+                      ? "Assets"
+                      : "Gen"}
               </button>
             ))}
           </div>
@@ -178,6 +181,21 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 onDeleteAsset={(url) =>
                   setAssets((a) => a.filter((x) => x !== url))
                 }
+              />
+            )}
+
+            {leftPanelTab === "generator" && (
+              <GeneratorPanel
+                components={components}
+                selectionIds={selectionIds}
+                onApply={(updates) => {
+                  updates.forEach(({ id, text, name }) => {
+                    updateComp(id, { text, name }, false);
+                  });
+                  toast.success(
+                    `Applied generated text to ${updates.length} component${updates.length !== 1 ? "s" : ""}.`
+                  );
+                }}
               />
             )}
           </div>
