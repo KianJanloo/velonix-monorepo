@@ -121,7 +121,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
               <button
                 key={tab}
                 onClick={() => setLeftPanelTab(tab)}
-                className={`flex-1 py-2 text-2xs font-ui font-bold tracking-[0.07em] uppercase border-b-2 -mb-px ${leftPanelTab === tab ? "text-emerald-glow border-emerald-glow" : "text-soft-gray border-transparent hover:text-parchment-light"}`}
+                className={`flex-1 py-2 text-[8px] font-ui font-bold tracking-[0.07em] uppercase border-b-2 -mb-px ${leftPanelTab === tab ? "text-emerald-glow border-emerald-glow" : "text-soft-gray border-transparent hover:text-parchment-light"}`}
               >
                 {tab === "layers"
                   ? "Layers"

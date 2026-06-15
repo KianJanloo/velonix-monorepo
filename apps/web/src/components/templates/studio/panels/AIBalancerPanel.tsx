@@ -312,7 +312,6 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
     <div className="p-3 space-y-4 overflow-y-auto">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <span className="text-lg">🤖</span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-display font-bold text-parchment-light">AI Balancer</p>
           <p className="text-[10px] text-soft-gray-dark font-ui">

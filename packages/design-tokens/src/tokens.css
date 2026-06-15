@@ -222,6 +222,12 @@
     background: linear-gradient(90deg, transparent, var(--color-warm-wood-light), transparent);
   }
 
+  .scrollbar-none {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+    
+  }
+
   /* Premium badge shimmer */
   @keyframes shimmer {
     0%   { background-position: -200% center; }

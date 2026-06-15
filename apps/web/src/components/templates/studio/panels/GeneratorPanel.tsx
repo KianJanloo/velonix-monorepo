@@ -240,9 +240,9 @@ export function GeneratorPanel({ components, selectionIds, onApply }: Props) {
     setAppliedCount(updates.length);
   }, [components, selectionIds, applyTarget, applyType, generated, onApply]);
 
-  const shuffleSeed = useCallback(() => {
-    setSeed(Math.floor(Math.random() * 99999));
-  }, []);
+  // const shuffleSeed = useCallback(() => {
+  //   setSeed(Math.floor(Math.random() * 99999));
+  // }, []);
 
   const categoryPresets = PRESETS.filter((p) => p.category === activeCategory);
 
@@ -255,18 +255,10 @@ export function GeneratorPanel({ components, selectionIds, onApply }: Props) {
 
   return (
     <div className="p-3 space-y-4 overflow-y-auto">
-      {/* Header */}
-      <div>
-        <p className="text-2xs font-ui text-parchment-mid leading-relaxed">
-          Generate text for cards, tokens, event names, zone labels, and more using
-          template strings with seeded randomness.
-        </p>
-      </div>
 
       {/* Presets */}
       <div>
-        <SectionLabel>Presets</SectionLabel>
-        <div className="flex gap-1 mb-2 overflow-x-auto pb-0.5 scrollbar-none">
+        <div className="flex gap-1 mb-2 overflow-x-auto pb-0.5 ">
           {PRESET_CATEGORIES.map((cat) => (
             <button
               key={cat}
@@ -286,7 +278,7 @@ export function GeneratorPanel({ components, selectionIds, onApply }: Props) {
             <button
               key={p.label}
               onClick={() => setTemplate(p.template)}
-              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg border text-left transition-colors group ${
+              className={`w-full flex flex-col gap-2 px-2 py-1.5 rounded-lg border text-left transition-colors group ${
                 template === p.template
                   ? "border-emerald-glow/40 bg-emerald-ghost"
                   : "border-warm-wood/40 hover:border-warm-wood hover:bg-warm-wood/20"
@@ -296,7 +288,7 @@ export function GeneratorPanel({ components, selectionIds, onApply }: Props) {
                 {p.label}
               </span>
               {p.template && (
-                <code className="text-[10px] font-mono text-soft-gray-dark truncate max-w-[100px]">
+                <code className="text-[10px] font-mono text-soft-gray-dark truncate ">
                   {p.template}
                 </code>
               )}
@@ -328,9 +320,8 @@ export function GeneratorPanel({ components, selectionIds, onApply }: Props) {
             value={customKey}
             onChange={(e) => setCustomKey(e.target.value.replace(/\s/g, ""))}
             placeholder="tag name"
-            className="w-24 bg-rich-wood-mid border border-warm-wood rounded-lg px-2 py-1.5 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow"
+            className="w-20 bg-rich-wood-mid border border-warm-wood rounded-lg px-2 py-1.5 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow"
           />
-          <span className="text-2xs text-soft-gray-dark self-center">→ use as</span>
           <code className="text-2xs font-mono text-emerald-glow self-center">
             {customKey ? `{${customKey}}` : "{tag}"}
           </code>
@@ -340,7 +331,7 @@ export function GeneratorPanel({ components, selectionIds, onApply }: Props) {
           value={customList}
           onChange={(e) => setCustomList(e.target.value)}
           placeholder={"One item per line:\nMystic Sword\nIron Shield\nDragon Scale"}
-          className="w-full bg-rich-wood-mid border border-warm-wood rounded-lg px-2.5 py-2 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow resize-none placeholder-soft-gray-dark leading-relaxed"
+          className="w-full bg-rich-wood-mid border border-warm-wood rounded-lg px-2.5 py-2 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow resize-none placeholder-soft-gray-dark "
         />
       </div>
 
@@ -357,13 +348,6 @@ export function GeneratorPanel({ components, selectionIds, onApply }: Props) {
               onChange={(e) => setSeed(Number(e.target.value))}
               className="flex-1 min-w-0 bg-rich-wood-mid border border-warm-wood rounded-lg px-2 py-1.5 text-2xs font-mono text-parchment-light outline-none focus:border-emerald-glow"
             />
-            <button
-              onClick={shuffleSeed}
-              title="Random seed"
-              className="px-2 py-1.5 rounded-lg border border-warm-wood text-soft-gray hover:text-parchment-light hover:bg-warm-wood transition-colors text-sm"
-            >
-              🎲
-            </button>
           </div>
         </div>
         <div>
