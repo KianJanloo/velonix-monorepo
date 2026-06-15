@@ -55,7 +55,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold text-parchment-light">Settings</h1>
         <Button variant="primary" disabled={!dirty} isLoading={update.isPending}

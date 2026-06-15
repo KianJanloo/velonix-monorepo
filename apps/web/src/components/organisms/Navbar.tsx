@@ -18,6 +18,8 @@ const PUBLIC_LINKS = [
 
 const AUTH_LINKS = [{ href: "/dashboard", label: "Dashboard" }];
 
+const ADMIN_LINKS = [{ href: "/admin", label: "Admin" }];
+
 export function Navbar() {
   const pathname = usePathname();
   const user = useCurrentUser();
@@ -33,6 +35,10 @@ export function Navbar() {
   const authed = mounted && !!user;
   const isAdmin = authed && user?.role === "admin";
   const navLinks = authed ? [...PUBLIC_LINKS, ...AUTH_LINKS] : PUBLIC_LINKS;
+
+  if (ADMIN_LINKS.map(a => pathname.includes(a.href)).some(Boolean)) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-200 h-14 bg-rich-wood-dark/90 backdrop-blur-md border-b border-warm-wood">

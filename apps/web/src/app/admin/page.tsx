@@ -89,22 +89,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Quick actions */}
-      <div className="mt-6 v-card p-5">
-        <h2 className="font-display text-sm font-bold tracking-wide text-parchment-light mb-4">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/admin/games?status=reviewing" className="px-4 py-2 rounded-lg bg-cyan-spark/10 border border-cyan-spark/30 text-cyan-spark text-sm font-ui hover:bg-cyan-spark/20 transition-colors">
-            Review Pending Games
-          </Link>
-          <Link href="/admin/blog" className="px-4 py-2 rounded-lg bg-emerald-ghost border border-emerald-glow/20 text-emerald-glow text-sm font-ui hover:bg-emerald-glow hover:text-deep-void transition-colors">
-            New Blog Post
-          </Link>
-          <Link href="/admin/users" className="px-4 py-2 rounded-lg bg-warm-wood border border-warm-wood-light text-parchment-light text-sm font-ui hover:bg-warm-wood-light transition-colors">
-            Manage Users
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }

@@ -27,7 +27,7 @@ export function MainShell({ children }: MainShellProps) {
   return (
     <div className="flex flex-col min-h-screen">
       <PromoBanner placement={placementFor(pathname)} />
-      <Navbar />
+      {<Navbar />}
       <div className="flex-1">{children}</div>
       <Footer />
     </div>

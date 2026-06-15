@@ -2,21 +2,11 @@
 
 import { useCallback } from "react";
 
-import {
-  toast,
-} from "sonner";
+import { toast } from "sonner";
 
-import {
-  PAGE_MIN,
-  PAGE_MAX,
-  makeComp,
-  normalizeComponents,
-} from "../core";
+import { PAGE_MIN, PAGE_MAX, makeComp, normalizeComponents } from "../core";
 
-import type {
-  CompType,
-  CanvasComp,
-} from "../core";
+import type { CompType, CanvasComp } from "../core";
 
 import type { StudioState } from "./useStudioEditorState";
 
@@ -39,6 +29,7 @@ export function useStudioActions(S: StudioState) {
     selectedComp,
     setMultiIds,
     selectionRef,
+    setRules,
   } = S;
 
   // ── Mutations ──────────────────────────────────────────────────────────────
@@ -152,7 +143,31 @@ export function useStudioActions(S: StudioState) {
     setMultiIds(copies.length > 1 ? copies.map((c) => c.id) : []);
   }, [components, commit]);
 
-  // ── Grouping ────────────────────────────────────────────────────────────────
+  // ── Template merge ──────────────────────────────────────────────────────────
+
+  const mergeTemplate = useCallback(
+    (template: import("@/lib/templateRegistry").StudioTemplate) => {
+      const base = Date.now();
+      const newComps = template.components.map((c, i) => ({
+        ...c,
+        id: `${c.type}-tmpl-${base}-${i}`,
+      }));
+      const newRules = template.rules.map((r, i) => ({
+        ...r,
+        id: `rule-tmpl-${base}-${i}`,
+      }));
+      setComponentsRaw((prev) => {
+        pastRef.current.push(prev);
+        futureRef.current = [];
+        return [...prev, ...newComps];
+      });
+      setRules((prev) => [...prev, ...newRules]);
+      toast.success(
+        `Merged "${template.name}" — ${newComps.length} components, ${newRules.length} rules added.`,
+      );
+    },
+    [setComponentsRaw, setRules],
+  );
 
   // These read the live selection (selectionRef) and operate on the live
   // component list via a functional update, so they stay correct regardless of
@@ -180,9 +195,13 @@ export function useStudioActions(S: StudioState) {
 
       // Detect if all selected components share the same existing groupId —
       // if so, we are nesting that group into a new parent group.
-      // const existingGroupIds = Array.from(
-      //  new Set(ids.map((id) => prev.find((c) => c.id === id)?.groupId).filter(Boolean) as string[])
-      // );
+      const existingGroupIds = Array.from(
+        new Set(
+          ids
+            .map((id) => prev.find((c) => c.id === id)?.groupId)
+            .filter(Boolean) as string[],
+        ),
+      );
 
       return prev.map((c) => {
         if (!set.has(c.id)) return c;
@@ -243,7 +262,7 @@ export function useStudioActions(S: StudioState) {
             ...c,
             x: Math.round(newCx - c.width / 2),
             y: Math.round(newCy - c.height / 2),
-            rotation: Math.round(((c.rotation + angleDeg) % 360 + 360) % 360),
+            rotation: Math.round((((c.rotation + angleDeg) % 360) + 360) % 360),
           };
         });
       });
@@ -573,13 +592,13 @@ export function useStudioActions(S: StudioState) {
     setSelectedId(copyComp.id);
   }, [components, commit]);
 
-
   return {
     updateComp,
     addComp,
     deleteSelected,
     deleteComp,
     duplicateSelected,
+    mergeTemplate,
     groupSelection,
     ungroupById,
     ungroupSelection,

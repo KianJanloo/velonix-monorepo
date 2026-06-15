@@ -15,11 +15,174 @@ import type { ComponentAsset, AssetKind } from "@velonix/types";
 import { ASSET_KINDS } from "@velonix/types";
 import { ImageUploadField } from "@/components/molecules/ImageUploadField";
 import { useBundleStore } from "@/stores/bundleStore";
+import {
+  TEMPLATE_REGISTRY,
+  TEMPLATE_CATEGORIES,
+  type StudioTemplate,
+} from "@/lib/templateRegistry";
 
 const money = (cents: number | null) =>
   cents == null ? "Free" : `$${(cents / 100).toFixed(2)}`;
 
-type Tab = "browse" | "library" | "publish";
+// ── Templates tab ─────────────────────────────────────────────────────────────
+
+function TemplateCard({
+  template,
+  onMerge,
+  onClose,
+}: {
+  template: StudioTemplate;
+  onMerge?: ((t: StudioTemplate) => void) | undefined;
+  onClose: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+
+  return (
+    <div
+      className="rounded-xl border border-warm-wood/50 bg-warm-wood/10 hover:border-warm-wood transition-colors overflow-hidden"
+      style={{ borderLeftColor: template.color, borderLeftWidth: 3 }}
+    >
+      {/* Header */}
+      <div className="flex items-start gap-3 p-3">
+        <span className="text-2xl shrink-0">{template.icon}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-display font-bold text-parchment-light truncate">{template.name}</p>
+          <p className="text-[10px] text-soft-gray-dark font-ui">{template.playerCount} · {template.estimatedTime}</p>
+        </div>
+        <span
+          className="text-[10px] font-ui px-1.5 py-0.5 rounded-full capitalize shrink-0"
+          style={{ background: `${template.color}22`, color: template.color }}
+        >
+          {template.category.replace("-", " ")}
+        </span>
+      </div>
+
+      {/* Description */}
+      <p className="px-3 pb-2 text-2xs font-ui text-parchment-mid leading-relaxed">{template.description}</p>
+
+      {/* Stats */}
+      <div className="px-3 pb-2 flex gap-3 text-[10px] text-soft-gray-dark font-ui">
+        <span>📦 {template.components.length} components</span>
+        <span>⚡ {template.rules.length} rules</span>
+      </div>
+
+      {/* Tags */}
+      <div className="px-3 pb-3 flex flex-wrap gap-1">
+        {template.tags.slice(0, 4).map((tag) => (
+          <span key={tag}
+            className="text-[10px] font-ui text-soft-gray-dark bg-rich-wood-mid border border-warm-wood/40 px-1.5 py-0.5 rounded-full">
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {/* Action */}
+      <div className="px-3 pb-3">
+        {confirming ? (
+          <div className="rounded-lg bg-rich-wood-mid border border-warm-wood/60 p-2.5">
+            <p className="text-2xs font-ui text-parchment-mid mb-2">
+              This will merge {template.components.length} components and {template.rules.length} rules into your current page. Existing work is preserved.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { onMerge?.(template); onClose(); }}
+                className="flex-1 py-1.5 rounded-lg bg-emerald-glow text-deep-void text-2xs font-ui font-bold hover:bg-emerald-bright transition-colors"
+              >
+                Merge now
+              </button>
+              <button
+                onClick={() => setConfirming(false)}
+                className="px-3 py-1.5 rounded-lg border border-warm-wood text-soft-gray text-2xs font-ui hover:text-parchment-light transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirming(true)}
+            className="w-full py-1.5 rounded-lg border border-dashed hover:border-solid transition-colors text-2xs font-ui font-semibold"
+            style={{ borderColor: template.color, color: template.color }}
+          >
+            Use template →
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TemplatesTab({
+  onMerge,
+  onClose,
+}: {
+  onMerge?: ((t: StudioTemplate) => void) | undefined;
+  onClose: () => void;
+}) {
+  const [activeCategory, setActiveCategory] = useState<StudioTemplate["category"] | "all">("all");
+  const [search, setSearch] = useState("");
+
+  const filtered = TEMPLATE_REGISTRY.filter((t) => {
+    const matchCat = activeCategory === "all" || t.category === activeCategory;
+    const matchSearch = !search.trim() || [t.name, t.description, ...t.tags]
+      .join(" ").toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Header */}
+      <div className="p-3 border-b border-warm-wood/40 space-y-2">
+        <div>
+          <p className="text-sm font-display font-bold text-parchment-light">Starter Kit Templates</p>
+          <p className="text-[10px] text-soft-gray-dark font-ui">
+            Merge a ready-to-play framework into your current game. Components, rules and layout — all included.
+          </p>
+        </div>
+
+        {/* Search */}
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search templates…"
+          className="w-full bg-rich-wood-mid border border-warm-wood rounded-lg px-2.5 py-1.5 text-2xs text-parchment-light font-ui outline-none focus:border-emerald-glow placeholder-soft-gray-dark"
+        />
+
+        {/* Category pills */}
+        <div className="flex gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+          {TEMPLATE_CATEGORIES.map((cat: any) => (
+            <button
+              key={cat.value}
+              onClick={() => setActiveCategory(cat.value)}
+              className={`px-2 py-0.5 rounded-full text-[10px] font-ui whitespace-nowrap transition-colors shrink-0 ${
+                activeCategory === cat.value
+                  ? "bg-emerald-glow text-deep-void font-bold"
+                  : "border border-warm-wood text-soft-gray hover:text-parchment-light"
+              }`}
+            >
+              {cat.icon} {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="flex-1 overflow-y-auto p-3">
+        {filtered.length === 0 ? (
+          <p className="text-center text-soft-gray-dark text-2xs font-ui py-8">No templates match.</p>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((t: any) => (
+              <TemplateCard key={t.id} template={t} onMerge={onMerge} onClose={onClose} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type Tab = "templates" | "browse" | "library" | "publish";
 
 interface Props {
   /** Components currently selected on the canvas (candidates to publish). */
@@ -29,6 +192,8 @@ interface Props {
   /** Read the full component objects to publish from the current selection. */
   getSelectionPayload: () => unknown[];
   onClose: () => void;
+  /** Merge a starter-kit template into the current game. */
+  onMergeTemplate?: (template: StudioTemplate) => void;
 }
 
 export function StudioMarketplace({
@@ -36,8 +201,9 @@ export function StudioMarketplace({
   onInsert,
   getSelectionPayload,
   onClose,
+  onMergeTemplate,
 }: Props) {
-  const [tab, setTab] = useState<Tab>("browse");
+  const [tab, setTab] = useState<Tab>("templates");
   const router = useRouter();
 
   // Filters
@@ -135,6 +301,7 @@ export function StudioMarketplace({
         <div className="flex gap-1 px-5 mt-3 border-b border-warm-wood">
           {(
             [
+              ["templates", "⬡ Templates"],
               ["browse", "Browse"],
               ["library", "My library"],
               ["publish", "Sell a component"],
@@ -152,6 +319,10 @@ export function StudioMarketplace({
 
         <div className="flex-1 overflow-y-auto p-5">
           {/* ── Browse ── */}
+          {tab === "templates" && (
+            <TemplatesTab onMerge={onMergeTemplate} onClose={onClose} />
+          )}
+
           {tab === "browse" && (
             <>
               <div className="flex flex-wrap gap-2 mb-4">

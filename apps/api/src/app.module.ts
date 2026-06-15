@@ -63,6 +63,7 @@ import { AssetsModule } from "./assets/assets.module";
 import { SettingsModule } from "./settings/settings.module";
 import { SupportModule } from "./support/support.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
+import { CategoriesModule } from "./categories/categories.module";
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { AnalyticsModule } from "./analytics/analytics.module";
     AuthModule,
     UsersModule,
     GamesModule,
+    CategoriesModule,
     MarketplaceModule,
     SubscriptionsModule,
     PaymentsModule,

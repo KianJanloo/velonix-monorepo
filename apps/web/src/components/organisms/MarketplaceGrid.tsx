@@ -42,17 +42,14 @@ export function MarketplaceGrid({ initialSearch = "", initialSort = "newest" }: 
   type SortOption = typeof validSorts[number];
   const validSort = validSorts.includes(sort as SortOption) ? (sort as SortOption) : ("newest" as const);
 
-  // URL params are strings; cast to the expected enum types after validation
-  type MarketplaceCategory = "strategy"|"party"|"cooperative"|"deck_building"|"worker_placement"|"euro"|"ameritrash"|"abstract"|"rpg"|"trivia"|"family"|"other";
+  // Category is now dynamic from DB — pass raw string, API validates server-side
   type MarketplaceComplexity = "light"|"medium"|"medium_heavy"|"heavy";
-  const validCategories: MarketplaceCategory[] = ["strategy","party","cooperative","deck_building","worker_placement","euro","ameritrash","abstract","rpg","trivia","family","other"];
   const validComplexities: MarketplaceComplexity[] = ["light","medium","medium_heavy","heavy"];
-  const typedCategory = validCategories.includes(category as MarketplaceCategory) ? (category as MarketplaceCategory) : undefined;
   const typedComplexity = validComplexities.includes(complexity as MarketplaceComplexity) ? (complexity as MarketplaceComplexity) : undefined;
 
   const filters = {
     ...(search ? { search } : {}),
-    ...(typedCategory ? { category: typedCategory } : {}),
+    ...(category ? { category: category as never } : {}),
     sort: validSort,
     ...(price === "free" ? { isFree: true } : price === "paid" ? { isFree: false } : {}),
     ...(typedComplexity ? { complexity: typedComplexity } : {}),

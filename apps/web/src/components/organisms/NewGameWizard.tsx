@@ -10,19 +10,7 @@ import { CreateGameSchema, type CreateGameDto } from "@velonix/game-engine";
 import { useCreateGame } from "@/hooks/useGames";
 import { Input } from "@/components/atoms/Input";
 import { Button } from "@/components/atoms/Button";
-
-const CATEGORIES = [
-  { value: "strategy", label: "Strategy" },
-  { value: "party", label: "Party" },
-  { value: "cooperative", label: "Cooperative" },
-  { value: "deck_building", label: "Deck Building" },
-  { value: "worker_placement", label: "Worker Placement" },
-  { value: "euro", label: "Euro" },
-  { value: "abstract", label: "Abstract" },
-  { value: "rpg", label: "RPG" },
-  { value: "family", label: "Family" },
-  { value: "other", label: "Other" },
-] as const;
+import { useCategories } from "@/hooks/useCategories";
 
 const COMPLEXITIES = [
   { value: "light", label: "Light", desc: "Easy to learn, great for newcomers" },
@@ -35,6 +23,7 @@ export function NewGameWizard() {
   const router = useRouter();
   const createGame = useCreateGame();
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const { data: categories = [], isLoading: catsLoading } = useCategories();
 
   const {
     register,
@@ -173,18 +162,20 @@ export function NewGameWizard() {
               <div>
                 <p className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider mb-3">Category</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {CATEGORIES.map(({ value, label }) => (
+                  {catsLoading ? (
+                    <span className="text-[10px] text-soft-gray-dark font-ui animate-pulse col-span-full">Loading categories…</span>
+                  ) : categories.map(({ slug, label, icon }: any) => (
                     <button
-                      key={value}
+                      key={slug}
                       type="button"
-                      onClick={() => setValue("category", value, { shouldValidate: true })}
+                      onClick={() => setValue("category", slug, { shouldValidate: true })}
                       className={`px-3 py-2.5 rounded-lg text-sm font-ui border transition-all ${
-                        category === value
+                        category === slug
                           ? "bg-emerald-ghost border-emerald-glow/50 text-emerald-glow"
                           : "border-warm-wood text-soft-gray hover:border-warm-wood-light hover:text-parchment-light"
                       }`}
                     >
-                      {label}
+                      {icon ? `${icon} ` : ""}{label}
                     </button>
                   ))}
                 </div>

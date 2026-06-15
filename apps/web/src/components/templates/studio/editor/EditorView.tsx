@@ -78,6 +78,10 @@ export function EditorView({ ed }: { ed: StudioEditor }) {
           onInsert={insertAssetComponents}
           getSelectionPayload={getSelectionPayload}
           onClose={() => setMarketOpen(false)}
+          onMergeTemplate={(template) => {
+            ed.mergeTemplate(template);
+            setMarketOpen(false);
+          }}
         />
       )}
 

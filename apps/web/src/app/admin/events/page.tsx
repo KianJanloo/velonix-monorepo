@@ -70,7 +70,7 @@ export default function AdminEventsPage() {
   };
 
   return (
-    <div className="max-w-5xl">
+    <div>
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold text-parchment-light">Promotional Events</h1>
         <p className="text-soft-gray text-sm font-ui mt-1">Announcement banners and offers shown across the site. Toggle active to publish instantly.</p>
