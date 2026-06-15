@@ -2,11 +2,12 @@
 
 import { useCallback, useRef } from "react";
 
-import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
+import type {
+  PointerEvent as ReactPointerEvent,
+  WheelEvent as ReactWheelEvent,
+} from "react";
 
-import {
-  useStudioCollab,
-  } from "@/hooks/useStudioCollab";
+import { useStudioCollab } from "@/hooks/useStudioCollab";
 
 import {
   MM_TO_PX,
@@ -16,12 +17,7 @@ import {
   EMPTY_GUIDE,
 } from "../core";
 
-import type {
-  CanvasComp,
-  StudioPage,
-  GameRule,
-  GameGuide,
-} from "../core";
+import type { CanvasComp, StudioPage, GameRule, GameGuide } from "../core";
 
 import type { StudioState } from "./useStudioEditorState";
 
@@ -73,14 +69,17 @@ function computeSpacingGuides(
   const dMidX = dragged.x + dragged.width / 2;
 
   // For each other component, compute horizontal and vertical gaps
-  let closestLeft = -Infinity;   // nearest right edge to our left
-  let closestRight = Infinity;   // nearest left edge to our right
-  let closestTop = -Infinity;    // nearest bottom edge above us
-  let closestBottom = Infinity;  // nearest top edge below us
+  let closestLeft = -Infinity; // nearest right edge to our left
+  let closestRight = Infinity; // nearest left edge to our right
+  let closestTop = -Infinity; // nearest bottom edge above us
+  let closestBottom = Infinity; // nearest top edge below us
 
   for (const c of others) {
     if (!c.visible) continue;
-    const cL = c.x, cR = c.x + c.width, cT = c.y, cB = c.y + c.height;
+    const cL = c.x,
+      cR = c.x + c.width,
+      cT = c.y,
+      cB = c.y + c.height;
 
     // Horizontal neighbours (vertically overlapping)
     const vOverlap = dT < cB && dB > cT;
@@ -101,32 +100,48 @@ function computeSpacingGuides(
   if (closestLeft > -Infinity) {
     const gapMm = Math.max(0, Math.round(dL - closestLeft));
     guides.push({
-      axis: "h", start: closestLeft, end: dL,
-      perp: dMidY, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+      axis: "h",
+      start: closestLeft,
+      end: dL,
+      perp: dMidY,
+      gapMm,
+      gapPx: Math.round(gapMm * MM_TO_PX),
     });
   }
   // Right gap
   if (closestRight < Infinity) {
     const gapMm = Math.max(0, Math.round(closestRight - dR));
     guides.push({
-      axis: "h", start: dR, end: closestRight,
-      perp: dMidY, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+      axis: "h",
+      start: dR,
+      end: closestRight,
+      perp: dMidY,
+      gapMm,
+      gapPx: Math.round(gapMm * MM_TO_PX),
     });
   }
   // Top gap
   if (closestTop > -Infinity) {
     const gapMm = Math.max(0, Math.round(dT - closestTop));
     guides.push({
-      axis: "v", start: closestTop, end: dT,
-      perp: dMidX, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+      axis: "v",
+      start: closestTop,
+      end: dT,
+      perp: dMidX,
+      gapMm,
+      gapPx: Math.round(gapMm * MM_TO_PX),
     });
   }
   // Bottom gap
   if (closestBottom < Infinity) {
     const gapMm = Math.max(0, Math.round(closestBottom - dB));
     guides.push({
-      axis: "v", start: dB, end: closestBottom,
-      perp: dMidX, gapMm, gapPx: Math.round(gapMm * MM_TO_PX),
+      axis: "v",
+      start: dB,
+      end: closestBottom,
+      perp: dMidX,
+      gapMm,
+      gapPx: Math.round(gapMm * MM_TO_PX),
     });
   }
 
@@ -144,7 +159,7 @@ export function useStudioPointerMotion(S: StudioState) {
     storeZoom,
     pages,
     setPages,
-    canvasSizeRef,
+    canvasSizeRef: _canvasSizeRef,
     componentsRef,
     setMarquee,
     setComponentsRaw,
@@ -163,7 +178,7 @@ export function useStudioPointerMotion(S: StudioState) {
     pendingRemoteRef,
     collabBroadcastRef,
     readOnlyRef,
-    drawBroadcastRef,
+    drawBroadcastRef: _drawBroadcastRef,
     draw,
     setMultiIds,
     dragRef,
@@ -200,8 +215,6 @@ export function useStudioPointerMotion(S: StudioState) {
 
           ny = Math.round(ny / GRID_MM) * GRID_MM;
         }
-
-
 
         if (dr.multi) {
           // Move the whole group/selection by the same delta as the primary.
@@ -305,7 +318,8 @@ export function useStudioPointerMotion(S: StudioState) {
           const all = componentsRef.current;
           const dragged = all.find((c) => c.id === dr.compId);
           const others = all.filter((c) => c.id !== dr.compId);
-          if (dragged) spacingGuidesRef.current = computeSpacingGuides(dragged, others);
+          if (dragged)
+            spacingGuidesRef.current = computeSpacingGuides(dragged, others);
         } else {
           spacingGuidesRef.current = [];
         }
@@ -455,7 +469,7 @@ export function useStudioPointerMotion(S: StudioState) {
     connected: collabConnected,
 
     broadcast,
-    broadcastDraw,
+    // broadcastDraw,
   } = useStudioCollab({
     gameId,
 
@@ -463,13 +477,19 @@ export function useStudioPointerMotion(S: StudioState) {
 
     onRemoteUpdate: applyRemoteSnapshot,
 
-    onRemoteDraw: draw?.applyRemoteStroke,
-    onRemoteDrawClear: draw?.applyRemoteClear,
-    getSnapshot: () => ({ pages, rules, assets, guide, drawingStrokes: draw?.strokes ?? [] }),
+    // onRemoteDraw: draw?.applyRemoteStroke,
+    // onRemoteDrawClear: draw?.applyRemoteClear,
+    getSnapshot: () => ({
+      pages,
+      rules,
+      assets,
+      guide,
+      drawingStrokes: draw?.strokes ?? [],
+    }),
   });
 
   collabBroadcastRef.current = collabEnabled ? broadcast : null;
-  drawBroadcastRef.current = collabEnabled ? broadcastDraw : null;
+  // drawBroadcastRef.current = collabEnabled ? broadcastDraw : null;
 
   const effectiveReadOnly = readOnly || liveRole === "viewer";
 
@@ -484,7 +504,6 @@ export function useStudioPointerMotion(S: StudioState) {
     [zoomIn, zoomOut],
   );
 
-
   return {
     onPointerMove,
     applyRemoteSnapshot,
@@ -498,3 +517,4 @@ export function useStudioPointerMotion(S: StudioState) {
     spacingGuidesRef,
     altActiveRef,
   };
+}
