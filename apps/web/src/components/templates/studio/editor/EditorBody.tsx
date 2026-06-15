@@ -14,6 +14,7 @@ import {
   AssetsPanel,
   RulesPanel,
   GeneratorPanel,
+  AIBalancerPanel,
 } from "../panels";
 
 import {
@@ -45,6 +46,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
     marquee,
     rules,
     setRules,
+    guide,
     assets,
     setAssets,
     renamingId,
@@ -548,7 +550,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
           className={`${rightOpen ? "w-60" : "w-0"} bg-rich-wood-dark border-l border-warm-wood flex flex-col shrink-0 overflow-hidden transition-[width] duration-200 max-lg:absolute max-lg:right-0 max-lg:z-30 max-lg:h-full`}
         >
           <div className="flex border-b border-warm-wood shrink-0">
-            {(["properties", "styling", "rules"] as const).map((tab) => (
+            {(["properties", "styling", "rules", "ai"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setRightPanelTab(tab)}
@@ -558,13 +560,15 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   ? "Props"
                   : tab === "styling"
                     ? "Style"
-                    : "Rules"}
+                    : tab === "rules"
+                      ? "Rules"
+                      : "AI"}
               </button>
             ))}
           </div>
 
           <div className="flex-1 overflow-y-auto min-h-0 p-3">
-            {!selectedComp && rightPanelTab !== "rules" && (
+            {!selectedComp && rightPanelTab !== "rules" && rightPanelTab !== "ai" && (
               <div className="flex flex-col items-center gap-2 py-8 text-center">
                 <svg
                   width="24"
@@ -658,6 +662,16 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   setRules((rs) => rs.filter((r) => r.id !== id))
                 }
                 pages={pages}
+              />
+            )}
+
+            {rightPanelTab === "ai" && (
+              <AIBalancerPanel
+                components={components}
+                rules={rules}
+                guide={guide}
+                pages={pages}
+                isPro={plan.hasAnalytics}
               />
             )}
           </div>

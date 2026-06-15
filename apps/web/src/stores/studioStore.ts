@@ -61,7 +61,7 @@ interface StudioState {
   leftPanelVisible: boolean;
   rightPanelVisible: boolean;
   leftPanelTab: "layers" | "components" | "assets" | "generator";
-  rightPanelTab: "properties" | "styling" | "rules";
+  rightPanelTab: "properties" | "styling" | "rules" | "ai";
   isFullscreen: boolean;
   showGrid: boolean;
   showRulers: boolean;
