@@ -195,13 +195,13 @@ export function useStudioActions(S: StudioState) {
 
       // Detect if all selected components share the same existing groupId —
       // if so, we are nesting that group into a new parent group.
-      const existingGroupIds = Array.from(
-        new Set(
-          ids
-            .map((id) => prev.find((c) => c.id === id)?.groupId)
-            .filter(Boolean) as string[],
-        ),
-      );
+      // const existingGroupIds = Array.from(
+      //   new Set(
+      //     ids
+      //       .map((id) => prev.find((c) => c.id === id)?.groupId)
+      //       .filter(Boolean) as string[],
+      //   ),
+      // );
 
       return prev.map((c) => {
         if (!set.has(c.id)) return c;
