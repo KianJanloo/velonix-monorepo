@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { GameDetail } from "@/components/organisms/GameDetail";
+import { GameDetail } from "@/components/organisms/game/GameDetail";
 
 export default function AdminGamePreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);

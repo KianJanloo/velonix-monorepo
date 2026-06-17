@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { VelonixLogo } from "@/components/atoms/VelonixLogo";
 import { Button } from "@/components/atoms/Button";
 import { ThemeToggle } from "@/components/atoms/ThemeToggle";
-import { NotificationBell } from "@/components/organisms/NotificationBell";
+import { NotificationBell } from "@/components/organisms/notification/NotificationBell";
 import { cn } from "@/lib/utils";
 import { useCurrentUser, useLogout } from "@/hooks/useAuth";
 

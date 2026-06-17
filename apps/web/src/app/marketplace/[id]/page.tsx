@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { GameDetail } from "@/components/organisms/GameDetail";
+import { GameDetail } from "@/components/organisms/game/GameDetail";
 
 export const metadata: Metadata = { title: "Game" };
 

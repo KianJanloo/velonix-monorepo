@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { LoginForm } from "@/components/organisms/LoginForm";
+import { LoginForm } from "@/components/organisms/auth/LoginForm";
 import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
 
 export const metadata: Metadata = { title: "Sign In" };

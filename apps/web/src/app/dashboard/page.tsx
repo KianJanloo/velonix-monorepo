@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DashboardStats } from "@/components/organisms/DashboardStats";
-import { GameGrid } from "@/components/organisms/GameGrid";
+import { DashboardStats } from "@/components/organisms/dashboard/DashboardStats";
+import { GameGrid } from "@/components/organisms/game/GameGrid";
 
 export const metadata: Metadata = { title: "Dashboard" };
 

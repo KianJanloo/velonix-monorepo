@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ResetPassForm } from "@/components/organisms/ResetPassForm";
+import { ResetPassForm } from "@/components/organisms/auth/ResetPassForm";
 import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
 import { Suspense } from "react";
 import Link from "next/dist/client/link";

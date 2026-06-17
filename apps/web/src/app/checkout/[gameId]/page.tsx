@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CheckoutView } from "@/components/organisms/CheckoutView";
+import { CheckoutView } from "@/components/organisms/checkout/CheckoutView";
 
 export const metadata: Metadata = { title: "Checkout — Velonix" };
 

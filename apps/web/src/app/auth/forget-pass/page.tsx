@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ForgetPassForm } from "@/components/organisms/ForgetPassForm";
+import { ForgetPassForm } from "@/components/organisms/auth/ForgetPassForm";
 import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
 import Link from "next/link";
 

@@ -1,8 +1,8 @@
-export { Navbar } from "./Navbar";
-export { DashboardStats } from "./DashboardStats";
-export { GameGrid } from "./GameGrid";
-export { MarketplaceGrid } from "./MarketplaceGrid";
-export { MarketplaceFiltersPanel } from "./MarketplaceFiltersPanel";
-export { LoginForm } from "./LoginForm";
-export { RegisterForm } from "./RegisterForm";
-export { SettingsTabs } from "./SettingsTabs";
+export { Navbar } from "./navbar/Navbar";
+export { DashboardStats } from "./dashboard/DashboardStats";
+export { GameGrid } from "./game/GameGrid";
+export { MarketplaceGrid } from "./marketplace/MarketplaceGrid";
+export { MarketplaceFiltersPanel } from "./marketplace/MarketplaceFiltersPanel";
+export { LoginForm } from "./auth/LoginForm";
+export { RegisterForm } from "./auth/RegisterForm";
+export { SettingsTabs } from "./profile/SettingsTabs";

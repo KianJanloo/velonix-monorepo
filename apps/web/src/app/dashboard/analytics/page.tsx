@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CreatorAnalytics } from "@/components/organisms/CreatorAnalytics";
+import { CreatorAnalytics } from "@/components/organisms/dashboard/CreatorAnalytics";
 
 export const metadata: Metadata = { title: "Analytics — Velonix" };
 

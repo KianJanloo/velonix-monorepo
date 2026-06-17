@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SettingsTabs } from "@/components/organisms/SettingsTabs";
+import { SettingsTabs } from "@/components/organisms/profile/SettingsTabs";
 
 export const metadata: Metadata = { title: "Settings" };
 

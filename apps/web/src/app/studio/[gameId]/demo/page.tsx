@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DemoVideoStudio } from "@/components/organisms/DemoVideoStudio";
+import { DemoVideoStudio } from "@/components/organisms/studio/DemoVideoStudio";
 
 export const metadata: Metadata = { title: "Demo video — Velonix" };
 

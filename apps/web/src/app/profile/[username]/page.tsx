@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ProfileView } from "@/components/organisms/ProfileView";
+import { ProfileView } from "@/components/organisms/profile/ProfileView";
 
 interface ProfilePageProps {
   params: Promise<{ username: string }>;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { MarketplaceFiltersPanel } from "@/components/organisms/MarketplaceFiltersPanel";
-import { MarketplaceGrid } from "@/components/organisms/MarketplaceGrid";
+import { MarketplaceFiltersPanel } from "@/components/organisms/marketplace/MarketplaceFiltersPanel";
+import { MarketplaceGrid } from "@/components/organisms/marketplace/MarketplaceGrid";
 
 export const metadata: Metadata = {
   title: "Marketplace",

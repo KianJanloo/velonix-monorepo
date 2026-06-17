@@ -1,9 +1,9 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Navbar } from "@/components/organisms/Navbar";
-import { Footer } from "@/components/organisms/Footer";
-import { PromoBanner } from "@/components/organisms/PromoBanner";
+import { Navbar } from "@/components/organisms/navbar/Navbar";
+import { Footer } from "@/components/organisms/footer/Footer";
+import { PromoBanner } from "@/components/organisms/event/PromoBanner";
 import type { PromoEventPlacement } from "@velonix/types";
 
 const NO_SHELL_PREFIXES = ["/studio", "/auth"];

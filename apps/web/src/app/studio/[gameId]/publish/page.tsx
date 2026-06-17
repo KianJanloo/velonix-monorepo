@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PublishSettings } from "@/components/organisms/PublishSettings";
+import { PublishSettings } from "@/components/organisms/studio/PublishSettings";
 
 export const metadata: Metadata = { title: "Publish — Studio" };
 
