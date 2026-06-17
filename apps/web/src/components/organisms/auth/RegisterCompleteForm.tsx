@@ -2,14 +2,14 @@
 
 import { z } from "zod";
 import { RegisterCompleteSchema } from "@velonix/game-engine";
-import { Button } from "../atoms";
+import { Button } from "../../atoms";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRegisterComplete } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
-import { OtpInput } from "../atoms/OtpInput";
+import { OtpInput } from "../../atoms/OtpInput";
 
 const FormSchema = RegisterCompleteSchema.pick({ code: true });
 type FormValues = z.infer<typeof FormSchema>;

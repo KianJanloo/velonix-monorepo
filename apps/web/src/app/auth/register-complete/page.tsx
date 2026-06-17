@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import AuthPagesLayout from "@/components/templates/AuthPagesLayout";
-import { RegisterCompleteForm } from "@/components/organisms/RegisterCompleteForm";
+import { RegisterCompleteForm } from "@/components/organisms/auth/RegisterCompleteForm";
 
 export const metadata: Metadata = { title: "Create Account" };
 
