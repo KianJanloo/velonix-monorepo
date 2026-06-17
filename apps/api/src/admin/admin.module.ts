@@ -3,7 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AdminController } from "./admin.controller";
 import { AdminService } from "./admin.service";
 import { AdminSeedService } from "./admin-seed.service";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { GameEntity } from "../games/game.entity";
 import { PurchaseEntity } from "../marketplace/purchase.entity";
 import { AssetPurchaseEntity } from "../assets/asset-purchase.entity";

@@ -1,6 +1,10 @@
 "use client";
 
-import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
+import { memo } from "react";
+import type {
+  PointerEvent as ReactPointerEvent,
+  MouseEvent as ReactMouseEvent,
+} from "react";
 
 import {
   MM_TO_PX,
@@ -11,10 +15,7 @@ import {
   isChromeless,
 } from "./core-model";
 
-import type {
-  CompType,
-  CanvasComp,
-} from "./core-model";
+import type { CompType, CanvasComp } from "./core-model";
 
 export function ShapeInner({ comp }: { comp: CanvasComp }) {
   if (comp.type === "board") {
@@ -36,11 +37,36 @@ export function ShapeInner({ comp }: { comp: CanvasComp }) {
     // Standard die pip positions (grid coords out of 3x3)
     const PIP_POSITIONS: Record<number, [number, number][]> = {
       1: [[1, 1]],
-      2: [[0, 0], [2, 2]],
-      3: [[0, 0], [1, 1], [2, 2]],
-      4: [[0, 0], [2, 0], [0, 2], [2, 2]],
-      5: [[0, 0], [2, 0], [1, 1], [0, 2], [2, 2]],
-      6: [[0, 0], [2, 0], [0, 1], [2, 1], [0, 2], [2, 2]],
+      2: [
+        [0, 0],
+        [2, 2],
+      ],
+      3: [
+        [0, 0],
+        [1, 1],
+        [2, 2],
+      ],
+      4: [
+        [0, 0],
+        [2, 0],
+        [0, 2],
+        [2, 2],
+      ],
+      5: [
+        [0, 0],
+        [2, 0],
+        [1, 1],
+        [0, 2],
+        [2, 2],
+      ],
+      6: [
+        [0, 0],
+        [2, 0],
+        [0, 1],
+        [2, 1],
+        [0, 2],
+        [2, 2],
+      ],
     };
     const pips = PIP_POSITIONS[dotCount] ?? PIP_POSITIONS[4]!;
     return (
@@ -182,7 +208,14 @@ export function ShapeInner({ comp }: { comp: CanvasComp }) {
       const y2 = cy + r * Math.sin(a2);
       return `M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z`;
     });
-    const PALETTE = ["#7c5cff", "#ff3b5c", "#3ddc97", "#f5c451", "#22d3ee", "#fb923c"];
+    const PALETTE = [
+      "#7c5cff",
+      "#ff3b5c",
+      "#3ddc97",
+      "#f5c451",
+      "#22d3ee",
+      "#fb923c",
+    ];
     return (
       <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
         {slices.map((d, i) => (
@@ -388,7 +421,15 @@ const HANDLES: { id: ResizeHandle; cx: number; cy: number; cursor: string }[] =
     { id: "w", cx: 0, cy: 0.5, cursor: "ew-resize" },
   ];
 
-export function CompView({
+/**
+ * Perf note: wrapped in React.memo below. With hundreds of components on a
+ * page, only the items whose own props actually changed (e.g. the one being
+ * dragged) re-render — siblings are skipped entirely. This only works
+ * because callers pass stable callback references (see EditorBody), so the
+ * default shallow prop comparison is sufficient — no custom comparator
+ * needed.
+ */
+function CompViewImpl({
   comp,
   selected,
   primary,
@@ -443,18 +484,25 @@ export function CompView({
         style={{
           position: "absolute",
           inset: 0,
-          backgroundColor: (isChromeless(comp.type) || isSilhouetteType(comp.type))
-            ? "transparent"
-            : safeColor(comp.fill, "#1a2535"),
-          backgroundImage: comp.image && !isChromeless(comp.type) ? `url("${comp.image}")` : undefined,
+          backgroundColor:
+            isChromeless(comp.type) || isSilhouetteType(comp.type)
+              ? "transparent"
+              : safeColor(comp.fill, "#1a2535"),
+          backgroundImage:
+            comp.image && !isChromeless(comp.type)
+              ? `url("${comp.image}")`
+              : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          border: (isChromeless(comp.type) || isSilhouetteType(comp.type))
-            ? "none"
-            : `${comp.strokeWidth}px solid ${safeColor(comp.stroke, "transparent")}`,
+          border:
+            isChromeless(comp.type) || isSilhouetteType(comp.type)
+              ? "none"
+              : `${comp.strokeWidth}px solid ${safeColor(comp.stroke, "transparent")}`,
           borderRadius: isCircle ? "50%" : comp.cornerRadius,
           boxShadow:
-            comp.type === "text" || isSilhouetteType(comp.type) || isChromeless(comp.type)
+            comp.type === "text" ||
+            isSilhouetteType(comp.type) ||
+            isChromeless(comp.type)
               ? "none"
               : "0 2px 8px rgba(0,0,0,0.45)",
           overflow: comp.type === "deck" ? "visible" : "hidden",
@@ -599,8 +647,9 @@ export function CompView({
   );
 }
 
-// ── Previews ──────────────────────────────────────────────────────────────────
+export const CompView = memo(CompViewImpl);
 
+// ── Previews ──────────────────────────────────────────────────────────────────
 
 // ── Group bounding box ────────────────────────────────────────────────────────
 
@@ -609,7 +658,10 @@ export function CompView({
  * that share a groupId. Used to render the group selection frame.
  */
 export function groupBoundingBox(members: CanvasComp[]): {
-  x: number; y: number; w: number; h: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 } | null {
   if (members.length === 0) return null;
   const minX = Math.min(...members.map((c) => c.x));

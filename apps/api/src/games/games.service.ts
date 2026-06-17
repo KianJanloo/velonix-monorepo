@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, In } from "typeorm";
 import { GameEntity } from "./game.entity";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { CollaboratorsService } from "./collaborators.service";
 import { createStarterGameData, suggestGamePrice } from "@velonix/game-engine";
 import { SUBSCRIPTION_LIMITS } from "@velonix/types";

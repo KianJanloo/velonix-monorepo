@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn,
   CreateDateColumn, UpdateDateColumn, Index,
 } from "typeorm";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 
 @Entity("blog_posts")
 export class BlogPostEntity {

@@ -12,7 +12,7 @@ import { Repository } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { SettingsService } from "../settings/settings.service";
 import type {
   RegisterDto,

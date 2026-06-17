@@ -6,7 +6,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, ILike } from "typeorm";
 import { GameEntity } from "./game.entity";
 import { GameCollaboratorEntity } from "./collaborator.entity";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { NotificationsService } from "../notifications/notifications.service";
 import { SUBSCRIPTION_LIMITS } from "@velonix/types";
 import type { CollaboratorRole, SubscriptionTier } from "@velonix/types";

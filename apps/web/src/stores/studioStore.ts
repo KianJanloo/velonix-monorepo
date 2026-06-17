@@ -61,7 +61,7 @@ interface StudioState {
   leftPanelVisible: boolean;
   rightPanelVisible: boolean;
   leftPanelTab: "layers" | "components" | "assets" | "generator";
-  rightPanelTab: "properties" | "styling" | "rules" | "ai";
+  rightPanelTab: "properties" | "styling" | "rules" | "ai" | "notes";
   isFullscreen: boolean;
   showGrid: boolean;
   showRulers: boolean;
@@ -339,32 +339,66 @@ export const useStudioStore = create<StudioState & StudioActions>()(
         },
 
         // ── Persistence ───────────────────────────────────────────────────
-        markDirty: () => set((state) => { state.isDirty = true; }),
-        markSaving: () => set((state) => { state.isSaving = true; }),
+        markDirty: () =>
+          set((state) => {
+            state.isDirty = true;
+          }),
+        markSaving: () =>
+          set((state) => {
+            state.isSaving = true;
+          }),
         markSaved: () =>
           set((state) => {
             state.isSaving = false;
             state.isDirty = false;
-            state.lastSavedAt = new Date()
-            .toISOString();
+            state.lastSavedAt = new Date().toISOString();
           }),
         setAutoSave: (enabled) =>
-          set((state) => { state.autoSaveEnabled = enabled; }),
+          set((state) => {
+            state.autoSaveEnabled = enabled;
+          }),
 
         // ── UI ────────────────────────────────────────────────────────────
-        toggleLeftPanel:  () => set((s) => { s.leftPanelVisible  = !s.leftPanelVisible; }),
-        toggleRightPanel: () => set((s) => { s.rightPanelVisible = !s.rightPanelVisible; }),
-        setLeftPanelTab:  (tab) => set((s) => { s.leftPanelTab  = tab; }),
-        setRightPanelTab: (tab) => set((s) => { s.rightPanelTab = tab; }),
-        toggleFullscreen: () => set((s) => { s.isFullscreen = !s.isFullscreen; }),
-        toggleGrid:   () => set((s) => { s.showGrid   = !s.showGrid; }),
-        toggleRulers: () => set((s) => { s.showRulers = !s.showRulers; }),
-        toggleSnap:   () => set((s) => { s.snapToGrid = !s.snapToGrid; }),
-        setGridSize:  (size) => set((s) => { s.gridSize = size; }),
-      }))
+        toggleLeftPanel: () =>
+          set((s) => {
+            s.leftPanelVisible = !s.leftPanelVisible;
+          }),
+        toggleRightPanel: () =>
+          set((s) => {
+            s.rightPanelVisible = !s.rightPanelVisible;
+          }),
+        setLeftPanelTab: (tab) =>
+          set((s) => {
+            s.leftPanelTab = tab;
+          }),
+        setRightPanelTab: (tab) =>
+          set((s) => {
+            s.rightPanelTab = tab;
+          }),
+        toggleFullscreen: () =>
+          set((s) => {
+            s.isFullscreen = !s.isFullscreen;
+          }),
+        toggleGrid: () =>
+          set((s) => {
+            s.showGrid = !s.showGrid;
+          }),
+        toggleRulers: () =>
+          set((s) => {
+            s.showRulers = !s.showRulers;
+          }),
+        toggleSnap: () =>
+          set((s) => {
+            s.snapToGrid = !s.snapToGrid;
+          }),
+        setGridSize: (size) =>
+          set((s) => {
+            s.gridSize = size;
+          }),
+      })),
     ),
-    { name: "velonix-studio", enabled: process.env.NODE_ENV === "development" }
-  )
+    { name: "velonix-studio", enabled: process.env.NODE_ENV === "development" },
+  ),
 );
 
 // ---------------------------------------------------------------------------

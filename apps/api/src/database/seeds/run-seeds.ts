@@ -7,7 +7,7 @@
 
 import "reflect-metadata";
 import { AppDataSource } from "../data-source";
-import { UserEntity } from "../../users/user.entity";
+import { UserEntity } from "../../users/entities/user.entity";
 import { GameEntity } from "../../games/game.entity";
 import { ReviewEntity } from "../../marketplace/review.entity";
 import * as bcrypt from "bcryptjs";

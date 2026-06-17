@@ -17,7 +17,7 @@ import {
   Unique,
 } from "typeorm";
 import type { CollaboratorRole } from "@velonix/types";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { GameEntity } from "./game.entity";
 
 @Entity("game_collaborators")

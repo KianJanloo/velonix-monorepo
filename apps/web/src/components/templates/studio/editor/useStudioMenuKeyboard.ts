@@ -4,20 +4,11 @@ import { useCallback, useEffect } from "react";
 
 import type { MouseEvent as ReactMouseEvent } from "react";
 
-import {
-  toast,
-} from "sonner";
+import { toast } from "sonner";
 
-import {
-  MM_TO_PX,
-  GRID_MM,
-  TOOLS,
-} from "../core";
+import { MM_TO_PX, GRID_MM, TOOLS } from "../core";
 
-import type {
-  CanvasComp,
-  MenuItem,
-} from "../core";
+import type { CanvasComp, MenuItem } from "../core";
 
 import type { StudioState } from "./useStudioEditorState";
 import type { StudioActions } from "./useStudioActions";
@@ -36,6 +27,9 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
     rules,
     assets,
     guide,
+    voiceNotes,
+    componentDesigns,
+    boxDesign,
     setSelectedId,
     panX,
     panY,
@@ -480,8 +474,21 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
 
       guide,
       drawingStrokes: draw?.strokes ?? [],
+      voiceNotes,
+      componentDesigns,
+      boxDesign,
     } as unknown as Record<string, unknown>);
-  }, [isNew, saveNow, pages, rules, assets, guide]);
+  }, [
+    isNew,
+    saveNow,
+    pages,
+    rules,
+    assets,
+    guide,
+    voiceNotes,
+    componentDesigns,
+    boxDesign,
+  ]);
 
   async function handlePublish() {
     if (isNew) {
@@ -503,6 +510,9 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
 
       guide,
       drawingStrokes: draw?.strokes ?? [],
+      voiceNotes,
+      componentDesigns,
+      boxDesign,
     } as unknown as Record<string, unknown>);
 
     router.push(`/studio/${gameId}/publish`);
@@ -526,7 +536,6 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
     TOOLS.find((t) => t.id === activeTool)?.cursor ?? "default";
 
   const reversed = [...components].reverse();
-
 
   return {
     openCompMenu,

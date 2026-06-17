@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 
 import { COMP_ICONS } from "../core";
 
@@ -35,7 +35,7 @@ interface LayerRowProps {
   onMove: (id: string, dir: "up" | "down") => void;
 }
 
-function LayerRow({
+function LayerRowImpl({
   c,
 
   idx,
@@ -199,6 +199,9 @@ function LayerRow({
   );
 }
 
+/** Memoized: with hundreds of layers, only the row(s) that actually changed
+ * (selection, visibility, rename) re-render instead of the whole list. */
+const LayerRow = memo(LayerRowImpl);
 
 export function LayersPanel({
   components,
@@ -464,4 +467,3 @@ export function LayersPanel({
     </div>
   );
 }
-

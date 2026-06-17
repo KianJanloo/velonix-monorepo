@@ -3,10 +3,9 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { GameCard } from "@/components/molecules/GameCard";
+import { FollowButton } from "@/components/molecules/FollowButton";
 import { usePublicProfile } from "@/hooks/useProfile";
 import { ApiError } from "@/lib/apiClient";
-import { Button } from "@/components/atoms";
-import Link from "next/link";
 
 const TIER_LABEL: Record<string, string> = {
   free: "Creator",
@@ -98,31 +97,42 @@ export function ProfileView({ username }: { username: string }) {
           </div>
 
           {/* Stats */}
-          <div className="flex flex-col gap-4 justify-center items-center">
-            <div className="flex gap-6">
-              <div className="text-center">
-                <p className="font-display text-2xl font-bold text-emerald-glow">
-                  {profile.stats.publishedGames}
-                </p>
-                <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
-                  Games
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="font-display text-2xl font-bold text-royal-gold">
-                  {profile.stats.totalSales}
-                </p>
-                <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
-                  Sales
-                </p>
-              </div>
+          <div className="flex gap-6">
+            <div className="text-center">
+              <p className="font-display text-2xl font-bold text-emerald-glow">
+                {profile.stats.publishedGames}
+              </p>
+              <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
+                Games
+              </p>
             </div>
-            <Link href="/settings" className="max-md:hidden">
-              <Button variant="ghost" size="sm">
-                Settings
-              </Button>
-            </Link>
+            <div className="text-center">
+              <p className="font-display text-2xl font-bold text-royal-gold">
+                {profile.stats.totalSales}
+              </p>
+              <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
+                Sales
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="font-display text-2xl font-bold text-cyan-spark">
+                {profile.stats.followersCount}
+              </p>
+              <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
+                Followers
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="font-display text-2xl font-bold text-parchment-mid">
+                {profile.stats.followingCount}
+              </p>
+              <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
+                Following
+              </p>
+            </div>
           </div>
+
+          <FollowButton username={profile.username} />
         </div>
 
         {/* Games */}

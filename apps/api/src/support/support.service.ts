@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { SupportTicketEntity, type TicketCategory, type TicketStatus } from "./support-ticket.entity";
 import { SupportMessageEntity } from "./support-message.entity";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { NotificationsService } from "../notifications/notifications.service";
 
 interface CreateTicketInput {

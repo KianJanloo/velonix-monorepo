@@ -12,7 +12,7 @@ import {
   JoinColumn, CreateDateColumn, UpdateDateColumn, Index,
 } from "typeorm";
 import type { AssetKind } from "@velonix/types";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 
 @Entity("component_assets")
 @Index(["isPublished", "createdAt"])

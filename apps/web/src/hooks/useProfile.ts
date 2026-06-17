@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiClient, ApiError } from "@/lib/apiClient";
 import { useAuthStore, type AuthUser } from "@/stores/authStore";
@@ -17,8 +17,19 @@ export interface PublicProfile {
   subscriptionTier: string;
   totalSales: number;
   createdAt: string;
-  stats: { publishedGames: number; totalSales: number };
+  stats: {
+    publishedGames: number;
+    totalSales: number;
+    followersCount: number;
+    followingCount: number;
+  };
   games: GameSummary[];
+}
+
+export interface FollowStatus {
+  isFollowing: boolean;
+  followersCount: number;
+  followingCount: number;
 }
 
 export function usePublicProfile(username: string) {
@@ -26,6 +37,51 @@ export function usePublicProfile(username: string) {
     queryKey: ["profile", username],
     queryFn: () => apiClient.get<PublicProfile>(`/users/${username}`),
     enabled: !!username,
+  });
+}
+
+/** Whether the current user follows `username`, plus live counts. Requires auth. */
+export function useFollowStatus(username: string, enabled: boolean) {
+  return useQuery<FollowStatus>({
+    queryKey: ["follow-status", username],
+    queryFn: () =>
+      apiClient.get<FollowStatus>(`/users/${username}/follow-status`),
+    enabled: enabled && !!username,
+  });
+}
+
+export function useFollowUser(username: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiClient.post<FollowStatus>(`/users/${username}/follow`),
+    onSuccess: (status) => {
+      qc.setQueryData(["follow-status", username], status);
+      void qc.invalidateQueries({ queryKey: ["profile", username] });
+    },
+    onError: (err) => {
+      toast.error(
+        err instanceof ApiError ? err.message : "Couldn't follow this creator.",
+      );
+    },
+  });
+}
+
+export function useUnfollowUser(username: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiClient.delete<FollowStatus>(`/users/${username}/follow`),
+    onSuccess: (status) => {
+      qc.setQueryData(["follow-status", username], status);
+      void qc.invalidateQueries({ queryKey: ["profile", username] });
+    },
+    onError: (err) => {
+      toast.error(
+        err instanceof ApiError
+          ? err.message
+          : "Couldn't unfollow this creator.",
+      );
+    },
   });
 }
 

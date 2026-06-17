@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne,
   JoinColumn, CreateDateColumn, Index
 } from "typeorm";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { GameEntity } from "../games/game.entity";
 
 @Entity("purchases")

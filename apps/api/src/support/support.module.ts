@@ -4,7 +4,7 @@ import { SupportController } from "./support.controller";
 import { SupportService } from "./support.service";
 import { SupportTicketEntity } from "./support-ticket.entity";
 import { SupportMessageEntity } from "./support-message.entity";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({

@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import Stripe from "stripe";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { SUBSCRIPTION_LIMITS } from "@velonix/types";
 import type { SubscriptionTier } from "@velonix/types";
 

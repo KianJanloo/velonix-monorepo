@@ -20,7 +20,7 @@ import type {
   GameComplexity,
   PlayerCountRange,
 } from "@velonix/types";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 
 @Entity("games")
 @Index(["status", "createdAt"]) // Marketplace listing queries

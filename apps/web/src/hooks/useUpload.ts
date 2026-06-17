@@ -31,13 +31,21 @@ export function useImageUpload() {
       if (!res.ok) {
         let msg = "Upload failed.";
         try {
-          const j = await res.json() as { error?: { message?: string }; message?: string };
+          const j = (await res.json()) as {
+            error?: { message?: string };
+            message?: string;
+          };
           msg = j.error?.message ?? j.message ?? msg;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         toast.error(msg);
         return null;
       }
-      const json = await res.json() as { data?: { url: string }; url?: string };
+      const json = (await res.json()) as {
+        data?: { url: string };
+        url?: string;
+      };
       return json.data?.url ?? json.url ?? null;
     } catch {
       toast.error("Upload failed. Check your connection.");
@@ -54,37 +62,109 @@ export function useImageUpload() {
 export function useVideoUpload() {
   const [uploading, setUploading] = useState(false);
 
-  const upload = useCallback(async (blob: Blob, filename = "demo.webm"): Promise<string | null> => {
-    if (blob.size > 50 * 1024 * 1024) {
-      toast.error("Video too large. Maximum size is 50MB.");
-      return null;
-    }
-    setUploading(true);
-    try {
-      const form = new FormData();
-      form.append("file", blob, filename);
-      const token = getAccessToken();
-      const headers: Record<string, string> = {};
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-      const res = await fetch(`${API_ROOT}/uploads/video`, { method: "POST", headers, body: form });
-      if (!res.ok) {
-        let msg = "Upload failed.";
-        try {
-          const j = await res.json() as { error?: { message?: string }; message?: string };
-          msg = j.error?.message ?? j.message ?? msg;
-        } catch { /* ignore */ }
-        toast.error(msg);
+  const upload = useCallback(
+    async (blob: Blob, filename = "demo.webm"): Promise<string | null> => {
+      if (blob.size > 50 * 1024 * 1024) {
+        toast.error("Video too large. Maximum size is 50MB.");
         return null;
       }
-      const json = await res.json() as { data?: { url: string }; url?: string };
-      return json.data?.url ?? json.url ?? null;
-    } catch {
-      toast.error("Upload failed. Check your connection.");
-      return null;
-    } finally {
-      setUploading(false);
-    }
-  }, []);
+      setUploading(true);
+      try {
+        const form = new FormData();
+        form.append("file", blob, filename);
+        const token = getAccessToken();
+        const headers: Record<string, string> = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const res = await fetch(`${API_ROOT}/uploads/video`, {
+          method: "POST",
+          headers,
+          body: form,
+        });
+        if (!res.ok) {
+          let msg = "Upload failed.";
+          try {
+            const j = (await res.json()) as {
+              error?: { message?: string };
+              message?: string;
+            };
+            msg = j.error?.message ?? j.message ?? msg;
+          } catch {
+            /* ignore */
+          }
+          toast.error(msg);
+          return null;
+        }
+        const json = (await res.json()) as {
+          data?: { url: string };
+          url?: string;
+        };
+        return json.data?.url ?? json.url ?? null;
+      } catch {
+        toast.error("Upload failed. Check your connection.");
+        return null;
+      } finally {
+        setUploading(false);
+      }
+    },
+    [],
+  );
+
+  return { upload, uploading };
+}
+
+/** Uploads a recorded voice-note clip (webm/m4a/mp3/wav, max 15MB). */
+export function useAudioUpload() {
+  const [uploading, setUploading] = useState(false);
+
+  const upload = useCallback(
+    async (
+      blob: Blob,
+      filename = "voice-note.webm",
+    ): Promise<string | null> => {
+      if (blob.size > 15 * 1024 * 1024) {
+        toast.error("Recording too large. Maximum size is 15MB.");
+        return null;
+      }
+      setUploading(true);
+      try {
+        const form = new FormData();
+        form.append("file", blob, filename);
+        const token = getAccessToken();
+        const headers: Record<string, string> = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const res = await fetch(`${API_ROOT}/uploads/audio`, {
+          method: "POST",
+          headers,
+          body: form,
+        });
+        if (!res.ok) {
+          let msg = "Upload failed.";
+          try {
+            const j = (await res.json()) as {
+              error?: { message?: string };
+              message?: string;
+            };
+            msg = j.error?.message ?? j.message ?? msg;
+          } catch {
+            /* ignore */
+          }
+          toast.error(msg);
+          return null;
+        }
+        const json = (await res.json()) as {
+          data?: { url: string };
+          url?: string;
+        };
+        return json.data?.url ?? json.url ?? null;
+      } catch {
+        toast.error("Upload failed. Check your connection.");
+        return null;
+      } finally {
+        setUploading(false);
+      }
+    },
+    [],
+  );
 
   return { upload, uploading };
 }

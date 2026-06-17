@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne,
   JoinColumn, CreateDateColumn, Index,
 } from "typeorm";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { AssetEntity } from "./asset.entity";
 
 /** A creator's ownership of a marketplace asset (free acquisition or paid purchase). */

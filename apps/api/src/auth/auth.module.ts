@@ -8,7 +8,7 @@ import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { LocalStrategy } from "./strategies/local.strategy";
 import { GoogleStrategy } from "./strategies/google.strategy";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { SettingsModule } from "../settings/settings.module";
 import { MailModule } from "../mail/mail.module";
 

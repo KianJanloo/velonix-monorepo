@@ -5,7 +5,7 @@ import { GamesController } from "./games.controller";
 import { GamesService } from "./games.service";
 import { GameEntity } from "./game.entity";
 import { GameCollaboratorEntity } from "./collaborator.entity";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { CollaboratorsService } from "./collaborators.service";
 import { CollaboratorsController } from "./collaborators.controller";
 import { StudioGateway } from "./studio.gateway";

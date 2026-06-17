@@ -1,6 +1,5 @@
 "use client";
 
-
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 export const MM_TO_PX = 2;
@@ -99,11 +98,25 @@ export interface CanvasComp {
   customLabel?: string;
   /** Line thickness used by the line component (mm). */
   lineWeight?: number;
+  /**
+   * Physical die type — how many faces it actually has (4/6/8/10/12/20).
+   * Independent of `dotCount`, which only controls the cosmetic pip preview.
+   */
+  dieFaces?: 4 | 6 | 8 | 10 | 12 | 20;
+  /** Back-face artwork (cards, boards, tiles, dice — double-sided pieces). */
+  backImage?: string;
 }
 
 // Rendering predicates shared by the editor canvas and previews.
 const CIRCLE_TYPES: CompType[] = ["token", "coin", "marker", "spinner"];
-const SILHOUETTE_TYPES: CompType[] = ["pawn", "meeple", "hex", "bag", "standee", "sand_timer"];
+const SILHOUETTE_TYPES: CompType[] = [
+  "pawn",
+  "meeple",
+  "hex",
+  "bag",
+  "standee",
+  "sand_timer",
+];
 export const isCircleType = (t: CompType) => CIRCLE_TYPES.includes(t);
 export const isSilhouetteType = (t: CompType) => SILHOUETTE_TYPES.includes(t);
 /** Types whose body has no fill/border box (drawn as SVG silhouette or plain text). */
@@ -112,7 +125,12 @@ export const isChromeless = (t: CompType) =>
 
 // ── Drawing layer ─────────────────────────────────────────────────────────────
 
-export type DrawingTool = "pencil" | "highlighter" | "eraser" | "arrow" | "rect";
+export type DrawingTool =
+  | "pencil"
+  | "highlighter"
+  | "eraser"
+  | "arrow"
+  | "rect";
 
 export interface DrawingStroke {
   id: string;
@@ -183,7 +201,14 @@ export type RuleActionType =
   | "shuffle_deck"
   | "custom";
 
-export type RuleTarget = "current" | "each" | "all" | "next" | "previous" | "winner" | "loser";
+export type RuleTarget =
+  | "current"
+  | "each"
+  | "all"
+  | "next"
+  | "previous"
+  | "winner"
+  | "loser";
 
 // ── Condition system ──────────────────────────────────────────────────────────
 
@@ -197,12 +222,12 @@ export type RuleConditionSubject =
   | "counter";
 
 export type RuleConditionOperator =
-  | "eq"   // equal
-  | "neq"  // not equal
-  | "gt"   // greater than
-  | "gte"  // greater than or equal
-  | "lt"   // less than
-  | "lte"  // less than or equal
+  | "eq" // equal
+  | "neq" // not equal
+  | "gt" // greater than
+  | "gte" // greater than or equal
+  | "lt" // less than
+  | "lte" // less than or equal
   | "between"
   | "is_multiple_of";
 
@@ -262,17 +287,62 @@ export const RULE_TRIGGERS: {
   short: string;
   icon: string;
 }[] = [
-  { value: "turn_start",        label: "On turn start",          short: "Turn start",    icon: "▶" },
-  { value: "turn_end",          label: "On turn end",            short: "Turn end",      icon: "■" },
-  { value: "round_start",       label: "On round start",         short: "Round start",   icon: "◎" },
-  { value: "round_end",         label: "On round end",           short: "Round end",     icon: "◉" },
-  { value: "card_played",       label: "When a card is played",  short: "Card played",   icon: "🃏" },
-  { value: "token_moved",       label: "When a token moves",     short: "Token moved",   icon: "♟" },
-  { value: "dice_rolled",       label: "When dice are rolled",   short: "Dice rolled",   icon: "🎲" },
-  { value: "score_changed",     label: "When score changes",     short: "Score change",  icon: "★" },
-  { value: "player_eliminated", label: "When a player is out",   short: "Player out",    icon: "✕" },
-  { value: "game_start",        label: "On game start",          short: "Game start",    icon: "⚑" },
-  { value: "game_end",          label: "Win / end condition",    short: "Game end",      icon: "🏆" },
+  {
+    value: "turn_start",
+    label: "On turn start",
+    short: "Turn start",
+    icon: "▶",
+  },
+  { value: "turn_end", label: "On turn end", short: "Turn end", icon: "■" },
+  {
+    value: "round_start",
+    label: "On round start",
+    short: "Round start",
+    icon: "◎",
+  },
+  { value: "round_end", label: "On round end", short: "Round end", icon: "◉" },
+  {
+    value: "card_played",
+    label: "When a card is played",
+    short: "Card played",
+    icon: "🃏",
+  },
+  {
+    value: "token_moved",
+    label: "When a token moves",
+    short: "Token moved",
+    icon: "♟",
+  },
+  {
+    value: "dice_rolled",
+    label: "When dice are rolled",
+    short: "Dice rolled",
+    icon: "🎲",
+  },
+  {
+    value: "score_changed",
+    label: "When score changes",
+    short: "Score change",
+    icon: "★",
+  },
+  {
+    value: "player_eliminated",
+    label: "When a player is out",
+    short: "Player out",
+    icon: "✕",
+  },
+  {
+    value: "game_start",
+    label: "On game start",
+    short: "Game start",
+    icon: "⚑",
+  },
+  {
+    value: "game_end",
+    label: "Win / end condition",
+    short: "Game end",
+    icon: "🏆",
+  },
 ];
 
 export const RULE_TARGETS: {
@@ -280,34 +350,45 @@ export const RULE_TARGETS: {
   label: string;
   sentence: string;
 }[] = [
-  { value: "current",  label: "Current player",  sentence: "the current player"  },
-  { value: "each",     label: "Each player",     sentence: "each player"          },
-  { value: "all",      label: "All players",     sentence: "all players"          },
-  { value: "next",     label: "Next player",     sentence: "the next player"      },
-  { value: "previous", label: "Previous player", sentence: "the previous player"  },
-  { value: "winner",   label: "Winner",          sentence: "the winner"           },
-  { value: "loser",    label: "Loser",           sentence: "the loser"            },
+  { value: "current", label: "Current player", sentence: "the current player" },
+  { value: "each", label: "Each player", sentence: "each player" },
+  { value: "all", label: "All players", sentence: "all players" },
+  { value: "next", label: "Next player", sentence: "the next player" },
+  {
+    value: "previous",
+    label: "Previous player",
+    sentence: "the previous player",
+  },
+  { value: "winner", label: "Winner", sentence: "the winner" },
+  { value: "loser", label: "Loser", sentence: "the loser" },
 ];
 
-export const RULE_CONDITION_SUBJECTS: { value: RuleConditionSubject; label: string }[] = [
-  { value: "score",        label: "Score"        },
-  { value: "round",        label: "Round number" },
-  { value: "turn_count",   label: "Turn count"   },
-  { value: "dice_result",  label: "Dice result"  },
+export const RULE_CONDITION_SUBJECTS: {
+  value: RuleConditionSubject;
+  label: string;
+}[] = [
+  { value: "score", label: "Score" },
+  { value: "round", label: "Round number" },
+  { value: "turn_count", label: "Turn count" },
+  { value: "dice_result", label: "Dice result" },
   { value: "player_count", label: "Player count" },
-  { value: "card_count",   label: "Cards in hand"},
-  { value: "counter",      label: "Counter"      },
+  { value: "card_count", label: "Cards in hand" },
+  { value: "counter", label: "Counter" },
 ];
 
-export const RULE_CONDITION_OPERATORS: { value: RuleConditionOperator; label: string; symbol: string }[] = [
-  { value: "eq",            label: "equals",            symbol: "="  },
-  { value: "neq",           label: "not equal to",      symbol: "≠"  },
-  { value: "gt",            label: "greater than",      symbol: ">"  },
-  { value: "gte",           label: "at least",          symbol: "≥"  },
-  { value: "lt",            label: "less than",         symbol: "<"  },
-  { value: "lte",           label: "at most",           symbol: "≤"  },
-  { value: "between",       label: "between",           symbol: "↔"  },
-  { value: "is_multiple_of",label: "multiple of",       symbol: "%"  },
+export const RULE_CONDITION_OPERATORS: {
+  value: RuleConditionOperator;
+  label: string;
+  symbol: string;
+}[] = [
+  { value: "eq", label: "equals", symbol: "=" },
+  { value: "neq", label: "not equal to", symbol: "≠" },
+  { value: "gt", label: "greater than", symbol: ">" },
+  { value: "gte", label: "at least", symbol: "≥" },
+  { value: "lt", label: "less than", symbol: "<" },
+  { value: "lte", label: "at most", symbol: "≤" },
+  { value: "between", label: "between", symbol: "↔" },
+  { value: "is_multiple_of", label: "multiple of", symbol: "%" },
 ];
 
 interface RuleActionDef {
@@ -490,7 +571,9 @@ export const RULE_TEMPLATES: {
     trigger: "score_changed",
     action: "end_game",
     params: { value: "a player reaches 30 points" },
-    conditions: [{ subject: "score", operator: "gte", value: 30, negate: false }],
+    conditions: [
+      { subject: "score", operator: "gte", value: 30, negate: false },
+    ],
   },
   {
     label: "Skip turn if score < 0",
@@ -504,14 +587,18 @@ export const RULE_TEMPLATES: {
     trigger: "dice_rolled",
     action: "extra_turn",
     params: { target: "current" },
-    conditions: [{ subject: "dice_result", operator: "eq", value: 6, negate: false }],
+    conditions: [
+      { subject: "dice_result", operator: "eq", value: 6, negate: false },
+    ],
   },
   {
     label: "Gain 5 on round 3+",
     trigger: "round_start",
     action: "gain_points",
     params: { amount: 5, target: "all" },
-    conditions: [{ subject: "round", operator: "gte", value: 3, negate: false }],
+    conditions: [
+      { subject: "round", operator: "gte", value: 3, negate: false },
+    ],
   },
 ];
 
@@ -845,3 +932,16 @@ export function normalizeComponents(arr: unknown): CanvasComp[] {
 
 // ── Icons ───────────────────────────────────────────────────────────────────
 
+// ── Voice notes ────────────────────────────────────────────────────────────
+
+/** A single recorded voice-note clip attached to one component. */
+export interface VoiceNoteEntry {
+  id: string;
+  /** Uploaded audio URL (webm/m4a/mp3/wav). */
+  url: string;
+  durationSec: number;
+  createdAt: number;
+  authorName?: string;
+  /** Optional manually-typed note to go with the recording. */
+  transcript?: string;
+}

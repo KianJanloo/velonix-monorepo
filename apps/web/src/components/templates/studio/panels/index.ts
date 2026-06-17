@@ -7,3 +7,4 @@ export { AssetsPanel } from "./AssetsPanel";
 export { RulesPanel } from "./RulesPanel";
 export { GeneratorPanel } from "./GeneratorPanel";
 export { AIBalancerPanel } from "./AIBalancerPanel";
+export { VoiceNotesPanel } from "./VoiceNotesPanel";

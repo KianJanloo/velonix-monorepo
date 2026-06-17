@@ -5,7 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import Stripe from "stripe";
 import { PurchaseEntity } from "../marketplace/purchase.entity";
 import { GameEntity } from "../games/game.entity";
-import { UserEntity } from "../users/user.entity";
+import { UserEntity } from "../users/entities/user.entity";
 import { AssetEntity } from "../assets/asset.entity";
 import { AssetPurchaseEntity } from "../assets/asset-purchase.entity";
 import { AssetBundleEntity, type BundleItem } from "./asset-bundle.entity";
