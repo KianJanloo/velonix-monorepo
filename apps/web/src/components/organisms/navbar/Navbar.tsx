@@ -15,9 +15,6 @@ const PUBLIC_LINKS = [
   { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Blog" },
 ];
-
-const AUTH_LINKS = [{ href: "/dashboard", label: "Dashboard" }];
-
 const ADMIN_LINKS = [{ href: "/admin", label: "Admin" }];
 
 export function Navbar() {
@@ -34,9 +31,9 @@ export function Navbar() {
 
   const authed = mounted && !!user;
   const isAdmin = authed && user?.role === "admin";
-  const navLinks = authed ? [...PUBLIC_LINKS, ...AUTH_LINKS] : PUBLIC_LINKS;
+  const navLinks = authed ? [...PUBLIC_LINKS] : PUBLIC_LINKS;
 
-  if (ADMIN_LINKS.map(a => pathname.includes(a.href)).some(Boolean)) {
+  if (ADMIN_LINKS.map((a) => pathname.includes(a.href)).some(Boolean)) {
     return null;
   }
 
@@ -99,9 +96,9 @@ export function Navbar() {
                     </Button>
                   </Link>
                 )}
-                <Link href="/settings">
+                <Link href="/dashboard">
                   <Button variant="ghost" size="sm">
-                    Settings
+                    Dashboard
                   </Button>
                 </Link>
                 <Button variant="outline" size="sm" onClick={logout}>
@@ -196,11 +193,17 @@ export function Navbar() {
                 {isAdmin && (
                   <Link
                     href="/admin"
-                    className="px-3 py-2.5 rounded-lg text-sm font-ui text-crimson-flame hover:bg-warm-wood"
+                    className="px-3 py-2.5 rounded-lg text-sm font-ui text-royal-gold hover:bg-warm-wood"
                   >
                     Admin Panel
                   </Link>
                 )}
+                <Link
+                  href="/dashboard"
+                  className="px-3 py-2.5 rounded-lg text-sm font-ui hover:bg-warm-wood"
+                >
+                  Dashboard
+                </Link>
                 <button
                   onClick={logout}
                   className="px-3 py-2.5 rounded-lg text-sm font-ui text-left text-soft-gray hover:text-parchment-light hover:bg-warm-wood"

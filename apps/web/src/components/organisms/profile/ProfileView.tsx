@@ -5,9 +5,14 @@ import Image from "next/image";
 import { GameCard } from "@/components/molecules/GameCard";
 import { usePublicProfile } from "@/hooks/useProfile";
 import { ApiError } from "@/lib/apiClient";
+import { Button } from "@/components/atoms";
+import Link from "next/link";
 
 const TIER_LABEL: Record<string, string> = {
-  free: "Creator", creator: "Creator", pro: "Pro Creator", studio: "Studio",
+  free: "Creator",
+  creator: "Creator",
+  pro: "Pro Creator",
+  studio: "Studio",
 };
 
 export function ProfileView({ username }: { username: string }) {
@@ -40,7 +45,12 @@ export function ProfileView({ username }: { username: string }) {
         <div className="v-card p-8 mb-8 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
           <div className="relative w-20 h-20 rounded-full bg-warm-wood border-2 border-royal-gold/30 flex items-center justify-center shrink-0 overflow-hidden">
             {profile.avatarUrl ? (
-              <Image src={profile.avatarUrl} alt={profile.displayName} fill className="object-cover" />
+              <Image
+                src={profile.avatarUrl}
+                alt={profile.displayName}
+                fill
+                className="object-cover"
+              />
             ) : (
               <span className="font-display text-2xl text-royal-gold font-bold">
                 {profile.displayName[0]?.toUpperCase() ?? "V"}
@@ -51,33 +61,67 @@ export function ProfileView({ username }: { username: string }) {
             <h1 className="font-display text-2xl font-bold tracking-display text-parchment-light mb-1">
               {profile.displayName}
             </h1>
-            <p className="text-soft-gray text-sm font-ui mb-2">@{profile.username}</p>
-            {profile.bio && <p className="text-parchment-mid text-sm font-ui mb-3 max-w-lg">{profile.bio}</p>}
+            <p className="text-soft-gray text-sm font-ui mb-2">
+              @{profile.username}
+            </p>
+            {profile.bio && (
+              <p className="text-parchment-mid text-sm font-ui mb-3 max-w-lg">
+                {profile.bio}
+              </p>
+            )}
             <div className="flex items-center gap-3 justify-center sm:justify-start">
               {profile.subscriptionTier !== "free" && (
                 <span className="v-badge-premium">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                    <path d="M5 1l1 2.5h2.5L6.5 5l.5 2.5L5 6.5 3 7.5l.5-2.5L1.5 3.5H4z" fill="currentColor" />
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M5 1l1 2.5h2.5L6.5 5l.5 2.5L5 6.5 3 7.5l.5-2.5L1.5 3.5H4z"
+                      fill="currentColor"
+                    />
                   </svg>
                   {TIER_LABEL[profile.subscriptionTier] ?? "Creator"}
                 </span>
               )}
               <span className="text-2xs text-soft-gray font-ui">
-                Joined {new Date(profile.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                Joined{" "}
+                {new Date(profile.createdAt).toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
               </span>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="flex gap-6">
-            <div className="text-center">
-              <p className="font-display text-2xl font-bold text-emerald-glow">{profile.stats.publishedGames}</p>
-              <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">Games</p>
+          <div className="flex flex-col gap-4 justify-center items-center">
+            <div className="flex gap-6">
+              <div className="text-center">
+                <p className="font-display text-2xl font-bold text-emerald-glow">
+                  {profile.stats.publishedGames}
+                </p>
+                <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
+                  Games
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="font-display text-2xl font-bold text-royal-gold">
+                  {profile.stats.totalSales}
+                </p>
+                <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">
+                  Sales
+                </p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="font-display text-2xl font-bold text-royal-gold">{profile.stats.totalSales}</p>
-              <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">Sales</p>
-            </div>
+            <Link href="/settings" className="max-md:hidden">
+              <Button variant="ghost" size="sm">
+                Settings
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -87,12 +131,18 @@ export function ProfileView({ username }: { username: string }) {
         </h2>
         {profile.games.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {profile.games.map(game => <GameCard key={game.id} game={game} />)}
+            {profile.games.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
           </div>
         ) : (
           <div className="v-card py-16 text-center">
-            <p className="font-display text-parchment-mid text-lg mb-2">No published games yet</p>
-            <p className="text-soft-gray text-sm font-ui">This creator hasn&apos;t published any games to the marketplace.</p>
+            <p className="font-display text-parchment-mid text-lg mb-2">
+              No published games yet
+            </p>
+            <p className="text-soft-gray text-sm font-ui">
+              This creator hasn&apos;t published any games to the marketplace.
+            </p>
           </div>
         )}
       </div>
