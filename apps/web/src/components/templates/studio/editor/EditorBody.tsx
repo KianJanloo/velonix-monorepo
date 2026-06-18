@@ -1,13 +1,9 @@
 "use client";
 
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from "react";
-import { toast } from "sonner";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import {
+  toast,
+} from "sonner";
 
 import {
   GroupBar,
@@ -22,7 +18,12 @@ import {
   VoiceNotesPanel,
 } from "../panels";
 
-import { MM_TO_PX, GRID_MM, CompView, groupBoundingBox } from "../core";
+import {
+  MM_TO_PX,
+  GRID_MM,
+  CompView,
+  groupBoundingBox,
+} from "../core";
 
 import { AlignmentGuides } from "./AlignmentGuides";
 import { DrawingLayer } from "./DrawingLayer";
@@ -67,6 +68,10 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
     setLeftOpen,
     rightOpen,
     setRightOpen,
+    leftPanelWidth,
+    setLeftPanelWidth,
+    rightPanelWidth,
+    setRightPanelWidth,
     selectedComp,
     setMultiIds,
     selectionIds,
@@ -117,7 +122,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
   );
   const handleNavigateToPage = useCallback(
     (pageId: string) => {
-      const target = pages.find((p: any) => p.id === pageId);
+      const target = pages.find((p) => p.id === pageId);
       switchPage(pageId);
       toast.success(`Jumped to "${target?.name ?? "page"}"`);
     },
@@ -141,31 +146,46 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
       const e = entries[0];
-      if (e)
-        setViewportSize({ w: e.contentRect.width, h: e.contentRect.height });
+      if (e) setViewportSize({ w: e.contentRect.width, h: e.contentRect.height });
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
   const CULL_THRESHOLD = 150;
+
+  // Drag-to-resize for the left/right side panels.
+  const startPanelResize = useCallback(
+    (side: "left" | "right") => (e: React.PointerEvent) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const startWidth = side === "left" ? leftPanelWidth : rightPanelWidth;
+      const onMove = (ev: PointerEvent) => {
+        const dx = ev.clientX - startX;
+        if (side === "left") setLeftPanelWidth(startWidth + dx);
+        else setRightPanelWidth(startWidth - dx);
+      };
+      const onUp = () => {
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+    },
+    [leftPanelWidth, rightPanelWidth, setLeftPanelWidth, setRightPanelWidth],
+  );
+
   const visibleComponents = useMemo(() => {
-    if (components.length <= CULL_THRESHOLD || viewportSize.w === 0)
-      return components;
+    if (components.length <= CULL_THRESHOLD || viewportSize.w === 0) return components;
     const MARGIN_MM = 150;
     const z = storeZoom * MM_TO_PX;
     const minX = -panX / z - MARGIN_MM;
     const minY = -panY / z - MARGIN_MM;
     const maxX = minX + viewportSize.w / z + MARGIN_MM * 2;
     const maxY = minY + viewportSize.h / z + MARGIN_MM * 2;
-    return components.filter((c: any) => {
+    return components.filter((c) => {
       if (selectionSet.has(c.id)) return true;
-      return (
-        c.x <= maxX &&
-        c.x + c.width >= minX &&
-        c.y <= maxY &&
-        c.y + c.height >= minY
-      );
+      return c.x <= maxX && c.x + c.width >= minX && c.y <= maxY && c.y + c.height >= minY;
     });
   }, [components, viewportSize, panX, panY, storeZoom, selectionSet]);
 
@@ -188,27 +208,34 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
         {/* Left panel */}
 
         <aside
-          className={`${leftOpen ? "w-52" : "w-0"} bg-rich-wood-dark border-r border-warm-wood flex flex-col shrink-0 overflow-hidden transition-[width] duration-200 max-lg:absolute max-lg:z-30 max-lg:h-full`}
+          style={{ width: leftOpen ? leftPanelWidth : 0 }}
+          className="bg-rich-wood-dark border-r border-warm-wood flex flex-col shrink-0 overflow-hidden transition-[width] duration-200 max-lg:absolute max-lg:z-30 max-lg:h-full relative"
         >
-          <div className="flex border-b border-warm-wood shrink-0">
-            {(["layers", "components", "assets", "generator"] as const).map(
-              (tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setLeftPanelTab(tab)}
-                  className={`flex-1 py-2 text-[8px] font-ui font-bold tracking-[0.07em] uppercase border-b-2 -mb-px ${leftPanelTab === tab ? "text-emerald-glow border-emerald-glow" : "text-soft-gray border-transparent hover:text-parchment-light"}`}
-                >
-                  {tab === "layers"
-                    ? "Layers"
-                    : tab === "components"
-                      ? "Parts"
-                      : tab === "assets"
-                        ? "Assets"
-                        : "Gen"}
-                </button>
-              ),
-            )}
+          <div className="flex border-b border-warm-wood shrink-0 overflow-x-auto" data-tutorial="left-tabs">
+            {(["layers", "components", "assets", "generator"] as const).map((tab) => (
+              <button
+                key={tab}
+                data-tutorial={tab === "components" ? "parts-tab" : tab === "layers" ? "layers-tab" : undefined}
+                onClick={() => setLeftPanelTab(tab)}
+                className={`flex-1 py-2 px-1 text-2xs font-ui font-bold tracking-[0.04em] uppercase border-b-2 -mb-px whitespace-nowrap ${leftPanelTab === tab ? "text-emerald-glow border-emerald-glow" : "text-soft-gray border-transparent hover:text-parchment-light"}`}
+              >
+                {tab === "layers"
+                  ? "Layers"
+                  : tab === "components"
+                    ? "Parts"
+                    : tab === "assets"
+                      ? "Assets"
+                      : "Gen"}
+              </button>
+            ))}
           </div>
+
+          {leftOpen && (
+            <div
+              onPointerDown={startPanelResize("left")}
+              className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-emerald-glow/40 active:bg-emerald-glow/60 z-10"
+            />
+          )}
 
           <div className="flex-1 overflow-y-auto min-h-0">
             {leftPanelTab === "layers" && (
@@ -240,7 +267,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 appliedUrl={selectedComp?.image}
                 hasSelection={!!selectedComp}
                 onUploaded={(url) => {
-                  setAssets((a: any) => (a.includes(url) ? a : [url, ...a]));
+                  setAssets((a) => (a.includes(url) ? a : [url, ...a]));
                 }}
                 onApply={(url) => {
                   if (!selectedComp) {
@@ -257,7 +284,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   if (selectedComp) updateComp(selectedComp.id, { image: "" });
                 }}
                 onDeleteAsset={(url) =>
-                  setAssets((a: any) => a.filter((x: any) => x !== url))
+                  setAssets((a) => a.filter((x) => x !== url))
                 }
               />
             )}
@@ -271,7 +298,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                     updateComp(id, { text, name }, false);
                   });
                   toast.success(
-                    `Applied generated text to ${updates.length} component${updates.length !== 1 ? "s" : ""}.`,
+                    `Applied generated text to ${updates.length} component${updates.length !== 1 ? "s" : ""}.`
                   );
                 }}
               />
@@ -284,6 +311,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
         <main
           ref={canvasRef}
           data-canvas
+          data-tutorial="canvas"
           className="flex-1 relative overflow-hidden"
           style={{
             cursor: activeTool === "hand" ? "grab" : toolCursor,
@@ -388,9 +416,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 }
 
                 const isGroupSelected = (gid: string) =>
-                  components.some(
-                    (c: any) => c.groupId === gid && selectionSet.has(c.id),
-                  );
+                  components.some((c) => c.groupId === gid && selectionSet.has(c.id));
 
                 return Array.from(groupMap.entries()).map(([gid, members]) => {
                   const bb = groupBoundingBox(members);
@@ -405,10 +431,9 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
 
                   // Detect nesting depth for colour
                   const depth = members[0]?.parentGroupId ? 1 : 0;
-                  const borderColor =
-                    depth > 0
-                      ? "rgba(245,196,81,0.55)" // gold for nested
-                      : "rgba(124,92,255,0.45)"; // violet for root
+                  const borderColor = depth > 0
+                    ? "rgba(245,196,81,0.55)"   // gold for nested
+                    : "rgba(124,92,255,0.45)";  // violet for root
 
                   return (
                     <div
@@ -448,8 +473,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                             userSelect: "none",
                           }}
                         >
-                          {depth > 0 ? "⤷ Nested group" : "Group"} ·{" "}
-                          {members.length}
+                          {depth > 0 ? "⤷ Nested group" : "Group"} · {members.length}
                         </span>
 
                         {/* Rotate group −15° / +15° buttons */}
@@ -469,10 +493,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                               }}
                               title="Rotate group −15°"
                               onPointerDown={(e) => e.stopPropagation()}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                rotateGroup(gid, -15);
-                              }}
+                              onClick={(e) => { e.stopPropagation(); rotateGroup(gid, -15); }}
                             >
                               ↺ −15°
                             </button>
@@ -490,10 +511,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                               }}
                               title="Rotate group +15°"
                               onPointerDown={(e) => e.stopPropagation()}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                rotateGroup(gid, 15);
-                              }}
+                              onClick={(e) => { e.stopPropagation(); rotateGroup(gid, 15); }}
                             >
                               ↻ +15°
                             </button>
@@ -529,7 +547,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 });
               })()}
 
-              {visibleComponents.map((c: any) => (
+              {visibleComponents.map((c) => (
                 <CompView
                   key={c.id}
                   comp={c}
@@ -541,9 +559,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   onRotateStart={onRotateStart}
                   onContextMenu={openCompMenu}
                   onTextChange={handleTextChange}
-                  onNavigateToPage={
-                    c.linkToPageId ? handleNavigateToPage : undefined
-                  }
+                  onNavigateToPage={c.linkToPageId ? handleNavigateToPage : undefined}
                 />
               ))}
 
@@ -557,12 +573,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 altActive={altActiveRef.current}
                 draggedComp={
                   altActiveRef.current && selectedComp
-                    ? {
-                        x: selectedComp.x,
-                        y: selectedComp.y,
-                        width: selectedComp.width,
-                        height: selectedComp.height,
-                      }
+                    ? { x: selectedComp.x, y: selectedComp.y, width: selectedComp.width, height: selectedComp.height }
                     : null
                 }
               />
@@ -597,18 +608,14 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
           </div>
 
           <div className="absolute bottom-3 right-3 text-2xs text-soft-gray-dark font-ui bg-rich-wood-dark/70 rounded px-2 py-1 pointer-events-none hidden lg:block">
-            drag to box-select · shift+click to add · ⌘G group · ctrl+click link
-            to jump ·{" "}
-            <span className="text-royal-gold/70">
-              alt+drag = spacing guides
-            </span>{" "}
-            · right-click for menu
+            drag to box-select · shift+click to add · ⌘G group · ctrl+click link to jump ·{" "}
+            <span className="text-royal-gold/70">alt+drag = spacing guides</span> · right-click for menu
           </div>
 
           {/* Panel collapse toggles (desktop) */}
 
           <button
-            onClick={() => setLeftOpen((v: any) => !v)}
+            onClick={() => setLeftOpen((v) => !v)}
             className="absolute left-0 top-1/2 -translate-y-1/2 w-3.5 h-10 bg-rich-wood-dark border border-l-0 border-warm-wood rounded-r-lg items-center justify-center text-soft-gray hover:text-parchment-light z-10 hidden lg:flex"
           >
             <svg width="7" height="10" viewBox="0 0 7 10" fill="none">
@@ -623,7 +630,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
           </button>
 
           <button
-            onClick={() => setRightOpen((v: any) => !v)}
+            onClick={() => setRightOpen((v) => !v)}
             className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-10 bg-rich-wood-dark border border-r-0 border-warm-wood rounded-l-lg items-center justify-center text-soft-gray hover:text-parchment-light z-10 hidden lg:flex"
           >
             <svg width="7" height="10" viewBox="0 0 7 10" fill="none">
@@ -641,91 +648,82 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
         {/* Right panel */}
 
         <aside
-          className={`${rightOpen ? "w-60" : "w-0"} bg-rich-wood-dark border-l border-warm-wood flex flex-col shrink-0 overflow-hidden transition-[width] duration-200 max-lg:absolute max-lg:right-0 max-lg:z-30 max-lg:h-full`}
+          style={{ width: rightOpen ? rightPanelWidth : 0 }}
+          className="bg-rich-wood-dark border-l border-warm-wood flex flex-col shrink-0 overflow-hidden transition-[width] duration-200 max-lg:absolute max-lg:right-0 max-lg:z-30 max-lg:h-full relative"
         >
-          <div className="flex border-b border-warm-wood shrink-0">
-            {(["properties", "styling", "notes", "rules", "ai"] as const).map(
-              (tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setRightPanelTab(tab)}
-                  className={`flex-1 py-2 text-2xs font-ui font-bold tracking-[0.07em] uppercase border-b-2 -mb-px ${rightPanelTab === tab ? "text-emerald-glow border-emerald-glow" : "text-soft-gray border-transparent hover:text-parchment-light"}`}
-                >
-                  {tab === "properties"
-                    ? "Props"
-                    : tab === "styling"
-                      ? "Style"
-                      : tab === "notes"
-                        ? "Notes"
-                        : tab === "rules"
-                          ? "Rules"
-                          : "AI"}
-                </button>
-              ),
-            )}
+          {rightOpen && (
+            <div
+              data-tutorial="resize-handle"
+              onPointerDown={startPanelResize("right")}
+              className="absolute top-0 left-0 h-full w-1.5 cursor-col-resize hover:bg-emerald-glow/40 active:bg-emerald-glow/60 z-10"
+            />
+          )}
+
+          <div className="flex border-b border-warm-wood shrink-0 overflow-x-auto" data-tutorial="right-tabs">
+            {(["properties", "styling", "notes", "rules", "ai"] as const).map((tab) => (
+              <button
+                key={tab}
+                data-tutorial={tab === "rules" ? "tab-rules" : undefined}
+                onClick={() => setRightPanelTab(tab)}
+                className={`flex-1 py-2 px-1 text-2xs font-ui font-bold tracking-[0.04em] uppercase border-b-2 -mb-px whitespace-nowrap ${rightPanelTab === tab ? "text-emerald-glow border-emerald-glow" : "text-soft-gray border-transparent hover:text-parchment-light"}`}
+              >
+                {tab === "properties"
+                  ? "Props"
+                  : tab === "styling"
+                    ? "Style"
+                    : tab === "notes"
+                      ? "Notes"
+                      : tab === "rules"
+                        ? "Rules"
+                        : "AI"}
+              </button>
+            ))}
           </div>
 
           <div className="flex-1 overflow-y-auto min-h-0 p-3">
-            {!selectedComp &&
-              rightPanelTab !== "rules" &&
-              rightPanelTab !== "ai" && (
-                <div className="flex flex-col items-center gap-2 py-8 text-center">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="text-soft-gray-dark"
-                  >
-                    <rect
-                      x="3"
-                      y="3"
-                      width="18"
-                      height="18"
-                      rx="2"
-                      stroke="currentColor"
-                      strokeWidth="1.3"
-                    />
+            {!selectedComp && rightPanelTab !== "rules" && rightPanelTab !== "ai" && (
+              <div className="flex flex-col items-center gap-2 py-8 text-center">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="text-soft-gray-dark"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                  />
 
-                    <path
-                      d="M9 12h6M12 9v6"
-                      stroke="currentColor"
-                      strokeWidth="1.3"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <path
+                    d="M9 12h6M12 9v6"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                  />
+                </svg>
 
-                  <p className="text-2xs text-soft-gray-dark font-ui">
-                    Select a component
-                  </p>
-                </div>
-              )}
+                <p className="text-2xs text-soft-gray-dark font-ui">
+                  Select a component
+                </p>
+              </div>
+            )}
 
             {rightPanelTab === "properties" && selectedComp && (
               <div className="space-y-3">
-                {selectedComp.type !== "text" &&
-                  selectedComp.type !== "line" &&
-                  !effectiveReadOnly && (
-                    <button
-                      onClick={() =>
-                        setDesignerTarget({
-                          compId: selectedComp.id,
-                          mode:
-                            selectedComp.type === "die" ||
-                            selectedComp.type === "cube"
-                              ? "dice"
-                              : "face",
-                        })
-                      }
-                      className="w-full px-3 py-2 text-2xs font-ui font-bold rounded-lg bg-royal-gold/15 text-royal-gold border border-royal-gold/30 hover:bg-royal-gold/25"
-                    >
-                      🎨{" "}
-                      {selectedComp.type === "die" ||
-                      selectedComp.type === "cube"
-                        ? "Design dice faces"
-                        : "Design artwork"}
-                    </button>
-                  )}
+                {selectedComp.type !== "text" && selectedComp.type !== "line" && !effectiveReadOnly && (
+                  <button
+                    onClick={() => setDesignerTarget({ compId: selectedComp.id, mode: selectedComp.type === "die" || selectedComp.type === "cube" ? "dice" : "face" })}
+                    className="w-full px-3 py-2 text-2xs font-ui font-bold rounded-lg bg-royal-gold/15 text-royal-gold border border-royal-gold/30 hover:bg-royal-gold/25"
+                  >
+                    🎨 {selectedComp.type === "die" || selectedComp.type === "cube" ? "Design dice faces" : "Design artwork"}
+                  </button>
+                )}
 
                 {(canGroup || canUngroup) && !effectiveReadOnly && (
                   <GroupBar
@@ -735,7 +733,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                     onGroup={groupSelection}
                     onUngroup={ungroupSelection}
                     hasNestedGroups={selectionIds.some(
-                      (id: any) => !!components.find((c: any) => c.id === id)?.groupId,
+                      (id) => !!components.find((c) => c.id === id)?.groupId
                     )}
                   />
                 )}
@@ -766,10 +764,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
               <VoiceNotesPanel
                 notes={voiceNotes[selectedComp.id] ?? []}
                 onChange={(notes) =>
-                  setVoiceNotes((prev: any) => ({
-                    ...prev,
-                    [selectedComp.id]: notes,
-                  }))
+                  setVoiceNotes((prev) => ({ ...prev, [selectedComp.id]: notes }))
                 }
               />
             )}
@@ -779,7 +774,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                 hasEngine={plan.hasTeamCollaboration}
                 rules={rules}
                 onAdd={(rule) =>
-                  setRules((rs: any) => [
+                  setRules((rs) => [
                     ...rs,
 
                     {
@@ -790,12 +785,12 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   ])
                 }
                 onUpdate={(id, patch) =>
-                  setRules((rs: any) =>
-                    rs.map((r: any) => (r.id === id ? { ...r, ...patch } : r)),
+                  setRules((rs) =>
+                    rs.map((r) => (r.id === id ? { ...r, ...patch } : r)),
                   )
                 }
                 onDelete={(id) =>
-                  setRules((rs: any) => rs.filter((r: any) => r.id !== id))
+                  setRules((rs) => rs.filter((r) => r.id !== id))
                 }
                 pages={pages}
               />
@@ -814,30 +809,22 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
         </aside>
       </div>
 
-      {designerTarget &&
-        (() => {
-          const target = components.find((c: any) => c.id === designerTarget.compId);
-          if (!target) return null;
-          return (
-            <ComponentDesignerModal
-              mode={designerTarget.mode}
-              comp={target}
-              design={
-                componentDesigns[designerTarget.compId] ??
-                emptyComponentDesign()
-              }
-              onSaveComponentDesign={(design, patch) => {
-                setComponentDesigns((prev: any) => ({
-                  ...prev,
-                  [designerTarget.compId]: design,
-                }));
-                if (Object.keys(patch).length > 0)
-                  updateComp(designerTarget.compId, patch);
-              }}
-              onClose={() => setDesignerTarget(null)}
-            />
-          );
-        })()}
+      {designerTarget && (() => {
+        const target = components.find((c) => c.id === designerTarget.compId);
+        if (!target) return null;
+        return (
+          <ComponentDesignerModal
+            mode={designerTarget.mode}
+            comp={target}
+            design={componentDesigns[designerTarget.compId] ?? emptyComponentDesign()}
+            onSaveComponentDesign={(design, patch) => {
+              setComponentDesigns((prev) => ({ ...prev, [designerTarget.compId]: design }));
+              if (Object.keys(patch).length > 0) updateComp(designerTarget.compId, patch);
+            }}
+            onClose={() => setDesignerTarget(null)}
+          />
+        );
+      })()}
     </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { apiClient, ApiError } from "@/lib/apiClient";
 import type { CanvasComp, GameRule, GameGuide } from "../core";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -67,40 +68,6 @@ SCENARIOS: ${guide.scenarios?.length ?? 0}
 ${guide.scenarios?.slice(0, 3).map((s) => `• ${s.name} (${s.players}p, ${s.difficulty})`).join("\n") ?? ""}
   `.trim();
 }
-
-const SYSTEM_PROMPT = `You are an expert board game designer and balance consultant. 
-Analyze the provided game design and return ONLY a valid JSON object (no markdown, no explanation) 
-with this exact structure:
-
-{
-  "difficultyScore": <1-10 integer>,
-  "complexityScore": <1-10 integer>,
-  "balanceScore": <1-10 integer>,
-  "replayabilityScore": <1-10 integer>,
-  "playerCountRating": "<string like '2-4 players, best 3'>",
-  "estimatedPlaytime": "<string like '30-60 min'>",
-  "summary": "<2-3 sentence overall assessment>",
-  "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
-  "issues": [
-    {
-      "severity": "<critical|warning|info>",
-      "category": "<Balance|Complexity|Clarity|Replayability|Components|Rules>",
-      "title": "<short title>",
-      "detail": "<1-2 sentence explanation and fix suggestion>"
-    }
-  ],
-  "suggestions": ["<actionable suggestion 1>", "<actionable suggestion 2>", "<suggestion 3>", "<suggestion 4>", "<suggestion 5>"]
-}
-
-Rules:
-- difficultyScore: how hard is the game to play (1=trivial, 10=brutal)
-- complexityScore: how many rules/decisions to track (1=simple, 10=overwhelming)  
-- balanceScore: how fairly balanced between players (1=very unfair, 10=perfectly balanced)
-- replayabilityScore: how much variety/replay value (1=play once, 10=infinite variety)
-- issues: identify 2-5 real design problems; if none, return []
-- suggestions: always return 4-6 concrete, actionable improvements
-- Base all analysis on the actual component count, types, rules provided
-- If the game is very sparse (few components, few rules), say so clearly`;
 
 // ── Score ring ────────────────────────────────────────────────────────────────
 
@@ -217,34 +184,11 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
     try {
       const gameSummary = buildGameSummary(components, rules, guide, pages);
 
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: [
-            {
-              role: "user",
-              content: `Please analyze this board game design and return a JSON balance report:\n\n${gameSummary}`,
-            },
-          ],
-        }),
-      });
-
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error((err as { error?: { message?: string } }).error?.message ?? `API error ${resp.status}`);
-      }
-
-      const data = await resp.json() as { content: { type: string; text: string }[] };
-      const raw = data.content.find((b) => b.type === "text")?.text ?? "";
-
-      // Strip any accidental markdown fences
-      const clean = raw.replace(/```json\n?|```\n?/g, "").trim();
-      const parsed = JSON.parse(clean) as BalanceAnalysis;
+      const parsed = await apiClient.post<BalanceAnalysis>(
+        "/ai/balance",
+        { gameSummary },
+        { signal: ctrl.signal },
+      );
 
       // Validate/clamp scores
       const clamp = (n: unknown) => Math.max(1, Math.min(10, Math.round(Number(n) || 5)));
@@ -259,7 +203,7 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
       if (err instanceof Error && err.name === "AbortError") {
         setStreamText("");
       } else {
-        setError(err instanceof Error ? err.message : "Analysis failed.");
+        setError(err instanceof ApiError ? err.message : "Analysis failed.");
       }
     } finally {
       setLoading(false);

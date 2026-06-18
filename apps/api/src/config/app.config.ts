@@ -81,6 +81,17 @@ export const stripeConfig = registerAs("stripe", () => ({
   },
 }));
 
+// ── AI features (balancer, etc.) ──────────────────────────────────────────
+
+export const aiConfig = registerAs("ai", () => ({
+  provider: process.env["AI_PROVIDER"] ?? "anthropic",
+  apiKey: process.env["AI_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"] ?? "",
+  model: process.env["AI_MODEL"] ?? "claude-sonnet-4-6",
+  maxTokens: parseInt(process.env["AI_MAX_TOKENS"] ?? "1000", 10),
+  /** Computed, not set directly — AI features are off unless a key is configured. */
+  enabled: !!(process.env["AI_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"]),
+}));
+
 // ── Storage (S3-compatible) ───────────────────────────────────────────────────
 
 export const storageConfig = registerAs("storage", () => ({

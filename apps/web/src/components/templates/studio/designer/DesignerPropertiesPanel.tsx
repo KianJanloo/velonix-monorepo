@@ -1,253 +1,158 @@
 "use client";
 
 import type { DesignLayer, FaceDesign } from "./designer-model";
-import { BLEND_MODES } from "./designer-model";
+import { BLEND_MODES, duplicateLayer } from "./designer-model";
+import { SectionLabel, Stepper, SliderField, ColorField, Presets } from "../panels/controls";
 
 interface DesignerPropertiesPanelProps {
   face: FaceDesign;
   selectedId: string | null;
   onChange: (layers: DesignLayer[]) => void;
+  onSelect: (id: string | null) => void;
 }
 
-const row =
-  "flex items-center justify-between gap-2 text-2xs font-ui text-soft-gray";
-const input = "v-input text-2xs w-24";
-
-export function DesignerPropertiesPanel({
-  face,
-  selectedId,
-  onChange,
-}: DesignerPropertiesPanelProps) {
+export function DesignerPropertiesPanel({ face, selectedId, onChange, onSelect }: DesignerPropertiesPanelProps) {
   const layer = face.layers.find((l) => l.id === selectedId);
 
   const patch = (p: Partial<DesignLayer>) =>
-    onChange(
-      face.layers.map((l) => (l.id === selectedId ? { ...l, ...p } : l)),
-    );
+    onChange(face.layers.map((l) => (l.id === selectedId ? { ...l, ...p } : l)));
 
   if (!layer) {
     return (
-      <p className="text-2xs text-soft-gray-dark font-ui text-center py-6">
-        Select a layer to edit its properties.
+      <p className="text-2xs text-soft-gray-dark font-ui text-center py-8 px-2 leading-relaxed">
+        Select a layer on the canvas (or in the layer list) to edit its properties here.
       </p>
     );
   }
 
+  const duplicate = () => {
+    const copy = duplicateLayer(layer);
+    onChange([...face.layers, copy]);
+    onSelect(copy.id);
+  };
+
   return (
-    <div className="space-y-2.5">
-      <label className={row}>
-        Name
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
         <input
-          className={input}
           value={layer.name}
           onChange={(e) => patch({ name: e.target.value })}
+          className="v-input text-xs flex-1"
         />
-      </label>
-
-      <div className="grid grid-cols-2 gap-2">
-        <label className={row}>
-          X
-          <input
-            className={input}
-            type="number"
-            step={1}
-            value={Math.round(layer.x * 100)}
-            onChange={(e) => patch({ x: Number(e.target.value) / 100 })}
-          />
-        </label>
-        <label className={row}>
-          Y
-          <input
-            className={input}
-            type="number"
-            step={1}
-            value={Math.round(layer.y * 100)}
-            onChange={(e) => patch({ y: Number(e.target.value) / 100 })}
-          />
-        </label>
-        <label className={row}>
-          W
-          <input
-            className={input}
-            type="number"
-            step={1}
-            value={Math.round(layer.w * 100)}
-            onChange={(e) => patch({ w: Number(e.target.value) / 100 })}
-          />
-        </label>
-        <label className={row}>
-          H
-          <input
-            className={input}
-            type="number"
-            step={1}
-            value={Math.round(layer.h * 100)}
-            onChange={(e) => patch({ h: Number(e.target.value) / 100 })}
-          />
-        </label>
-        <label className={row}>
-          Rotate
-          <input
-            className={input}
-            type="number"
-            value={layer.rotation}
-            onChange={(e) => patch({ rotation: Number(e.target.value) })}
-          />
-        </label>
-        <label className={row}>
-          Opacity
-          <input
-            className={input}
-            type="number"
-            min={0}
-            max={100}
-            value={layer.opacity}
-            onChange={(e) => patch({ opacity: Number(e.target.value) })}
-          />
-        </label>
+        <button onClick={duplicate} title="Duplicate layer" className="v-tool-btn shrink-0">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+            <rect x="4.5" y="4.5" width="8" height="8" rx="1.2" stroke="currentColor" strokeWidth="1.1" />
+            <path d="M2 9.5V2.5A1 1 0 013 1.5h7" stroke="currentColor" strokeWidth="1.1" />
+          </svg>
+        </button>
       </div>
 
-      <label className={row}>
-        Blend mode
-        <select
-          className={input}
-          value={layer.blend}
-          onChange={(e) =>
-            patch({ blend: e.target.value as DesignLayer["blend"] })
-          }
-        >
-          {BLEND_MODES.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div>
+        <SectionLabel>Transform</SectionLabel>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
+          <Stepper label="X %" value={layer.x * 100} onChange={(v) => patch({ x: v / 100 })} min={-50} max={150} />
+          <Stepper label="Y %" value={layer.y * 100} onChange={(v) => patch({ y: v / 100 })} min={-50} max={150} />
+          <Stepper label="W %" value={layer.w * 100} onChange={(v) => patch({ w: Math.max(1, v) / 100 })} min={1} max={200} />
+          <Stepper label="H %" value={layer.h * 100} onChange={(v) => patch({ h: Math.max(1, v) / 100 })} min={1} max={200} />
+          <Stepper label="Rotation°" value={layer.rotation} onChange={(v) => patch({ rotation: v })} min={-360} max={360} />
+        </div>
+      </div>
+
+      <div>
+        <SectionLabel>Appearance</SectionLabel>
+        <div className="space-y-2.5">
+          <SliderField label="Opacity" value={layer.opacity} onChange={(v) => patch({ opacity: v })} min={0} max={100} unit="%" />
+          <label className="block">
+            <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Blend mode</span>
+            <select
+              className="v-input text-xs w-full"
+              value={layer.blend}
+              onChange={(e) => patch({ blend: e.target.value as DesignLayer["blend"] })}
+            >
+              {BLEND_MODES.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </label>
+        </div>
+      </div>
 
       {layer.type === "text" && (
-        <>
-          <label className={row}>
-            Text
-            <input
-              className={input}
+        <div>
+          <SectionLabel>Text</SectionLabel>
+          <div className="space-y-2.5">
+            <textarea
               value={layer.text ?? ""}
               onChange={(e) => patch({ text: e.target.value })}
+              rows={2}
+              className="v-input text-xs w-full resize-none"
+              placeholder="Tap to type… (or double-click the layer on canvas)"
             />
-          </label>
-          <label className={row}>
-            Color
-            <input
-              className={input}
-              type="color"
-              value={layer.color ?? "#000000"}
-              onChange={(e) => patch({ color: e.target.value })}
-            />
-          </label>
-          <label className={row}>
-            Size
-            <input
-              className={input}
-              type="number"
-              value={layer.fontSize ?? 24}
-              onChange={(e) => patch({ fontSize: Number(e.target.value) })}
-            />
-          </label>
-          <label className={row}>
-            Align
-            <select
-              className={input}
-              value={layer.align}
-              onChange={(e) =>
-                patch({ align: (e.target.value as DesignLayer["align"])! })
-              }
-            >
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
-            </select>
-          </label>
-          <label className={row}>
-            Weight
-            <select
-              className={input}
-              value={layer.weight}
-              onChange={(e) =>
-                patch({ weight: (e.target.value as DesignLayer["weight"])! })
-              }
-            >
-              <option value="normal">Normal</option>
-              <option value="bold">Bold</option>
-            </select>
-          </label>
-        </>
+            <ColorField label="Color" value={layer.color ?? "#1a1410"} onChange={(v) => patch({ color: v })} />
+            <Stepper label="Size (px)" value={layer.fontSize ?? 24} onChange={(v) => patch({ fontSize: v })} min={6} max={200} />
+            <div>
+              <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Font</span>
+              <Presets
+                options={[{ label: "Serif", value: "serif" }, { label: "Sans", value: "sans" }, { label: "Mono", value: "mono" }]}
+                isActive={(v) => (layer.fontFamily ?? "serif") === v}
+                onPick={(v) => patch({ fontFamily: (v as DesignLayer["fontFamily"])! })}
+              />
+            </div>
+            <div>
+              <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Align</span>
+              <Presets
+                options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]}
+                isActive={(v) => (layer.align ?? "center") === v}
+                onPick={(v) => patch({ align: (v as DesignLayer["align"])! })}
+              />
+            </div>
+            <div>
+              <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Weight</span>
+              <Presets
+                options={[{ label: "Normal", value: "normal" }, { label: "Bold", value: "bold" }]}
+                isActive={(v) => (layer.weight ?? "normal") === v}
+                onPick={(v) => patch({ weight: (v as DesignLayer["weight"])! })}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {(layer.type === "rect" || layer.type === "ellipse") && (
-        <>
-          <label className={row}>
-            Fill
-            <input
-              className={input}
-              type="color"
-              value={layer.fill ?? "#888888"}
-              onChange={(e) => patch({ fill: e.target.value })}
-            />
-          </label>
-          <label className={row}>
-            Stroke
-            <input
-              className={input}
-              type="color"
-              value={layer.stroke || "#000000"}
-              onChange={(e) => patch({ stroke: e.target.value })}
-            />
-          </label>
-          <label className={row}>
-            Stroke width
-            <input
-              className={input}
-              type="number"
-              value={layer.strokeWidth ?? 0}
-              onChange={(e) => patch({ strokeWidth: Number(e.target.value) })}
-            />
-          </label>
-          {layer.type === "rect" && (
-            <label className={row}>
-              Corner radius
-              <input
-                className={input}
-                type="number"
-                value={layer.cornerRadius ?? 0}
-                onChange={(e) =>
-                  patch({ cornerRadius: Number(e.target.value) })
-                }
-              />
-            </label>
-          )}
-        </>
+        <div>
+          <SectionLabel>Fill & stroke</SectionLabel>
+          <div className="space-y-2.5">
+            <ColorField label="Fill" value={layer.fill ?? "#7c5cff"} onChange={(v) => patch({ fill: v })} allowTransparent />
+            <ColorField label="Stroke" value={layer.stroke || "transparent"} onChange={(v) => patch({ stroke: v === "transparent" ? "" : v })} allowTransparent />
+            <Stepper label="Stroke width" value={layer.strokeWidth ?? 0} onChange={(v) => patch({ strokeWidth: v })} min={0} max={40} />
+            {layer.type === "rect" && (
+              <Stepper label="Corner radius" value={layer.cornerRadius ?? 0} onChange={(v) => patch({ cornerRadius: v })} min={0} max={200} />
+            )}
+          </div>
+        </div>
       )}
 
       {layer.type === "line" && (
-        <>
-          <label className={row}>
-            Color
-            <input
-              className={input}
-              type="color"
-              value={layer.color ?? "#000000"}
-              onChange={(e) => patch({ color: e.target.value })}
-            />
-          </label>
-          <label className={row}>
-            Thickness
-            <input
-              className={input}
-              type="number"
-              value={layer.strokeWidth ?? 2}
-              onChange={(e) => patch({ strokeWidth: Number(e.target.value) })}
-            />
-          </label>
-        </>
+        <div>
+          <SectionLabel>Line</SectionLabel>
+          <div className="space-y-2.5">
+            <ColorField label="Color" value={layer.color ?? "#f5c451"} onChange={(v) => patch({ color: v })} />
+            <Stepper label="Thickness" value={layer.strokeWidth ?? 3} onChange={(v) => patch({ strokeWidth: v })} min={1} max={40} />
+            <div>
+              <span className="text-2xs text-soft-gray-dark font-ui block mb-1">Direction</span>
+              <Presets
+                options={[
+                  { label: "—", value: "horizontal" }, { label: "|", value: "vertical" },
+                  { label: "\\", value: "diagonal-down" }, { label: "/", value: "diagonal-up" },
+                ]}
+                isActive={(v) => (layer.direction ?? "horizontal") === v}
+                onPick={(v) => patch({ direction: (v as DesignLayer["direction"])! })}
+              />
+            </div>
+            <label className="flex items-center gap-2 text-2xs font-ui text-soft-gray">
+              <input type="checkbox" checked={!!layer.dashed} onChange={(e) => patch({ dashed: e.target.checked })} />
+              Dashed
+            </label>
+          </div>
+        </div>
       )}
     </div>
   );

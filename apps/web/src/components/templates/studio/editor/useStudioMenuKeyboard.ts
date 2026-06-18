@@ -4,11 +4,20 @@ import { useCallback, useEffect } from "react";
 
 import type { MouseEvent as ReactMouseEvent } from "react";
 
-import { toast } from "sonner";
+import {
+  toast,
+} from "sonner";
 
-import { MM_TO_PX, GRID_MM, TOOLS } from "../core";
+import {
+  MM_TO_PX,
+  GRID_MM,
+  TOOLS,
+} from "../core";
 
-import type { CanvasComp, MenuItem } from "../core";
+import type {
+  CanvasComp,
+  MenuItem,
+} from "../core";
 
 import type { StudioState } from "./useStudioEditorState";
 import type { StudioActions } from "./useStudioActions";
@@ -390,12 +399,14 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
 
         setMultiIds([]);
 
+        draw?.setDrawTool(null);
+
         return;
       }
 
-      if (e.key === "v" || e.key === "V") setActiveTool("select");
+      if (e.key === "v" || e.key === "V") { setActiveTool("select"); draw?.setDrawTool(null); }
 
-      if (e.key === "h" || e.key === "H") setActiveTool("hand");
+      if (e.key === "h" || e.key === "H") { setActiveTool("hand"); draw?.setDrawTool(null); }
 
       if (e.key === "t" || e.key === "T") setActiveTool("text");
 
@@ -478,17 +489,7 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
       componentDesigns,
       boxDesign,
     } as unknown as Record<string, unknown>);
-  }, [
-    isNew,
-    saveNow,
-    pages,
-    rules,
-    assets,
-    guide,
-    voiceNotes,
-    componentDesigns,
-    boxDesign,
-  ]);
+  }, [isNew, saveNow, pages, rules, assets, guide, voiceNotes, componentDesigns, boxDesign]);
 
   async function handlePublish() {
     if (isNew) {
@@ -536,6 +537,7 @@ export function useStudioMenuKeyboard(S: StudioState, A: StudioActions) {
     TOOLS.find((t) => t.id === activeTool)?.cursor ?? "default";
 
   const reversed = [...components].reverse();
+
 
   return {
     openCompMenu,

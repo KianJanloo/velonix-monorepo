@@ -34,7 +34,7 @@ interface ComponentDesignerModalProps {
   onClose: () => void;
 }
 
-const MAX_CANVAS_DIM = 480;
+const MAX_CANVAS_DIM = 560;
 
 export function ComponentDesignerModal({
   mode,
@@ -144,6 +144,14 @@ export function ComponentDesignerModal({
               : `Design artwork — ${comp?.name}`}
         </h2>
         <div className="flex items-center gap-2">
+          {mode === "face" && (
+            <button
+              onClick={() => setShow3d((v) => !v)}
+              className="px-3 py-1.5 text-2xs font-ui rounded bg-warm-wood text-parchment-light hover:bg-warm-wood/70"
+            >
+              {show3d ? "Back to editing" : "Flip preview"}
+            </button>
+          )}
           {(mode === "dice" || mode === "box") && (
             <button
               onClick={() => setShow3d((v) => !v)}
@@ -186,7 +194,10 @@ export function ComponentDesignerModal({
 
       {/* Body */}
       <div className="flex-1 flex overflow-hidden">
-        <aside className="w-56 border-r border-warm-wood p-3 overflow-y-auto shrink-0">
+        <aside className="w-64 border-r border-warm-wood p-3 overflow-y-auto shrink-0">
+          <p className="text-2xs font-ui font-bold text-soft-gray uppercase tracking-wider mb-2">
+            Layers
+          </p>
           <DesignerLayersPanel
             face={activeFace}
             selectedId={selectedLayerId}
@@ -196,7 +207,9 @@ export function ComponentDesignerModal({
         </aside>
 
         <main className="flex-1 flex items-center justify-center p-6 overflow-auto">
-          {show3d && (mode === "dice" || mode === "box") ? (
+          {show3d && mode === "face" ? (
+            <FlipPreview faces={faces} canvasW={canvasW} canvasH={canvasH} />
+          ) : show3d && (mode === "dice" || mode === "box") ? (
             <Preview3D
               mode={mode}
               comp={comp!}
@@ -217,11 +230,15 @@ export function ComponentDesignerModal({
           )}
         </main>
 
-        <aside className="w-60 border-l border-warm-wood p-3 overflow-y-auto shrink-0">
+        <aside className="w-72 border-l border-warm-wood p-3 overflow-y-auto shrink-0">
+          <p className="text-2xs font-ui font-bold text-soft-gray uppercase tracking-wider mb-2">
+            Properties
+          </p>
           <DesignerPropertiesPanel
             face={activeFace}
             selectedId={selectedLayerId}
             onChange={setActiveLayers}
+            onSelect={setSelectedLayerId}
           />
         </aside>
       </div>
@@ -266,19 +283,25 @@ function Preview3D({
 
   if (!supportsCube) {
     return (
-      <div className="grid grid-cols-3 gap-3">
-        {Object.keys(faces).map((k) => (
-          <div key={k} className="text-center">
-            <FaceThumb face={faces[k]!} w={canvasW / 3} h={canvasH / 3} />
-            <p className="text-2xs text-soft-gray-dark font-ui mt-1">
-              Face {k}
-            </p>
-          </div>
-        ))}
-        <p className="col-span-3 text-2xs text-soft-gray-dark font-ui text-center mt-2">
-          3D per-face texturing is only available for the standard 6-sided die
-          and the game box — this die type shows a flat reference grid instead.
+      <div className="max-w-md">
+        <p className="text-xs font-ui font-bold text-parchment-light mb-1">
+          d{comp?.dieFaces ?? "?"} — flat face reference
         </p>
+        <p className="text-2xs text-soft-gray-dark font-ui mb-3">
+          True 3D per-face texturing is only available for the standard d6 die
+          and the game box (both are simple cubes). For this die type, here's
+          every face you've designed so far.
+        </p>
+        <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-rich-wood-dark/60 border border-warm-wood">
+          {Object.keys(faces).map((k) => (
+            <div key={k} className="text-center">
+              <FaceThumb face={faces[k]!} w={canvasW / 3.4} h={canvasH / 3.4} />
+              <p className="text-2xs text-soft-gray-dark font-ui mt-1">
+                Face {k}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -293,6 +316,98 @@ function Preview3D({
       faceUrls={urls as [string, string, string, string, string, string]}
       size={mode === "box" ? [1.4, 1, 0.4] : [1, 1, 1]}
     />
+  );
+}
+
+/** A real flip-card preview: click to flip and see the back, like turning
+ * a physical card or board over in your hands. */
+function FlipPreview({
+  faces,
+  canvasW,
+  canvasH,
+}: {
+  faces: Record<string, FaceDesign>;
+  canvasW: number;
+  canvasH: number;
+}) {
+  const [flipped, setFlipped] = useState(false);
+  const [frontUrl, setFrontUrl] = useState<string | null>(null);
+  const [backUrl, setBackUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    void rasterizeFace(
+      faces["front"] ?? { layers: [] },
+      Math.round(canvasW),
+      Math.round(canvasH),
+    ).then(setFrontUrl);
+    void rasterizeFace(
+      faces["back"] ?? { layers: [] },
+      Math.round(canvasW),
+      Math.round(canvasH),
+    ).then(setBackUrl);
+  }, [faces, canvasW, canvasH]);
+
+  return (
+    <div
+      className="flex flex-col items-center gap-3"
+      style={{ perspective: 1400 }}
+    >
+      <div
+        onClick={() => setFlipped((v) => !v)}
+        style={{
+          width: canvasW,
+          height: canvasH,
+          position: "relative",
+          cursor: "pointer",
+          transformStyle: "preserve-3d",
+          transition: "transform 0.6s cubic-bezier(0.4,0.2,0.2,1)",
+          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backfaceVisibility: "hidden",
+            background: "#1a1a1a",
+            border: "1px solid rgba(245,196,81,0.3)",
+            borderRadius: 8,
+            overflow: "hidden",
+          }}
+        >
+          {frontUrl && (
+            <img
+              src={frontUrl}
+              alt="Front"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          )}
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backfaceVisibility: "hidden",
+            background: "#1a1a1a",
+            border: "1px solid rgba(245,196,81,0.3)",
+            borderRadius: 8,
+            overflow: "hidden",
+            transform: "rotateY(180deg)",
+          }}
+        >
+          {backUrl && (
+            <img
+              src={backUrl}
+              alt="Back"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          )}
+        </div>
+      </div>
+      <p className="text-2xs font-ui text-soft-gray-dark">
+        Click the card to flip it over
+      </p>
+    </div>
   );
 }
 

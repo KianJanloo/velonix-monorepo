@@ -2,21 +2,42 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+} from "next/navigation";
 
-import { useStudioStore, selectZoomPercent } from "@/stores/studioStore";
+import {
+  useStudioStore,
+  selectZoomPercent,
+} from "@/stores/studioStore";
 
-import { useGame, usePublishGame } from "@/hooks/useGames";
+import {
+  useGame,
+  usePublishGame,
+} from "@/hooks/useGames";
 
-import { useMyMembership } from "@/hooks/useCollaborators";
+import {
+  useMyMembership,
+} from "@/hooks/useCollaborators";
 
-import { useStudio } from "@/hooks/useStudio";
+import {
+  useStudio,
+} from "@/hooks/useStudio";
 
-import { usePlan } from "@/hooks/usePlan";
+import {
+  usePlan,
+} from "@/hooks/usePlan";
 
-import { STUDIO_TUTORIAL_KEY } from "@/components/templates/StudioTutorial";
+import {
+  STUDIO_TUTORIAL_KEY,
+} from "@/components/templates/StudioTutorial";
 
-import { safeNum, EMPTY_GUIDE, INITIAL, normalizeComponents } from "../core";
+import {
+  safeNum,
+  EMPTY_GUIDE,
+  INITIAL,
+  normalizeComponents,
+} from "../core";
 
 import type {
   CanvasComp,
@@ -166,17 +187,11 @@ export function useStudioEditorState(gameId: string) {
   // Voice-note annotations, per-component artwork designs, and the game-box
   // design all ride the same studioData JSON blob + autosave/collab pipeline
   // as rules/assets/guide above.
-  const [voiceNotes, setVoiceNotes] = useState<
-    Record<string, import("../core").VoiceNoteEntry[]>
-  >({});
+  const [voiceNotes, setVoiceNotes] = useState<Record<string, import("../core").VoiceNoteEntry[]>>({});
 
-  const [componentDesigns, setComponentDesigns] = useState<
-    Record<string, import("../designer/designer-model").ComponentDesignData>
-  >({});
+  const [componentDesigns, setComponentDesigns] = useState<Record<string, import("../designer/designer-model").ComponentDesignData>>({});
 
-  const [boxDesign, setBoxDesign] = useState<
-    import("../designer/designer-model").BoxDesignData | null
-  >(null);
+  const [boxDesign, setBoxDesign] = useState<import("../designer/designer-model").BoxDesignData | null>(null);
 
   const [guideOpen, setGuideOpen] = useState(false);
 
@@ -215,6 +230,30 @@ export function useStudioEditorState(gameId: string) {
   const [leftOpen, setLeftOpen] = useState(true);
 
   const [rightOpen, setRightOpen] = useState(true);
+
+  // Panel widths are user-resizable (drag handle in EditorBody) since more
+  // tabs were added over time than the old fixed widths could comfortably
+  // fit. Persisted per-browser so the layout sticks between sessions.
+  const [leftPanelWidth, setLeftPanelWidthState] = useState(208);
+  const [rightPanelWidth, setRightPanelWidthState] = useState(260);
+  useEffect(() => {
+    try {
+      const l = localStorage.getItem("velonix:studio:leftPanelWidth");
+      const r = localStorage.getItem("velonix:studio:rightPanelWidth");
+      if (l) setLeftPanelWidthState(Number(l));
+      if (r) setRightPanelWidthState(Number(r));
+    } catch { /* ignore (SSR / private browsing) */ }
+  }, []);
+  const setLeftPanelWidth = useCallback((w: number) => {
+    const clamped = Math.max(160, Math.min(420, w));
+    setLeftPanelWidthState(clamped);
+    try { localStorage.setItem("velonix:studio:leftPanelWidth", String(clamped)); } catch { /* ignore */ }
+  }, []);
+  const setRightPanelWidth = useCallback((w: number) => {
+    const clamped = Math.max(200, Math.min(480, w));
+    setRightPanelWidthState(clamped);
+    try { localStorage.setItem("velonix:studio:rightPanelWidth", String(clamped)); } catch { /* ignore */ }
+  }, []);
 
   // Editing requires a desktop-sized screen
 
@@ -285,10 +324,7 @@ export function useStudioEditorState(gameId: string) {
   // and whether the game-box designer is open. Lives here so both the
   // toolbar (entry point for the box) and the canvas body (entry point for
   // a selected component) can reach it.
-  const [designerTarget, setDesignerTarget] = useState<{
-    compId: string;
-    mode: "face" | "dice";
-  } | null>(null);
+  const [designerTarget, setDesignerTarget] = useState<{ compId: string; mode: "face" | "dice" } | null>(null);
 
   const [boxDesignerOpen, setBoxDesignerOpen] = useState(false);
 
@@ -315,9 +351,7 @@ export function useStudioEditorState(gameId: string) {
   const collabBroadcastRef = useRef<((snapshot: unknown) => void) | null>(null);
 
   /** Separate broadcast ref for drawing events (studio:draw / studio:draw-clear). */
-  const drawBroadcastRef = useRef<
-    ((event: string, payload: unknown) => void) | null
-  >(null);
+  const drawBroadcastRef = useRef<((event: string, payload: unknown) => void) | null>(null);
 
   const draw = useDrawingTool(drawBroadcastRef.current);
 
@@ -395,10 +429,7 @@ export function useStudioEditorState(gameId: string) {
 
       voiceNotes?: Record<string, import("../core").VoiceNoteEntry[]>;
 
-      componentDesigns?: Record<
-        string,
-        import("../designer/designer-model").ComponentDesignData
-      >;
+      componentDesigns?: Record<string, import("../designer/designer-model").ComponentDesignData>;
 
       boxDesign?: import("../designer/designer-model").BoxDesignData;
     } | null;
@@ -460,10 +491,7 @@ export function useStudioEditorState(gameId: string) {
     if (data?.boxDesign) setBoxDesign(data.boxDesign);
 
     // Restore drawing strokes saved in the previous session
-    if (
-      Array.isArray(data?.drawingStrokes) &&
-      data!.drawingStrokes!.length > 0
-    ) {
+    if (Array.isArray(data?.drawingStrokes) && data!.drawingStrokes!.length > 0) {
       data!.drawingStrokes!.forEach((s) => draw.applyRemoteStroke(s));
     }
   }, [game, firstPageId]);
@@ -513,17 +541,9 @@ export function useStudioEditorState(gameId: string) {
         });
       }, 250);
     }
-  }, [
-    pages,
-    rules,
-    assets,
-    guide,
-    draw.strokes,
-    voiceNotes,
-    componentDesigns,
-    boxDesign,
-    markDirty,
-  ]);
+  }, [pages, rules, assets, guide, draw.strokes, voiceNotes, componentDesigns, boxDesign, markDirty]);
+
+
 
   const dragRef = useRef<{
     kind: "move" | "pan" | "resize" | "rotate" | "marquee";
@@ -555,124 +575,30 @@ export function useStudioEditorState(gameId: string) {
     multi?: { id: string; ox: number; oy: number }[];
   } | null>(null);
 
+
   return {
-    gameId,
-    dragRef,
-    isNew,
-    router,
-    mode,
-    setMode,
-    leftPanelTab,
-    setLeftPanelTab,
-    rightPanelTab,
-    setRightPanelTab,
-    showGrid,
-    toggleGrid,
-    snapToGrid,
-    toggleSnap,
-    isDirty,
-    isSaving,
-    zoomIn,
-    zoomOut,
-    resetZoom,
-    markDirty,
-    zoomPercent,
-    storeZoom,
-    saveNow,
-    plan,
-    activeTool,
-    setActiveTool,
-    firstPageId,
-    pages,
-    setPages,
-    activePageId,
-    setActivePageId,
-    activePageIdRef,
-    activePage,
-    components,
-    canvasW,
-    canvasH,
-    canvasSizeRef,
-    componentsRef,
-    marquee,
-    setMarquee,
-    setComponentsRaw,
-    rules,
-    setRules,
-    assets,
-    setAssets,
-    guide,
-    setGuide,
-    guideOpen,
-    voiceNotes,
-    setVoiceNotes,
-    componentDesigns,
-    setComponentDesigns,
-    boxDesign,
-    setBoxDesign,
-    setGuideOpen,
-    renamingId,
-    setRenamingId,
-    renamingPageId,
-    setRenamingPageId,
-    pastRef,
-    futureRef,
-    forceRerender,
-    commit,
-    selectedId,
-    setSelectedId,
-    panX,
-    setPanX,
-    panY,
-    setPanY,
-    leftOpen,
-    setLeftOpen,
-    rightOpen,
-    setRightOpen,
-    isMobile,
-    setIsMobile,
-    closeTutorial,
-    clipboardRef,
-    game,
-    publish,
-    membership,
-    myRole,
-    readOnly,
-    collabEnabled,
-    shareOpen,
-    setShareOpen,
-    tutorialOpen,
-    setTutorialOpen,
-    marketOpen,
-    setMarketOpen,
-    moreOpen,
-    designerTarget,
-    setDesignerTarget,
-    boxDesignerOpen,
-    setBoxDesignerOpen,
-    setMoreOpen,
-    menu,
-    setMenu,
-    applyingRemoteRef,
-    pendingRemoteRef,
-    broadcastTimerRef,
-    collabBroadcastRef,
-    readOnlyRef,
-    selectedComp,
-    inPreview,
-    isPlaytest,
-    multiIds,
-    setMultiIds,
-    draw,
-    drawBroadcastRef,
-    selectionIds,
-    selectionRef,
-    selectedGroupIds,
-    canGroup,
-    canUngroup,
-    hydratedRef,
-    suppressDirtyRef,
-    mountedRef,
+    gameId, dragRef, isNew, router, mode, setMode,
+    leftPanelTab, setLeftPanelTab, rightPanelTab, setRightPanelTab, showGrid, toggleGrid,
+    snapToGrid, toggleSnap, isDirty, isSaving, zoomIn, zoomOut,
+    resetZoom, markDirty, zoomPercent, storeZoom, saveNow, plan,
+    activeTool, setActiveTool, firstPageId, pages, setPages, activePageId,
+    setActivePageId, activePageIdRef, activePage, components, canvasW, canvasH,
+    canvasSizeRef, componentsRef, marquee, setMarquee, setComponentsRaw, rules,
+    setRules, assets, setAssets, guide, setGuide, guideOpen,
+    voiceNotes, setVoiceNotes, componentDesigns, setComponentDesigns, boxDesign, setBoxDesign,
+    setGuideOpen, renamingId, setRenamingId, renamingPageId, setRenamingPageId, pastRef,
+    futureRef, forceRerender, commit, selectedId, setSelectedId, panX,
+    setPanX, panY, setPanY, leftOpen, setLeftOpen, rightOpen,
+    leftPanelWidth, setLeftPanelWidth, rightPanelWidth, setRightPanelWidth,
+    setRightOpen, isMobile, setIsMobile, closeTutorial, clipboardRef, game,
+    publish, membership, myRole, readOnly, collabEnabled, shareOpen,
+    setShareOpen, tutorialOpen, setTutorialOpen, marketOpen, setMarketOpen, moreOpen,
+    designerTarget, setDesignerTarget, boxDesignerOpen, setBoxDesignerOpen,
+    setMoreOpen, menu, setMenu, applyingRemoteRef, pendingRemoteRef, broadcastTimerRef,
+    collabBroadcastRef, readOnlyRef, selectedComp, inPreview, isPlaytest, multiIds, setMultiIds,
+    draw, drawBroadcastRef,
+    selectionIds, selectionRef, selectedGroupIds, canGroup, canUngroup, hydratedRef,
+    suppressDirtyRef, mountedRef,
   };
 }
 

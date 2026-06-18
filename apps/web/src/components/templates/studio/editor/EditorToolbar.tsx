@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 
-import { PresenceAvatar } from "../dialogs";
+import {
+  PresenceAvatar,
+} from "../dialogs";
 
 import { ComponentDesignerModal } from "../designer/ComponentDesignerModal";
 import { emptyBoxDesign } from "../designer/designer-model";
@@ -74,9 +76,45 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
           {game?.title ?? (isNew ? "New Game" : gameId.slice(0, 8))}
         </span>
 
+        {/* ── Select / Pan ── */}
+        <button
+          data-tutorial="tool-select"
+          title="Select & move (V)"
+          onClick={() => { ed.setActiveTool("select"); ed.draw?.setDrawTool(null); }}
+          className={`v-tool-btn shrink-0 ${ed.activeTool === "select" && !ed.draw?.activeTool ? "active" : ""}`}
+        >
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M2 1.5l8.5 5-3.3.7 2 3.3-1.4.8-2-3.3-2.3 2.4V1.5z" fill="currentColor" />
+          </svg>
+        </button>
+        <button
+          data-tutorial="tool-hand"
+          title="Pan / hand tool (H)"
+          onClick={() => { ed.setActiveTool("hand"); ed.draw?.setDrawTool(null); }}
+          className={`v-tool-btn shrink-0 ${ed.activeTool === "hand" ? "active" : ""}`}
+        >
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M3.5 6.5V2.8a1 1 0 012 0V6M5.5 6V2a1 1 0 012 0v4M7.5 6.2V2.6a1 1 0 012 0V7M9.5 7V5.3a1 1 0 012 0V8c0 2.5-1.7 4-3.8 4H6.2C4.4 12 3 10.7 2.3 9.2L1.2 6.8c-.3-.6 0-1.2.6-1.4.5-.2 1 0 1.3.5l1 1.6"
+              stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+
+        <div className="w-px h-5 bg-warm-wood shrink-0" />
+
         {/* ── Drawing tools ── */}
         {ed.draw && (
           <>
+            {ed.draw.activeTool && (
+              <button
+                title="Stop drawing — back to select (V)"
+                onClick={() => { ed.draw!.setDrawTool(null); ed.setActiveTool("select"); }}
+                className="v-tool-btn shrink-0 text-crimson-flame"
+              >
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M2.5 2.5l8 8M10.5 2.5l-8 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
             {(
               [
                 {
@@ -84,18 +122,9 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
                   label: "Pencil (draw freehand)",
                   icon: (
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <path
-                        d="M9.5 1.5l2 2-7 7-2.5.5.5-2.5 7-7z"
-                        stroke="currentColor"
-                        strokeWidth="1.2"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M8 3l2 2"
-                        stroke="currentColor"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                      />
+                      <path d="M9.5 1.5l2 2-7 7-2.5.5.5-2.5 7-7z"
+                        stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                      <path d="M8 3l2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
                     </svg>
                   ),
                 },
@@ -104,23 +133,9 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
                   label: "Highlighter",
                   icon: (
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <rect
-                        x="2"
-                        y="4"
-                        width="9"
-                        height="5"
-                        rx="2"
-                        stroke="currentColor"
-                        strokeWidth="1.2"
-                        fill="currentColor"
-                        fillOpacity="0.2"
-                      />
-                      <path
-                        d="M6.5 9v2"
-                        stroke="currentColor"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                      />
+                      <rect x="2" y="4" width="9" height="5" rx="2"
+                        stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity="0.2" />
+                      <path d="M6.5 9v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
                     </svg>
                   ),
                 },
@@ -129,13 +144,8 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
                   label: "Arrow",
                   icon: (
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <path
-                        d="M2 11L10 3M7 3h3v3"
-                        stroke="currentColor"
-                        strokeWidth="1.3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                      <path d="M2 11L10 3M7 3h3v3"
+                        stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   ),
                 },
@@ -144,15 +154,8 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
                   label: "Rectangle",
                   icon: (
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <rect
-                        x="2"
-                        y="2"
-                        width="9"
-                        height="9"
-                        rx="1.5"
-                        stroke="currentColor"
-                        strokeWidth="1.3"
-                      />
+                      <rect x="2" y="2" width="9" height="9" rx="1.5"
+                        stroke="currentColor" strokeWidth="1.3" />
                     </svg>
                   ),
                 },
@@ -161,13 +164,8 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
                   label: "Eraser",
                   icon: (
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <path
-                        d="M2 10l2.5-6.5 4.5 4.5L3.5 12H11"
-                        stroke="currentColor"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                      <path d="M2 10l2.5-6.5 4.5 4.5L3.5 12H11"
+                        stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   ),
                 },
@@ -175,6 +173,7 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
             ).map((t) => (
               <button
                 key={t.id}
+                data-tutorial={t.id === "pencil" ? "tool-pencil" : undefined}
                 title={t.label}
                 onClick={() => {
                   if (ed.draw!.activeTool === t.id) {
@@ -212,19 +211,10 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
               className="v-tool-btn shrink-0"
             >
               <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                <path
-                  d="M2 6.5A3.5 3.5 0 018 3h1.5"
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M2 3.5L2 6.5 5 6.5"
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M2 6.5A3.5 3.5 0 018 3h1.5" stroke="currentColor"
+                  strokeWidth="1.2" strokeLinecap="round" />
+                <path d="M2 3.5L2 6.5 5 6.5" stroke="currentColor"
+                  strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
@@ -235,12 +225,8 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
               className="v-tool-btn shrink-0 text-crimson-flame/60 hover:text-crimson-flame"
             >
               <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                <path
-                  d="M1.5 1.5l8 8M9.5 1.5l-8 8"
-                  stroke="currentColor"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
+                <path d="M1.5 1.5l8 8M9.5 1.5l-8 8"
+                  stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
               </svg>
             </button>
           </>
@@ -337,7 +323,7 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
 
         <button
           title="Layers"
-          onClick={() => setLeftOpen((v: any) => !v)}
+          onClick={() => setLeftOpen((v) => !v)}
           className={`v-tool-btn shrink-0 lg:hidden ${leftOpen ? "active" : ""}`}
         >
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -533,6 +519,7 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
               </span>
 
               <button
+                data-tutorial="save-btn"
                 onClick={() => void handleSave()}
                 className="v-tool-btn text-2xs font-ui px-2"
                 title="Save (⌘S)"
@@ -546,7 +533,7 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
 
           <div className="relative shrink-0">
             <button
-              onClick={() => setMoreOpen((v: any) => !v)}
+              onClick={() => setMoreOpen((v) => !v)}
               className={`v-tool-btn ${moreOpen ? "active" : ""}`}
               title="More — marketplace, guide, share, help"
             >
@@ -602,24 +589,9 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
                       }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-2xs font-ui text-parchment-light hover:bg-warm-wood text-left"
                     >
-                      <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                      >
-                        <path
-                          d="M1.5 4.5L7 1.5l5.5 3v6L7 13.5 1.5 10.5v-6z"
-                          stroke="currentColor"
-                          strokeWidth="1.1"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M1.5 4.5L7 7.5l5.5-3M7 7.5v6"
-                          stroke="currentColor"
-                          strokeWidth="1.1"
-                          strokeLinejoin="round"
-                        />
+                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                        <path d="M1.5 4.5L7 1.5l5.5 3v6L7 13.5 1.5 10.5v-6z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" />
+                        <path d="M1.5 4.5L7 7.5l5.5-3M7 7.5v6" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" />
                       </svg>
                       Design game box
                     </button>
@@ -737,6 +709,7 @@ export function EditorToolbar({ ed }: { ed: StudioEditor }) {
 
           {myRole === "owner" && (
             <button
+              data-tutorial="publish-btn"
               onClick={handlePublish}
               disabled={publish.isPending || game?.status === "reviewing"}
               className="px-3 py-1 rounded-md bg-emerald-glow text-deep-void text-xs font-ui font-bold hover:bg-emerald-bright disabled:opacity-50"

@@ -31,6 +31,12 @@ export interface DesignLayer {
   strokeWidth?: number;
   cornerRadius?: number;
   src?: string;
+  fontFamily?: "serif" | "sans" | "mono";
+  /** Line layers: drawn corner-to-corner of the bounding box along this axis,
+   * so resizing/rotating the layer normally (like every other layer type)
+   * actually changes the line's length and angle. */
+  direction?: "horizontal" | "vertical" | "diagonal-down" | "diagonal-up";
+  dashed?: boolean;
 }
 
 export interface FaceDesign {
@@ -83,10 +89,15 @@ export function makeLayer(type: LayerType): DesignLayer {
     case "ellipse":
       return { ...base, fill: "#3ddc97", stroke: "" };
     case "line":
-      return { ...base, color: "#f5c451", strokeWidth: 3, h: 0.01 };
+      return { ...base, color: "#f5c451", strokeWidth: 3, w: 0.4, h: 0.15, direction: "horizontal", dashed: false };
     case "image":
       return { ...base, w: 0.5, h: 0.5 };
   }
+}
+
+export function duplicateLayer(layer: DesignLayer): DesignLayer {
+  layerSeq += 1;
+  return { ...layer, id: `layer-${Date.now()}-${layerSeq}`, name: `${layer.name} copy`, x: layer.x + 0.03, y: layer.y + 0.03 };
 }
 
 export const BLEND_MODES: DesignLayer["blend"][] = ["normal", "multiply", "screen", "overlay"];
@@ -153,14 +164,22 @@ export async function rasterizeFace(face: FaceDesign, widthPx: number, heightPx:
     } else if (layer.type === "line") {
       ctx.strokeStyle = layer.color || "#000";
       ctx.lineWidth = layer.strokeWidth || 2;
+      ctx.lineCap = "round";
+      if (layer.dashed) ctx.setLineDash([layer.strokeWidth ? layer.strokeWidth * 2.5 : 8, layer.strokeWidth ? layer.strokeWidth * 1.8 : 6]);
       ctx.beginPath();
-      ctx.moveTo(0, lh / 2);
-      ctx.lineTo(lw, lh / 2);
+      switch (layer.direction) {
+        case "vertical": ctx.moveTo(lw / 2, 0); ctx.lineTo(lw / 2, lh); break;
+        case "diagonal-down": ctx.moveTo(0, 0); ctx.lineTo(lw, lh); break;
+        case "diagonal-up": ctx.moveTo(0, lh); ctx.lineTo(lw, 0); break;
+        default: ctx.moveTo(0, lh / 2); ctx.lineTo(lw, lh / 2);
+      }
       ctx.stroke();
+      ctx.setLineDash([]);
     } else if (layer.type === "text") {
       ctx.fillStyle = layer.color || "#000";
       const size = layer.fontSize || 24;
-      ctx.font = `${layer.weight === "bold" ? "bold " : ""}${size}px Georgia, serif`;
+      const fam = layer.fontFamily === "sans" ? "Helvetica, Arial, sans-serif" : layer.fontFamily === "mono" ? "'Courier New', monospace" : "Georgia, serif";
+      ctx.font = `${layer.weight === "bold" ? "bold " : ""}${size}px ${fam}`;
       ctx.textAlign = layer.align || "center";
       ctx.textBaseline = "middle";
       const tx = layer.align === "left" ? 0 : layer.align === "right" ? lw : lw / 2;

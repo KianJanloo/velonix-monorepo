@@ -311,3 +311,28 @@
     );
   }
 }
+
+/* ── Slim, themed scrollbars (everywhere) ──────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #5a4630 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #5a4630;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #f5c451;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}

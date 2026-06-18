@@ -22,6 +22,7 @@ import {
   oauthConfig,
   stripeConfig,
   storageConfig,
+  aiConfig,
 } from "./config/app.config";
 
 const defaultLogDir = path.resolve(process.cwd(), "logs");
@@ -56,6 +57,7 @@ import { PaymentsModule } from "./payments/payments.module";
 import { AdminModule } from "./admin/admin.module";
 import { BlogModule } from "./blog/blog.module";
 import { NotificationsModule } from "./notifications/notifications.module";
+import { AiModule } from "./ai/ai.module";
 import { UploadsModule } from "./uploadsModule/uploads.module";
 import { PlansModule } from "./plans/plans.module";
 import { EventsModule } from "./events/events.module";
@@ -71,7 +73,7 @@ import { CategoriesModule } from "./categories/categories.module";
 
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, adminConfig, jwtConfig, oauthConfig, stripeConfig, storageConfig],
+      load: [appConfig, adminConfig, jwtConfig, oauthConfig, stripeConfig, storageConfig, aiConfig],
 
       envFilePath: [
         path.resolve(process.cwd(), "../../.env.local"),
@@ -126,6 +128,7 @@ import { CategoriesModule } from "./categories/categories.module";
     AdminModule,
     BlogModule,
     NotificationsModule,
+    AiModule,
     UploadsModule,
     PlansModule,
     EventsModule,
