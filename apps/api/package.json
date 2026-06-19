@@ -81,6 +81,7 @@
   },
   "devDependencies": {
     "@nestjs/schematics": "^10.2.3",
-    "@nestjs/testing": "^10.4.15"
+    "@nestjs/testing": "^10.4.15",
+    "@types/nodemailer": "^8.0.0"
   }
 }
