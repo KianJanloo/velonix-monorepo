@@ -60,7 +60,7 @@ const STEPS: Step[] = [
   },
   {
     title: "Build real rules",
-    body: "Click Rules to write When → Then logic in plain language (\"On turn start, each player draws 1 card\") — no scripting needed.",
+    body: 'Click Rules to write When → Then logic in plain language ("On turn start, each player draws 1 card") — no scripting needed.',
     target: "tab-rules",
     advanceOnClick: true,
     placement: "left",
@@ -89,13 +89,21 @@ const STEPS: Step[] = [
   },
 ];
 
-interface Rect { top: number; left: number; width: number; height: number; }
+interface Rect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
 
 function useTargetRect(selector: string | undefined): Rect | null {
   const [rect, setRect] = useState<Rect | null>(null);
 
   useEffect(() => {
-    if (!selector) { setRect(null); return; }
+    if (!selector) {
+      setRect(null);
+      return;
+    }
     let raf = 0;
     const measure = () => {
       const el = document.querySelector(`[data-tutorial="${selector}"]`);
@@ -121,6 +129,24 @@ export function StudioTutorial({ onClose }: { onClose: () => void }) {
   const rect = useTargetRect(step.target);
   const calloutRef = useRef<HTMLDivElement>(null);
 
+  // Real measured size of the callout card (it varies — body text length
+  // differs per step). Falls back to a sane guess before the first
+  // measurement so there's no flash of an unclamped, off-screen position.
+  const [calloutSize, setCalloutSize] = useState({ width: 320, height: 180 });
+  useEffect(() => {
+    const el = calloutRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) setCalloutSize({ width, height });
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [i, rect]);
+
   // Auto-advance when the spotlighted element is actually clicked.
   useEffect(() => {
     if (!step.target || !step.advanceOnClick) return;
@@ -140,72 +166,209 @@ export function StudioTutorial({ onClose }: { onClose: () => void }) {
   // fall back to a centered card so the tour never gets visually stuck.
   if (!step.target || !rect) {
     return (
-      <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-        <div className="v-card w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div
+          className="v-card w-full max-w-md p-6"
+          onClick={(e) => e.stopPropagation()}
+        >
           <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-[0.12em] mb-2">
             Studio tour · {i + 1}/{STEPS.length}
           </p>
-          <h2 className="font-display text-xl font-bold text-parchment-light mb-2">{step.title}</h2>
-          <p className="text-sm text-parchment-mid font-ui leading-relaxed mb-5">{step.body}</p>
-          <Footer i={i} isLast={isLast} onSkip={onClose} onBack={back} onNext={next} />
+          <h2 className="font-display text-xl font-bold text-parchment-light mb-2">
+            {step.title}
+          </h2>
+          <p className="text-sm text-parchment-mid font-ui leading-relaxed mb-5">
+            {step.body}
+          </p>
+          <Footer
+            i={i}
+            isLast={isLast}
+            onSkip={onClose}
+            onBack={back}
+            onNext={next}
+          />
         </div>
       </div>
     );
   }
 
-  // Position the callout beside the spotlighted element.
+  // Position the callout beside the spotlighted element, then clamp it
+  // fully inside the viewport using its real measured size — this is what
+  // stops the card running off the right/bottom edge of the screen when
+  // the target element itself sits near an edge (e.g. the Save button).
   const placement = step.placement ?? "bottom";
-  const calloutStyle: React.CSSProperties = { position: "fixed", maxWidth: 320, zIndex: 202 };
-  if (placement === "bottom") { calloutStyle.top = rect.top + rect.height + 14; calloutStyle.left = Math.max(12, rect.left); }
-  if (placement === "top") { calloutStyle.bottom = window.innerHeight - rect.top + 14; calloutStyle.left = Math.max(12, rect.left); }
-  if (placement === "left") { calloutStyle.top = rect.top; calloutStyle.right = window.innerWidth - rect.left + 14; }
-  if (placement === "right") { calloutStyle.top = rect.top; calloutStyle.left = rect.left + rect.width + 14; }
+  const gap = 14;
+  const margin = 12;
+  let top: number;
+  let left: number;
+  if (placement === "bottom") {
+    top = rect.top + rect.height + gap;
+    left = rect.left;
+  } else if (placement === "top") {
+    top = rect.top - gap - calloutSize.height;
+    left = rect.left;
+  } else if (placement === "left") {
+    top = rect.top;
+    left = rect.left - gap - calloutSize.width;
+  } else {
+    top = rect.top;
+    left = rect.left + rect.width + gap;
+  } // right
+
+  const maxLeft = Math.max(
+    margin,
+    window.innerWidth - calloutSize.width - margin,
+  );
+  const maxTop = Math.max(
+    margin,
+    window.innerHeight - calloutSize.height - margin,
+  );
+  top = Math.min(Math.max(margin, top), maxTop);
+  left = Math.min(Math.max(margin, left), maxLeft);
+
+  const calloutStyle: React.CSSProperties = {
+    position: "fixed",
+    top,
+    left,
+    maxWidth: 320,
+    zIndex: 202,
+  };
 
   return (
     <div className="fixed inset-0 z-[200]" style={{ pointerEvents: "none" }}>
       {/* Four dimmed strips around the spotlighted rect — the cutout itself has no overlay, so the real element stays fully clickable. */}
-      <div style={{ position: "fixed", inset: 0, top: 0, height: Math.max(0, rect.top - PAD), background: "rgba(0,0,0,0.65)", pointerEvents: "auto" }} onClick={onClose} />
-      <div style={{ position: "fixed", left: 0, top: rect.top + rect.height + PAD, right: 0, bottom: 0, background: "rgba(0,0,0,0.65)", pointerEvents: "auto" }} onClick={onClose} />
-      <div style={{ position: "fixed", left: 0, top: Math.max(0, rect.top - PAD), width: Math.max(0, rect.left - PAD), height: rect.height + PAD * 2, background: "rgba(0,0,0,0.65)", pointerEvents: "auto" }} onClick={onClose} />
-      <div style={{ position: "fixed", left: rect.left + rect.width + PAD, top: Math.max(0, rect.top - PAD), right: 0, height: rect.height + PAD * 2, background: "rgba(0,0,0,0.65)", pointerEvents: "auto" }} onClick={onClose} />
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          top: 0,
+          height: Math.max(0, rect.top - PAD),
+          background: "rgba(0,0,0,0.65)",
+          pointerEvents: "auto",
+        }}
+        onClick={onClose}
+      />
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          top: rect.top + rect.height + PAD,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.65)",
+          pointerEvents: "auto",
+        }}
+        onClick={onClose}
+      />
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          top: Math.max(0, rect.top - PAD),
+          width: Math.max(0, rect.left - PAD),
+          height: rect.height + PAD * 2,
+          background: "rgba(0,0,0,0.65)",
+          pointerEvents: "auto",
+        }}
+        onClick={onClose}
+      />
+      <div
+        style={{
+          position: "fixed",
+          left: rect.left + rect.width + PAD,
+          top: Math.max(0, rect.top - PAD),
+          right: 0,
+          height: rect.height + PAD * 2,
+          background: "rgba(0,0,0,0.65)",
+          pointerEvents: "auto",
+        }}
+        onClick={onClose}
+      />
 
       {/* Glow ring around the real element */}
       <div
         style={{
-          position: "fixed", top: rect.top - PAD, left: rect.left - PAD, width: rect.width + PAD * 2, height: rect.height + PAD * 2,
-          border: "2px solid #3ddc97", borderRadius: 10, boxShadow: "0 0 0 4px rgba(61,220,151,0.25), 0 0 24px rgba(61,220,151,0.5)",
+          position: "fixed",
+          top: rect.top - PAD,
+          left: rect.left - PAD,
+          width: rect.width + PAD * 2,
+          height: rect.height + PAD * 2,
+          border: "2px solid #3ddc97",
+          borderRadius: 10,
+          boxShadow:
+            "0 0 0 4px rgba(61,220,151,0.25), 0 0 24px rgba(61,220,151,0.5)",
           pointerEvents: "none",
         }}
       />
 
-      <div ref={calloutRef} style={{ ...calloutStyle, pointerEvents: "auto" }} className="v-card p-4">
+      <div
+        ref={calloutRef}
+        style={{ ...calloutStyle, pointerEvents: "auto" }}
+        className="v-card p-4"
+      >
         <p className="text-2xs font-ui font-semibold text-soft-gray uppercase tracking-[0.1em] mb-1.5">
           Studio tour · {i + 1}/{STEPS.length}
         </p>
-        <h2 className="font-display text-base font-bold text-parchment-light mb-1.5">{step.title}</h2>
-        <p className="text-xs text-parchment-mid font-ui leading-relaxed mb-3">{step.body}</p>
+        <h2 className="font-display text-base font-bold text-parchment-light mb-1.5">
+          {step.title}
+        </h2>
+        <p className="text-xs text-parchment-mid font-ui leading-relaxed mb-3">
+          {step.body}
+        </p>
         {step.advanceOnClick && (
-          <p className="text-2xs text-emerald-glow font-ui font-semibold mb-3">👉 Try clicking the highlighted button</p>
+          <p className="text-2xs text-emerald-glow font-ui font-semibold mb-3">
+            👉 Try clicking the highlighted button
+          </p>
         )}
-        <Footer i={i} isLast={isLast} onSkip={onClose} onBack={back} onNext={next} />
+        <Footer
+          i={i}
+          isLast={isLast}
+          onSkip={onClose}
+          onBack={back}
+          onNext={next}
+        />
       </div>
     </div>
   );
 }
 
-function Footer({ i, isLast, onSkip, onBack, onNext }: { i: number; isLast: boolean; onSkip: () => void; onBack: () => void; onNext: () => void }) {
+function Footer({
+  i,
+  isLast,
+  onSkip,
+  onBack,
+  onNext,
+}: {
+  i: number;
+  isLast: boolean;
+  onSkip: () => void;
+  onBack: () => void;
+  onNext: () => void;
+}) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <button onClick={onSkip} className="text-2xs font-ui text-soft-gray hover:text-parchment-light">
+      <button
+        onClick={onSkip}
+        className="text-2xs font-ui text-soft-gray hover:text-parchment-light"
+      >
         Skip tour
       </button>
       <div className="flex items-center gap-2">
         {i > 0 && (
-          <button onClick={onBack} className="px-3 py-1.5 rounded-lg border border-warm-wood-light text-parchment-light text-2xs font-ui font-semibold hover:bg-warm-wood">
+          <button
+            onClick={onBack}
+            className="px-3 py-1.5 rounded-lg border border-warm-wood-light text-parchment-light text-2xs font-ui font-semibold hover:bg-warm-wood"
+          >
             Back
           </button>
         )}
-        <button onClick={onNext} className="px-4 py-1.5 rounded-lg bg-emerald-glow text-deep-void text-2xs font-ui font-bold hover:bg-emerald-bright transition-all">
+        <button
+          onClick={onNext}
+          className="px-4 py-1.5 rounded-lg bg-emerald-glow text-deep-void text-2xs font-ui font-bold hover:bg-emerald-bright transition-all"
+        >
           {isLast ? "Start building" : "Next"}
         </button>
       </div>
