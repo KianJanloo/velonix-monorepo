@@ -26,6 +26,12 @@ exports.pxToMm = pxToMm;
 exports.bumpPatch = bumpPatch;
 exports.bumpMinor = bumpMinor;
 exports.bumpMajor = bumpMajor;
+exports.evaluateCondition = evaluateCondition;
+exports.evaluateRuleConditions = evaluateRuleConditions;
+exports.executeRuleAction = executeRuleAction;
+exports.executeRuleActions = executeRuleActions;
+exports.processRule = processRule;
+exports.processTrigger = processTrigger;
 var types_1 = require("@velonix/types");
 // ---------------------------------------------------------------------------
 // PRICING & COMMISSION
@@ -253,4 +259,137 @@ function bumpMajor(version) {
     if (parts.length !== 3)
         return version;
     return "".concat(((_a = parts[0]) !== null && _a !== void 0 ? _a : 0) + 1, ".0.0");
+}
+// ── Condition evaluation ──────────────────────────────────────────────────────
+function readSubject(ctx, c) {
+    var _a, _b;
+    switch (c.subject) {
+        case "score": return ctx.score;
+        case "round": return ctx.round;
+        case "turn_count": return ctx.turnCount;
+        case "dice_result": return ctx.diceResult;
+        case "player_count": return ctx.playerCount;
+        case "card_count": return ctx.cardCount;
+        case "counter": return (_b = ctx.counters[(_a = c.counterKey) !== null && _a !== void 0 ? _a : ""]) !== null && _b !== void 0 ? _b : 0;
+        default: return 0;
+    }
+}
+function applyOperator(lhs, op, rhs, rhs2) {
+    switch (op) {
+        case "eq": return lhs === rhs;
+        case "neq": return lhs !== rhs;
+        case "gt": return lhs > rhs;
+        case "gte": return lhs >= rhs;
+        case "lt": return lhs < rhs;
+        case "lte": return lhs <= rhs;
+        case "between": return lhs >= rhs && lhs <= (rhs2 !== null && rhs2 !== void 0 ? rhs2 : rhs);
+        case "is_multiple_of": return rhs !== 0 && lhs % rhs === 0;
+        default: return false;
+    }
+}
+/**
+ * Evaluates a single RuleCondition against the provided game context.
+ * Returns `true` if the condition passes (after applying optional negation).
+ */
+function evaluateCondition(condition, ctx) {
+    var lhs = readSubject(ctx, condition);
+    var result = applyOperator(lhs, condition.operator, condition.value, condition.value2);
+    return condition.negate ? !result : result;
+}
+/**
+ * Evaluates ALL conditions for a rule (AND logic).
+ * Returns `true` if the rule should fire (all conditions pass, or no conditions set).
+ */
+function evaluateRuleConditions(rule, ctx) {
+    if (!rule.conditions || rule.conditions.length === 0)
+        return true;
+    return rule.conditions.every(function (c) { return evaluateCondition(c, ctx); });
+}
+/**
+ * Executes a single RuleAction and returns a structured result describing
+ * what happened. Pure function — callers apply the result to their own state.
+ */
+function executeRuleAction(action) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var target = (_a = action.target) !== null && _a !== void 0 ? _a : "current";
+    var amount = (_b = action.amount) !== null && _b !== void 0 ? _b : 1;
+    switch (action.type) {
+        case "draw_cards":
+            return { type: "draw_cards", target: target, amount: amount };
+        case "gain_points":
+            return { type: "gain_points", target: target, amount: amount };
+        case "lose_points":
+            return { type: "lose_points", target: target, amount: -Math.abs(amount) };
+        case "move_spaces":
+            return { type: "move_spaces", target: target, amount: amount };
+        case "roll_dice": {
+            var sides = Math.max(2, amount);
+            var roll = 1 + Math.floor(Math.random() * sides);
+            return { type: "roll_dice", target: target, amount: sides, roll: roll };
+        }
+        case "extra_turn":
+            return { type: "extra_turn", target: target };
+        case "skip_turn":
+            return { type: "skip_turn", target: target };
+        case "end_game":
+            return { type: "end_game", target: "all", message: (_c = action.value) !== null && _c !== void 0 ? _c : "Game over." };
+        case "set_counter":
+            return { type: "set_counter", target: target, amount: amount, key: (_e = (_d = action.counterKey) !== null && _d !== void 0 ? _d : action.value) !== null && _e !== void 0 ? _e : "counter" };
+        case "flip_component":
+            return { type: "flip_component", target: "all", key: (_f = action.value) !== null && _f !== void 0 ? _f : "" };
+        case "navigate_page":
+            return { type: "navigate_page", target: "all", pageId: (_h = (_g = action.pageId) !== null && _g !== void 0 ? _g : action.value) !== null && _h !== void 0 ? _h : "" };
+        case "eliminate_player":
+            return { type: "eliminate_player", target: target };
+        case "shuffle_deck":
+            return { type: "shuffle_deck", target: "all", key: (_j = action.value) !== null && _j !== void 0 ? _j : "deck" };
+        case "custom":
+            return { type: "custom", target: target, message: (_k = action.value) !== null && _k !== void 0 ? _k : "Custom effect." };
+        default:
+            return { type: "custom", target: target, message: "Unknown action." };
+    }
+}
+/**
+ * Evaluates all actions for a rule and returns the full list of results.
+ * Also handles the legacy single-action format for backward compatibility.
+ */
+function executeRuleActions(rule) {
+    var _a, _b, _c, _d, _e;
+    // New structured actions array
+    if (rule.actions && rule.actions.length > 0) {
+        return rule.actions.map(executeRuleAction);
+    }
+    // Legacy single action fallback
+    if (rule.action) {
+        var legacyAction = {
+            id: "legacy-".concat(rule.id),
+            type: rule.action,
+            target: (_b = (_a = rule.params) === null || _a === void 0 ? void 0 : _a.target) !== null && _b !== void 0 ? _b : "current",
+            amount: (_d = (_c = rule.params) === null || _c === void 0 ? void 0 : _c.amount) !== null && _d !== void 0 ? _d : 1,
+            value: (_e = rule.params) === null || _e === void 0 ? void 0 : _e.value,
+        };
+        return [executeRuleAction(legacyAction)];
+    }
+    return [];
+}
+/**
+ * Full rule evaluation pipeline: checks enabled → evaluates conditions → executes actions.
+ * Returns null if the rule does not fire, or the action results if it does.
+ */
+function processRule(rule, ctx) {
+    if (rule.enabled === false)
+        return null;
+    if (!evaluateRuleConditions(rule, ctx))
+        return null;
+    return executeRuleActions(rule);
+}
+/**
+ * Process all rules for a given trigger, sorted by priority (lower = first).
+ * Returns a flat list of all action results from rules that fired.
+ */
+function processTrigger(rules, trigger, ctx) {
+    return rules
+        .filter(function (r) { return r.trigger === trigger && r.enabled !== false; })
+        .sort(function (a, b) { var _a, _b; return ((_a = a.priority) !== null && _a !== void 0 ? _a : 50) - ((_b = b.priority) !== null && _b !== void 0 ? _b : 50); })
+        .flatMap(function (r) { var _a; return (_a = processRule(r, ctx)) !== null && _a !== void 0 ? _a : []; });
 }

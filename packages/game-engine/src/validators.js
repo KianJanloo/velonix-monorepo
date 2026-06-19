@@ -5,7 +5,7 @@
  * Used both client-side (form validation) and server-side (API DTO validation).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateReviewSchema = exports.MarketplaceFiltersSchema = exports.UpdateProfileSchema = exports.ResetPassSchema = exports.ForgetPassSchema = exports.LoginSchema = exports.RegisterCompleteSchema = exports.RegisterSchema = exports.CreateComponentSchema = exports.ComponentTypeSchema = exports.SetGamePricingSchema = exports.UpdateGameSchema = exports.CreateGameSchema = exports.GameComplexitySchema = exports.GameCategorySchema = exports.SemVerSchema = exports.HexColorSchema = exports.UUIDSchema = void 0;
+exports.GameRulesArraySchema = exports.GameRuleSchema = exports.RuleActionSchema = exports.RuleTargetSchema = exports.RuleActionTypeSchema = exports.RuleConditionSchema = exports.RuleConditionOperatorSchema = exports.RuleConditionSubjectSchema = exports.CreateReviewSchema = exports.MarketplaceFiltersSchema = exports.UpdateProfileSchema = exports.ResetPassSchema = exports.ForgetPassSchema = exports.LoginSchema = exports.RegisterCompleteSchema = exports.RegisterSchema = exports.CreateComponentSchema = exports.ComponentTypeSchema = exports.SetGamePricingSchema = exports.UpdateGameSchema = exports.CreateGameSchema = exports.GameComplexitySchema = exports.GameCategorySchema = exports.SemVerSchema = exports.HexColorSchema = exports.UUIDSchema = void 0;
 var zod_1 = require("zod");
 // ---------------------------------------------------------------------------
 // SHARED PRIMITIVES
@@ -211,3 +211,97 @@ exports.CreateReviewSchema = zod_1.z.object({
     title: zod_1.z.string().max(120).trim().optional(),
     body: zod_1.z.string().max(2000).trim().optional(),
 });
+// ---------------------------------------------------------------------------
+// RULE ENGINE SCHEMAS
+// ---------------------------------------------------------------------------
+exports.RuleConditionSubjectSchema = zod_1.z.enum([
+    "score",
+    "round",
+    "turn_count",
+    "dice_result",
+    "player_count",
+    "card_count",
+    "counter",
+]);
+exports.RuleConditionOperatorSchema = zod_1.z.enum([
+    "eq",
+    "neq",
+    "gt",
+    "gte",
+    "lt",
+    "lte",
+    "between",
+    "is_multiple_of",
+]);
+exports.RuleConditionSchema = zod_1.z.object({
+    id: zod_1.z.string(),
+    subject: exports.RuleConditionSubjectSchema,
+    counterKey: zod_1.z.string().optional(),
+    operator: exports.RuleConditionOperatorSchema,
+    value: zod_1.z.number(),
+    value2: zod_1.z.number().optional(),
+    negate: zod_1.z.boolean().optional(),
+});
+exports.RuleActionTypeSchema = zod_1.z.enum([
+    "draw_cards",
+    "gain_points",
+    "lose_points",
+    "move_spaces",
+    "roll_dice",
+    "extra_turn",
+    "skip_turn",
+    "end_game",
+    "set_counter",
+    "flip_component",
+    "navigate_page",
+    "eliminate_player",
+    "shuffle_deck",
+    "custom",
+]);
+exports.RuleTargetSchema = zod_1.z.enum([
+    "current",
+    "each",
+    "all",
+    "next",
+    "previous",
+    "winner",
+    "loser",
+]);
+exports.RuleActionSchema = zod_1.z.object({
+    id: zod_1.z.string(),
+    type: exports.RuleActionTypeSchema,
+    target: exports.RuleTargetSchema.optional(),
+    amount: zod_1.z.number().optional(),
+    value: zod_1.z.string().optional(),
+    pageId: zod_1.z.string().optional(),
+    counterKey: zod_1.z.string().optional(),
+});
+exports.GameRuleSchema = zod_1.z.object({
+    id: zod_1.z.string(),
+    trigger: zod_1.z.enum([
+        "turn_start",
+        "turn_end",
+        "card_played",
+        "token_moved",
+        "dice_rolled",
+        "score_changed",
+        "round_start",
+        "round_end",
+        "player_eliminated",
+        "game_start",
+        "game_end",
+    ]),
+    description: zod_1.z.string().max(500),
+    priority: zod_1.z.number().int().min(0).max(999).optional(),
+    conditions: zod_1.z.array(exports.RuleConditionSchema).optional(),
+    actions: zod_1.z.array(exports.RuleActionSchema).optional(),
+    // Legacy single-action fields kept for backward compat
+    action: exports.RuleActionTypeSchema.optional(),
+    params: zod_1.z.object({
+        amount: zod_1.z.number().optional(),
+        target: exports.RuleTargetSchema.optional(),
+        value: zod_1.z.string().optional(),
+    }).optional(),
+    enabled: zod_1.z.boolean().optional(),
+});
+exports.GameRulesArraySchema = zod_1.z.array(exports.GameRuleSchema).max(200);

@@ -1,6 +1,9 @@
 {
   "name": "@velonix/types",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "compilerOptions": {
+    
+  },
   "private": true,
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
