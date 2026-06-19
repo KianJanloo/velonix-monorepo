@@ -165,6 +165,9 @@ importers:
       nest-winston:
         specifier: ^1.10.2
         version: 1.10.2(@nestjs/common@10.4.22(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(winston@3.19.0)
+      nodemailer:
+        specifier: ^8.0.10
+        version: 8.0.10
       passport:
         specifier: ^0.7.0
         version: 0.7.0
