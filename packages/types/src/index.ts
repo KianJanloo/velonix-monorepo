@@ -227,6 +227,7 @@ export interface RuleAction {
   value?: string;
   counterKey?: string;
   pageId?: string;
+  flatMap?: RuleActionType[]
 }
 
 export interface GameRule {
