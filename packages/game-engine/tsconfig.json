@@ -1,23 +1,10 @@
 {
-  "name": "@velonix/types",
-  "version": "1.0.0",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
-  "private": true,
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.d.ts",
-      "default": "./src/index.js"
-    }
-  },
-  "scripts": {
-    "build": "tsc",
-    "type-check": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "typescript": "^5.7.3"
-  }
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
