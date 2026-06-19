@@ -69,19 +69,19 @@ const STEPS: Step[] = [
     title: "Resize the side panels",
     body: "Got a lot of tabs open and feeling cramped? Drag this edge left or right — it remembers your preferred width.",
     target: "resize-handle",
-    placement: "left",
+    placement: "right",
   },
   {
     title: "Save anytime",
     body: "Your work autosaves, but ⌘/Ctrl+S (or this button) saves instantly.",
     target: "save-btn",
-    placement: "bottom",
+    placement: "left",
   },
   {
     title: "Publish when ready",
     body: "Set your pricing and submit to the marketplace whenever the game feels ready. You can keep editing after publishing, too.",
     target: "publish-btn",
-    placement: "bottom",
+    placement: "left",
   },
   {
     title: "That's the tour",
