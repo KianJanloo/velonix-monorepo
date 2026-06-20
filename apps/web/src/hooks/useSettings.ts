@@ -11,21 +11,39 @@ export interface SiteSettings {
   maintenanceMode: boolean;
   maintenanceMessage: string;
   announcement: string;
+  siteName: string;
+  siteDescription: string;
+  logoUrl: string;
+  faviconUrl: string;
   supportEmail: string;
+  contactEmail: string;
+  phone: string;
+  address: string;
   discordUrl: string;
   twitterUrl: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  youtubeUrl: string;
+  githubUrl: string;
+  linkedinUrl: string;
+  metaDescription: string;
+  metaKeywords: string;
+  primaryColor: string;
+  accentColor: string;
+  footerText: string;
+  aboutContent: string;
 }
 
-/** Public — site-wide settings (banner, social links, flags). */
+export type PublicSiteSettings = Omit<SiteSettings, "id">;
+
 export function usePublicSettings() {
-  return useQuery<Omit<SiteSettings, "id">>({
+  return useQuery<PublicSiteSettings>({
     queryKey: ["settings", "public"],
-    queryFn: () => apiClient.get<Omit<SiteSettings, "id">>("/settings"),
+    queryFn: () => apiClient.get<PublicSiteSettings>("/settings"),
     staleTime: 5 * 60 * 1000,
   });
 }
 
-/** Admin — full settings row. */
 export function useAdminSettings() {
   return useQuery<SiteSettings>({
     queryKey: ["settings", "admin"],
@@ -33,7 +51,6 @@ export function useAdminSettings() {
   });
 }
 
-/** Admin — update site settings. */
 export function useUpdateSettings() {
   const qc = useQueryClient();
   return useMutation({

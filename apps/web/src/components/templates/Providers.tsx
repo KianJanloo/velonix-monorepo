@@ -13,6 +13,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionGuard } from "@/components/templates/SessionGuard";
+import { SettingsProvider } from "@/components/templates/SettingsProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
@@ -86,7 +87,9 @@ export function Providers({ children }: ProvidersProps) {
         {/* Validates/refreshes the session and handles expiry app-wide */}
         <SessionGuard />
 
-        {children}
+        <SettingsProvider>
+          {children}
+        </SettingsProvider>
 
         {/* Toast notifications (theme-aware) */}
         <ThemedToaster />

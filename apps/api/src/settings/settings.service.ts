@@ -21,7 +21,6 @@ export class SettingsService {
     return settings;
   }
 
-  /** Fields safe to expose to unauthenticated visitors. */
   async getPublic() {
     const s = await this.get();
     return {
@@ -30,9 +29,27 @@ export class SettingsService {
       maintenanceMode: s.maintenanceMode,
       maintenanceMessage: s.maintenanceMessage,
       announcement: s.announcement,
+      siteName: s.siteName,
+      siteDescription: s.siteDescription,
+      logoUrl: s.logoUrl,
+      faviconUrl: s.faviconUrl,
       supportEmail: s.supportEmail,
+      contactEmail: s.contactEmail,
+      phone: s.phone,
+      address: s.address,
       discordUrl: s.discordUrl,
       twitterUrl: s.twitterUrl,
+      facebookUrl: s.facebookUrl,
+      instagramUrl: s.instagramUrl,
+      youtubeUrl: s.youtubeUrl,
+      githubUrl: s.githubUrl,
+      linkedinUrl: s.linkedinUrl,
+      metaDescription: s.metaDescription,
+      metaKeywords: s.metaKeywords,
+      primaryColor: s.primaryColor,
+      accentColor: s.accentColor,
+      footerText: s.footerText,
+      aboutContent: s.aboutContent,
     };
   }
 

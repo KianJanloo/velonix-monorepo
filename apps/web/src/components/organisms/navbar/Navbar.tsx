@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/atoms/ThemeToggle";
 import { NotificationBell } from "@/components/organisms/notification/NotificationBell";
 import { cn } from "@/lib/utils";
 import { useCurrentUser, useLogout } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/components/templates/SettingsProvider";
 
 const PUBLIC_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
@@ -21,6 +22,7 @@ export function Navbar() {
   const pathname = usePathname();
   const user = useCurrentUser();
   const logout = useLogout();
+  const { settings } = useSiteSettings();
   // Avoid hydration mismatch: auth state is only known on the client (localStorage)
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,7 +44,11 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center gap-4 md:gap-8">
         {/* Logo */}
         <Link href="/" className="shrink-0">
-          <VelonixLogo size={28} showWordmark wordmarkSize="sm" />
+          {settings?.logoUrl ? (
+            <img src={settings.logoUrl} alt={settings.siteName || "Velonix"} className="h-7 w-auto" />
+          ) : (
+            <VelonixLogo size={28} showWordmark wordmarkSize="sm" />
+          )}
         </Link>
 
         {/* Desktop nav links */}

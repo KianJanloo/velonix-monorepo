@@ -3,12 +3,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 
+interface AiProvider {
+  name: string;
+  label: string;
+  configured: boolean;
+}
+
 interface AiConfig {
   enabled: boolean;
   provider: string | null;
   model: string | null;
   maxTokens: number | null;
   hasApiKey: boolean;
+  configuredProviders: AiProvider[];
 }
 
 export default function AdminAiPage() {
@@ -52,10 +59,10 @@ export default function AdminAiPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Configuration */}
+          {/* Active Configuration */}
           <div className="v-card p-6">
             <h2 className="font-display text-sm font-bold text-parchment-light mb-4">
-              Configuration
+              Active Configuration
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-warm-wood/30">
@@ -86,6 +93,30 @@ export default function AdminAiPage() {
                   )}
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Configured Providers */}
+          <div className="v-card p-6">
+            <h2 className="font-display text-sm font-bold text-parchment-light mb-4">
+              Available Providers
+            </h2>
+            <div className="space-y-3">
+              {config?.configuredProviders?.map((p) => (
+                <div key={p.name} className="flex justify-between items-center py-2 border-b border-warm-wood/30 last:border-0">
+                  <span className="text-sm font-ui text-parchment-light">{p.label}</span>
+                  <span className={`text-xs font-ui font-bold px-2.5 py-0.5 rounded-full ${
+                    p.configured
+                      ? "bg-emerald-ghost text-emerald-glow"
+                      : "bg-warm-wood/50 text-soft-gray-dark"
+                  }`}>
+                    {p.configured ? "Configured" : "Not configured"}
+                  </span>
+                </div>
+              ))}
+              {(!config?.configuredProviders || config.configuredProviders.length === 0) && (
+                <p className="text-sm text-soft-gray font-ui">No providers configured.</p>
+              )}
             </div>
           </div>
 
@@ -124,36 +155,56 @@ export default function AdminAiPage() {
             <h2 className="font-display text-sm font-bold text-parchment-light mb-3">
               Environment Variables
             </h2>
-            <div className="space-y-2 text-sm font-ui">
+            <div className="space-y-3 text-sm font-ui">
+              <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">Legacy (single provider)</p>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">
-                  AI_API_KEY
-                </code>
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_API_KEY</code>
+                <span className="text-soft-gray">API key (overrides provider-specific keys)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_MODEL</code>
+                <span className="text-soft-gray">Model name (default: claude-sonnet-4-6)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_MAX_TOKENS</code>
+                <span className="text-soft-gray">Max tokens per response (default: 1000)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_PROVIDER</code>
+                <span className="text-soft-gray">Active provider name (default: anthropic)</span>
+              </div>
+
+              <div className="h-px bg-warm-wood/40 my-3" />
+              <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">Anthropic (Claude)</p>
+              <div className="flex items-center gap-2">
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_ANTHROPIC_API_KEY</code>
                 <span className="text-soft-gray">Anthropic API key</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">
-                  AI_MODEL
-                </code>
-                <span className="text-soft-gray">
-                  Model name (default: claude-sonnet-4-6)
-                </span>
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_ANTHROPIC_MODEL</code>
+                <span className="text-soft-gray">Model (default: claude-sonnet-4-6)</span>
+              </div>
+
+              <div className="h-px bg-warm-wood/40 my-3" />
+              <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">OpenAI (GPT)</p>
+              <div className="flex items-center gap-2">
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_OPENAI_API_KEY</code>
+                <span className="text-soft-gray">OpenAI API key</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">
-                  AI_MAX_TOKENS
-                </code>
-                <span className="text-soft-gray">
-                  Max tokens per response (default: 1000)
-                </span>
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_OPENAI_MODEL</code>
+                <span className="text-soft-gray">Model (default: gpt-4o)</span>
+              </div>
+
+              <div className="h-px bg-warm-wood/40 my-3" />
+              <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">Google (Gemini)</p>
+              <div className="flex items-center gap-2">
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_GOOGLE_API_KEY</code>
+                <span className="text-soft-gray">Google AI API key</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">
-                  AI_PROVIDER
-                </code>
-                <span className="text-soft-gray">
-                  Provider name (default: anthropic)
-                </span>
+                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_GOOGLE_MODEL</code>
+                <span className="text-soft-gray">Model (default: gemini-2.0-flash)</span>
               </div>
             </div>
           </div>

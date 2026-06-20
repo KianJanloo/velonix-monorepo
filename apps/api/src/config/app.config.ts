@@ -84,12 +84,52 @@ export const stripeConfig = registerAs("stripe", () => ({
 // ── AI features (balancer, etc.) ──────────────────────────────────────────
 
 export const aiConfig = registerAs("ai", () => ({
+  /** Default provider used when multiple are configured */
   provider: process.env["AI_PROVIDER"] ?? "anthropic",
-  apiKey: process.env["AI_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"] ?? "",
+  /** Legacy single-provider key (overrides provider-specific keys) */
+  apiKey: process.env["AI_API_KEY"] ?? "",
   model: process.env["AI_MODEL"] ?? "claude-sonnet-4-6",
   maxTokens: parseInt(process.env["AI_MAX_TOKENS"] ?? "1000", 10),
-  /** Computed, not set directly — AI features are off unless a key is configured. */
-  enabled: !!(process.env["AI_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"]),
+
+  /** Anthropic (Claude) */
+  anthropicApiKey: process.env["AI_ANTHROPIC_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"] ?? "",
+  anthropicModel: process.env["AI_ANTHROPIC_MODEL"] ?? "claude-sonnet-4-6",
+
+  /** OpenAI (GPT) */
+  openaiApiKey: process.env["AI_OPENAI_API_KEY"] ?? "",
+  openaiModel: process.env["AI_OPENAI_MODEL"] ?? "gpt-4o",
+
+  /** Google (Gemini) */
+  googleApiKey: process.env["AI_GOOGLE_API_KEY"] ?? "",
+  googleModel: process.env["AI_GOOGLE_MODEL"] ?? "gemini-2.0-flash",
+
+  /** Computed: AI is enabled if ANY API key is configured */
+  enabled: !!(
+    process.env["AI_API_KEY"] ??
+    process.env["AI_ANTHROPIC_API_KEY"] ??
+    process.env["ANTHROPIC_API_KEY"] ??
+    process.env["AI_OPENAI_API_KEY"] ??
+    process.env["AI_GOOGLE_API_KEY"]
+  ),
+
+  /** Providers that have a configured API key */
+  configuredProviders: ((): { name: string; label: string; configured: boolean }[] => {
+    const providers: { name: string; label: string; configured: boolean }[] = [
+      { name: "anthropic", label: "Anthropic (Claude)", configured: false },
+      { name: "openai", label: "OpenAI (GPT)", configured: false },
+      { name: "google", label: "Google (Gemini)", configured: false },
+    ];
+    if (process.env["AI_API_KEY"] || process.env["AI_ANTHROPIC_API_KEY"] || process.env["ANTHROPIC_API_KEY"]) {
+      providers[0]!.configured = true;
+    }
+    if (process.env["AI_OPENAI_API_KEY"]) {
+      providers[1]!.configured = true;
+    }
+    if (process.env["AI_GOOGLE_API_KEY"]) {
+      providers[2]!.configured = true;
+    }
+    return providers;
+  })(),
 }));
 
 // ── Storage (S3-compatible) ───────────────────────────────────────────────────
