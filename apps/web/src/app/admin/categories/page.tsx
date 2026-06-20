@@ -11,6 +11,7 @@ import {
   type CreateCategoryPayload,
 } from "@/hooks/useCategories";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Pagination } from "@/components/atoms/Pagination";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -431,28 +432,7 @@ export default function AdminCategoriesPage() {
         )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:text-parchment-light transition-colors"
-          >
-            ← Prev
-          </button>
-          <span className="text-xs text-soft-gray font-ui">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:text-parchment-light transition-colors"
-          >
-            Next →
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       <p className="mt-4 text-xs text-soft-gray-dark font-ui">
         Slugs are immutable once created — they match the <code>category</code>{" "}

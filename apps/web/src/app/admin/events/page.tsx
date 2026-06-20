@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAdminEvents, useCreateEvent, useUpdateEvent, useDeleteEvent, type PromoEventInput } from "@/hooks/useEvents";
 import type { PromoEvent, PromoEventVariant, PromoEventPlacement } from "@velonix/types";
+import { Pagination } from "@/components/atoms/Pagination";
 
 const VARIANTS: PromoEventVariant[] = ["promo", "sale", "info", "warning"];
 const PLACEMENTS: PromoEventPlacement[] = ["global", "landing", "marketplace"];
@@ -25,7 +26,10 @@ function toLocalInput(iso: string | null | undefined): string {
 }
 
 export default function AdminEventsPage() {
-  const { data: events, isLoading } = useAdminEvents();
+  const [page, setPage] = useState(1);
+  const { data: result, isLoading } = useAdminEvents(page);
+  const events = result?.data ?? [];
+  const totalPages = result?.totalPages ?? 1;
   const create = useCreateEvent();
   const update = useUpdateEvent();
   const remove = useDeleteEvent();
@@ -36,7 +40,7 @@ export default function AdminEventsPage() {
 
   function set<K extends keyof PromoEventInput>(k: K, v: PromoEventInput[K]) { setForm(f => ({ ...f, [k]: v })); }
 
-  function startNew() { setEditingId(null); setForm(BLANK); }
+  function startNew() { setEditingId(null); setForm(BLANK); setPage(1); }
   function startEdit(e: PromoEvent) {
     setEditingId(e.id);
     setForm({
@@ -164,6 +168,7 @@ export default function AdminEventsPage() {
           ) : !events || events.length === 0 ? (
             <div className="v-card p-8 text-center text-soft-gray text-sm font-ui">No events yet. Create your first banner on the left.</div>
           ) : (
+            <>
             <div className="space-y-2">
               {events.map(e => (
                 <div key={e.id} className="v-card p-4 flex items-start gap-3">
@@ -192,6 +197,8 @@ export default function AdminEventsPage() {
                 </div>
               ))}
             </div>
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            </>
           )}
         </div>
       </div>

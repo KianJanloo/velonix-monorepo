@@ -67,8 +67,13 @@ export class AdminEventsController {
   constructor(private readonly events: EventsService) {}
 
   @Get()
-  @ApiOperation({ summary: "List all promotional events" })
-  list() { return this.events.findAll(); }
+  @ApiOperation({ summary: "List all promotional events (paginated)" })
+  list(
+    @Query("page") page?: string,
+    @Query("perPage") perPage?: string,
+  ) {
+    return this.events.findAll(Number(page) || 1, Number(perPage) || 20);
+  }
 
   @Post()
   @ApiOperation({ summary: "Create a promotional event" })

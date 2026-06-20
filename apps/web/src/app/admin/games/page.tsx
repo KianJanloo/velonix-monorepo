@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAdminGames, useAdminApproveGame, useAdminRejectGame, useAdminDeleteGame } from "@/hooks/useAdmin";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Pagination } from "@/components/atoms/Pagination";
 
 const STATUS_OPTIONS = ["", "draft", "reviewing", "published", "rejected"];
 
@@ -152,13 +153,7 @@ export default function AdminGamesPage() {
         </div>
       </div>
 
-      {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40">← Prev</button>
-          <span className="text-xs text-soft-gray font-ui">Page {page} of {data.totalPages}</span>
-          <button disabled={page === data.totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40">Next →</button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={data?.totalPages ?? 1} onPageChange={setPage} />
     </div>
   );
 }

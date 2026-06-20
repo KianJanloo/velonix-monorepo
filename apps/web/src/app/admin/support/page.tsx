@@ -6,6 +6,7 @@ import {
   type TicketStatus,
 } from "@/hooks/useSupport";
 import { Button } from "@/components/atoms/Button";
+import { Pagination } from "@/components/atoms/Pagination";
 
 const FILTERS: { value: TicketStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -67,8 +68,9 @@ function TicketDetail({ id }: { id: string }) {
 }
 
 export default function AdminSupportPage() {
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<TicketStatus | "all">("all");
-  const { data, isLoading } = useAdminTickets(filter === "all" ? undefined : filter);
+  const { data, isLoading } = useAdminTickets(filter === "all" ? undefined : filter, page);
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
@@ -105,6 +107,7 @@ export default function AdminSupportPage() {
           )) : (
             <div className="v-card p-8 text-center text-soft-gray text-sm font-ui">No tickets in this view.</div>
           )}
+          <Pagination page={page} totalPages={data?.totalPages ?? 1} onPageChange={setPage} />
         </div>
 
         <div className="lg:sticky lg:top-20">

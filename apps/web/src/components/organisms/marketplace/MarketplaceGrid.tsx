@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GameCard } from "@/components/molecules/GameCard";
 import { useMarketplace } from "@/hooks/useGames";
+import { Pagination } from "@/components/atoms/Pagination";
 
 interface MarketplaceGridProps {
   initialSearch?: string;
@@ -37,6 +38,11 @@ export function MarketplaceGrid({ initialSearch = "", initialSort = "newest" }: 
   const price = searchParams.get("price") ?? "all";
   const complexity = searchParams.get("complexity") ?? "";
   const page = Number(searchParams.get("page") ?? "1");
+  const setPage = useCallback((p: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(p));
+    router.push(`?${params.toString()}`);
+  }, [router, searchParams]);
 
   const validSorts = ["newest","popular","top_rated","price_asc","price_desc","most_sold"] as const;
   type SortOption = typeof validSorts[number];
@@ -124,30 +130,7 @@ export function MarketplaceGrid({ initialSearch = "", initialSort = "newest" }: 
         </div>
       )}
 
-      {/* Pagination */}
-      {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          {data.hasPreviousPage && (
-            <a
-              href={`?${new URLSearchParams({ ...Object.fromEntries(searchParams), page: String(page - 1) }).toString()}`}
-              className="px-4 py-2 rounded-lg border border-warm-wood text-sm font-ui text-parchment-mid hover:border-warm-wood-light hover:text-parchment-light transition-colors"
-            >
-              Previous
-            </a>
-          )}
-          <span className="text-xs text-soft-gray font-ui">
-            Page {page} of {data.totalPages}
-          </span>
-          {data.hasNextPage && (
-            <a
-              href={`?${new URLSearchParams({ ...Object.fromEntries(searchParams), page: String(page + 1) }).toString()}`}
-              className="px-4 py-2 rounded-lg border border-warm-wood text-sm font-ui text-parchment-mid hover:border-warm-wood-light hover:text-parchment-light transition-colors"
-            >
-              Next
-            </a>
-          )}
-        </div>
-      )}
+      <Pagination page={page} totalPages={data?.totalPages ?? 1} onPageChange={setPage} />
     </div>
   );
 }

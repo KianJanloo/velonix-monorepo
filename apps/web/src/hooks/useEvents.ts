@@ -24,10 +24,12 @@ export function useActiveEvents(placement: PromoEventPlacement = "global") {
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
-export function useAdminEvents() {
+export function useAdminEvents(page = 1, perPage = 20) {
   return useQuery({
-    queryKey: ["admin", "events"],
-    queryFn: () => apiClient.get<PromoEvent[]>("/admin/events"),
+    queryKey: ["admin", "events", { page, perPage }],
+    queryFn: () => apiClient.get<{ data: PromoEvent[]; total: number; totalPages: number }>(
+      "/admin/events", { params: { page, perPage } },
+    ),
   });
 }
 

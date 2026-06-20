@@ -43,9 +43,22 @@ export class EventsService {
     );
   }
 
-  /** Admin — everything, newest first. */
-  findAll() {
-    return this.repo.find({ order: { priority: "DESC", createdAt: "DESC" } });
+  /** Admin — everything, newest first, paginated. */
+  async findAll(page = 1, perPage = 20) {
+    const [data, total] = await this.repo.findAndCount({
+      order: { priority: "DESC", createdAt: "DESC" },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    });
+    return {
+      data,
+      total,
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+      hasNextPage: page * perPage < total,
+      hasPreviousPage: page > 1,
+    };
   }
 
   async findOne(id: string) {

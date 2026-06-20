@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useBlogPosts } from "@/hooks/useBlog";
+import { Pagination } from "@/components/atoms/Pagination";
 
 export default function BlogPage() {
   const [page, setPage] = useState(1);
@@ -84,14 +85,7 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* Pagination */}
-        {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-12">
-            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-4 py-2 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:text-parchment-light transition-colors">← Prev</button>
-            <span className="text-xs text-soft-gray font-ui">Page {page} of {data.totalPages}</span>
-            <button disabled={page === data.totalPages} onClick={() => setPage(p => p + 1)} className="px-4 py-2 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:text-parchment-light transition-colors">Next →</button>
-          </div>
-        )}
+        <Pagination page={page} totalPages={data?.totalPages ?? 1} onPageChange={setPage} className="mt-12" />
       </div>
     </div>
   );

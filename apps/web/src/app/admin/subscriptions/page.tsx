@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAdminSubscriptionStats, useAdminSubscribers } from "@/hooks/useAdmin";
+import { Pagination } from "@/components/atoms/Pagination";
 
 const TIERS = ["all", "creator", "pro", "studio"] as const;
 type TierFilter = (typeof TIERS)[number];
@@ -115,20 +116,7 @@ export default function AdminSubscriptionsPage() {
         </div>
       </div>
 
-      {/* Pagination */}
-      {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <button disabled={page === 1} onClick={() => setPage(p => p - 1)}
-            className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:border-warm-wood-light hover:text-parchment-light transition-colors">
-            ← Prev
-          </button>
-          <span className="text-xs text-soft-gray font-ui">Page {page} of {data.totalPages}</span>
-          <button disabled={page === data.totalPages} onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:border-warm-wood-light hover:text-parchment-light transition-colors">
-            Next →
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={data?.totalPages ?? 1} onPageChange={setPage} />
     </div>
   );
 }
