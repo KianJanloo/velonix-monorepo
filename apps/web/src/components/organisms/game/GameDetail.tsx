@@ -147,7 +147,7 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
             {/* Title + meta */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xs text-emerald-glow font-ui uppercase tracking-wider bg-emerald-ghost px-2 py-1 rounded-full">{game.category?.replace("_", " ")}</span>
+                <span className="text-2xs text-emerald-glow font-ui uppercase tracking-wider bg-emerald-ghost px-2 py-1 rounded-full">{(game.categories ?? []).join(", ").replace(/_/g, " ")}</span>
                 <span className="text-2xs text-soft-gray font-ui capitalize">{game.complexity?.replace("_", " ")}</span>
               </div>
               <h1 className="font-display text-3xl sm:text-4xl font-black tracking-display mb-2">{game.title}</h1>
@@ -327,7 +327,7 @@ export function GameDetail({ gameId, adminPreview = false }: { gameId: string; a
                 </Button>
               )}
               <div className="mt-4 pt-4 border-t border-warm-wood space-y-2 text-sm font-ui">
-                <div className="flex justify-between"><span className="text-soft-gray">Category</span><span className="text-parchment-light capitalize">{game.category?.replace("_"," ")}</span></div>
+                <div className="flex justify-between"><span className="text-soft-gray">Categories</span><span className="text-parchment-light capitalize">{(game.categories ?? []).join(", ").replace(/_/g, " ")}</span></div>
                 <div className="flex justify-between"><span className="text-soft-gray">Complexity</span><span className="text-parchment-light capitalize">{game.complexity?.replace("_"," ")}</span></div>
                 <div className="flex justify-between"><span className="text-soft-gray">Version</span><span className="text-parchment-light font-mono">{game.version}</span></div>
                 <div className="flex justify-between"><span className="text-soft-gray">Language</span><span className="text-parchment-light uppercase">{game.language}</span></div>

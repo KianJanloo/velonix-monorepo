@@ -107,7 +107,7 @@ function GameRow({
             <span className="shrink-0">{statusBadge(game.status)}</span>
           </div>
           <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-2xs text-soft-gray font-ui">
-            <span className="capitalize">{game.category}</span>
+            <span className="capitalize">{Array.isArray(game.categories) ? game.categories.join(", ").replace(/_/g, " ") : ""}</span>
             <span className="text-warm-wood-light">|</span>
             <span>
               {game.isFree ? "Free" : `$${((game.priceUsd ?? 0) / 100).toFixed(2)}`}

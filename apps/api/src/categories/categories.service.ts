@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, Raw } from "typeorm";
 import { CategoryEntity } from "./category.entity";
 import { GameEntity } from "../games/game.entity";
 
@@ -45,10 +45,19 @@ export class CategoriesService {
 
   // ── Admin ─────────────────────────────────────────────────────────────────
 
-  async listAll() {
-    return this.categoryRepo.find({
+  async listAll(page = 1, perPage = 50) {
+    const [categories, total] = await this.categoryRepo.findAndCount({
       order: { sortOrder: "ASC", label: "ASC" },
+      skip: (page - 1) * perPage,
+      take: perPage,
     });
+    return {
+      data: categories,
+      total,
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
   async findOne(id: string): Promise<CategoryEntity> {
@@ -99,7 +108,7 @@ export class CategoriesService {
   /** Recompute the gameCount from current DB state for a given slug. */
   async refreshCount(slug: string) {
     const count = await this.gameRepo.count({
-      where: { category: slug as never },
+      where: { categories: Raw((alias) => `${alias} @> :slug::jsonb`, { slug: JSON.stringify([slug]) }) },
     });
     await this.categoryRepo.update({ slug }, { gameCount: count });
   }

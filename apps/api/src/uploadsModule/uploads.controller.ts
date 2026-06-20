@@ -1,11 +1,13 @@
 import {
   Controller,
+  Get,
   Post,
   UseGuards,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
   PayloadTooLargeException,
+  Query,
   Req,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -15,11 +17,13 @@ import {
   ApiOperation,
   ApiConsumes,
   ApiBody,
+  ApiQuery,
 } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import { ConfigService } from "@nestjs/config";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { writeFile, mkdir } from "fs/promises";
+import { AdminGuard } from "../auth/guards/admin.guard";
+import { writeFile, mkdir, readdir, stat } from "fs/promises";
 import { join } from "path";
 import { randomBytes } from "crypto";
 
@@ -122,10 +126,57 @@ function sniffAudioType(buf: Buffer): { ext: string } | null {
 
 @ApiTags("uploads")
 @Controller({ path: "uploads", version: "1" })
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth("JWT")
 export class UploadsController {
   constructor(private readonly config: ConfigService) {}
+
+  @Get("admin/list")
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth("JWT")
+  @ApiOperation({ summary: "List all uploaded files (admin)" })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "perPage", required: false, type: Number })
+  async adminList(
+    @Query("page") page?: string,
+    @Query("perPage") perPage?: string,
+  ) {
+    const p = page ? parseInt(page, 10) : 1;
+    const pp = perPage ? parseInt(perPage, 10) : 50;
+    const uploadsDir = join(process.cwd(), "uploads");
+    const files: { userId: string; filename: string; size: number; url: string }[] = [];
+
+    try {
+      const userDirs = await readdir(uploadsDir, { withFileTypes: true });
+      for (const dir of userDirs) {
+        if (!dir.isDirectory()) continue;
+        const userUploadsDir = join(uploadsDir, dir.name);
+        const entries = await readdir(userUploadsDir);
+        for (const filename of entries) {
+          const filePath = join(userUploadsDir, filename);
+          const fileStat = await stat(filePath);
+          if (!fileStat.isFile()) continue;
+          const apiUrl = this.config.get<string>("app.apiUrl") ?? "http://localhost:3001";
+          files.push({
+            userId: dir.name,
+            filename,
+            size: fileStat.size,
+            url: `${apiUrl}/uploads/${dir.name}/${filename}`,
+          });
+        }
+      }
+    } catch {
+      // Uploads directory may not exist yet
+    }
+
+    files.sort((a, b) => b.size - a.size);
+    const total = files.length;
+    const data = files.slice((p - 1) * pp, p * pp);
+
+    return { data, total, page, perPage: pp, totalPages: Math.ceil(total / pp) || 1 };
+  }
+
+  @Post("image")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("JWT")
 
   @Post("image")
   // Tighter than the global limit: 20 uploads per minute per IP.

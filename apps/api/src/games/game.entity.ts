@@ -59,8 +59,8 @@ export class GameEntity {
   @Column({ name: "preview_images", type: "jsonb", default: [] })
   previewImages!: string[];
 
-  @Column({ type: "varchar" })
-  category!: GameCategory;
+  @Column({ name: "category", type: "jsonb", default: [] })
+  categories!: GameCategory[];
 
   @Column({ type: "jsonb", default: [] })
   tags!: string[];
@@ -155,7 +155,7 @@ export class GameEntity {
       title: this.title,
       shortDescription: this.shortDescription,
       thumbnailUrl: this.thumbnailUrl,
-      category: this.category,
+      categories: this.categories,
       isFree: this.isFree,
       priceUsd: this.priceUsd,
       averageRating: this.averageRating,

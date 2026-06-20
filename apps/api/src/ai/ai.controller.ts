@@ -3,6 +3,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import { AiService } from "./ai.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { AdminGuard } from "../auth/guards/admin.guard";
 
 @ApiTags("ai")
 @Controller("ai")
@@ -14,6 +15,15 @@ export class AiController {
   @ApiOperation({ summary: "Whether AI features are configured on this server" })
   status() {
     return { enabled: this.aiService.enabled };
+  }
+
+  @Get("config")
+  @Version("1")
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth("JWT")
+  @ApiOperation({ summary: "Get AI configuration details (admin)" })
+  getConfig() {
+    return this.aiService.getConfig();
   }
 
   @Post("balance")

@@ -66,7 +66,7 @@ export function useAdminGames(page = 1, perPage = 20, status?: string, search?: 
 }
 
 export interface AdminGame {
-  id: string; title: string; status: string; category: string;
+  id: string; title: string; status: string; categories: string[];
   isFree: boolean; priceUsd: number | null; totalPurchases: number;
   averageRating: number | null; totalRatings: number;
   creator: { id: string; username: string };

@@ -107,7 +107,8 @@ export default function AdminGamesPage() {
                     {game.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-soft-gray font-ui capitalize">{game.category}</td>
+                <td className="px-4 py-3 text-sm text-soft-gray font-ui">
+                  {(game.categories ?? []).map((c: string) => <span key={c} className="mr-1 last:mr-0 capitalize">{c.replace("_", " ")}</span>).reduce((acc: any, span: any, i: number) => i === 0 ? [span] : [...acc, <span key={`sep-${i}`} className="text-soft-gray-dark mx-0.5">,</span>, span], null)}</td>
                 <td className="px-4 py-3 text-sm font-mono text-soft-gray">{game.totalPurchases}</td>
                 <td className="px-4 py-3 text-sm font-mono text-soft-gray">
                   {game.averageRating ? game.averageRating : "—"}

@@ -2,7 +2,7 @@ import {
   Injectable, NotFoundException, ForbiddenException, ConflictException
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, FindManyOptions, ILike, In } from "typeorm";
+import { Repository, FindManyOptions, ILike, In, Raw } from "typeorm";
 import { GameEntity } from "../games/game.entity";
 import { ReviewEntity } from "./review.entity";
 import { PurchaseEntity } from "./purchase.entity";
@@ -33,7 +33,7 @@ export class MarketplaceService {
 
     const where: FindManyOptions<GameEntity>["where"] = { status: "published" };
 
-    if (category) Object.assign(where, { category });
+    if (category) Object.assign(where, { categories: Raw((alias) => `${alias} @> :cat::jsonb`, { cat: JSON.stringify([category]) }) });
     if (typeof isFree === "boolean") Object.assign(where, { isFree });
     if (complexity) Object.assign(where, { complexity });
     if (search) Object.assign(where, { title: ILike(`%${search}%`) });

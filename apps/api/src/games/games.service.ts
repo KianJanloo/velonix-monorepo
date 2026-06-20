@@ -39,7 +39,7 @@ export class GamesService {
       title: dto.title,
       description: dto.description,
       shortDescription: dto.shortDescription,
-      category: dto.category,
+      categories: dto.categories,
       tags: dto.tags,
       playerCountMin: dto.playerCountMin,
       playerCountMax: dto.playerCountMax,
@@ -104,8 +104,8 @@ export class GamesService {
     if (game.creatorId !== creatorId) throw new ForbiddenException("You don't own this game.");
 
     const comparableGames = await this.gameRepo.find({
-      where: { status: "published", category: game.category, isFree: false },
-      select: ["id", "priceUsd", "complexity", "category"],
+      where: { status: "published", isFree: false },
+      select: ["id", "priceUsd", "complexity", "categories"],
       take: 200,
     });
 
@@ -114,7 +114,7 @@ export class GamesService {
       .map((g) => ({
         priceUsd: g.priceUsd as number,
         complexity: g.complexity,
-        sameCategory: g.category === game.category,
+        sameCategory: g.categories?.some((c) => game.categories?.includes(c)) ?? false,
       }));
 
     return suggestGamePrice(game.complexity, comparables);

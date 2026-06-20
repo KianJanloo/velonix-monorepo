@@ -10,7 +10,7 @@ export interface GameRecord {
   thumbnailUrl: string | null;
   demoVideoUrl: string | null;
   previewImages: string[];
-  category: GameCategory;
+  categories: GameCategory[];
   tags: string[];
   playerCountMin: number;
   playerCountMax: number;

@@ -39,6 +39,11 @@ export const GameCategorySchema = z.enum([
   "other",
 ]);
 
+export const GameCategoriesSchema = z
+  .array(GameCategorySchema)
+  .min(1, "At least one category is required")
+  .max(5, "Maximum 5 categories allowed");
+
 export const GameComplexitySchema = z.enum([
   "light",
   "medium",
@@ -61,7 +66,7 @@ const BaseCreateGameSchema = z.object({
     .min(10, "Short description must be at least 10 characters")
     .max(160, "Short description cannot exceed 160 characters")
     .trim(),
-  category: GameCategorySchema,
+  categories: GameCategoriesSchema,
   tags: z
     .array(z.string().min(1).max(32).trim())
     .max(10, "Maximum 10 tags allowed")

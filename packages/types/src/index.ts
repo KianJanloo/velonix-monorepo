@@ -353,7 +353,7 @@ export interface GameMetadata {
   shortDescription: string; // Max 160 chars for cards
   thumbnailUrl: Nullable<string>;
   previewImages: string[];
-  category: GameCategory;
+  categories: GameCategory[];
   tags: string[];
   playerCount: PlayerCountRange;
   averagePlaytimeMinutes: PlayerCountRange;
@@ -392,7 +392,7 @@ export interface GameSummary {
   title: string;
   shortDescription: string;
   thumbnailUrl: Nullable<string>;
-  category: GameCategory;
+  categories: GameCategory[];
   isFree: boolean;
   priceUsd: Nullable<CurrencyAmount>;
   averageRating: Nullable<number>;

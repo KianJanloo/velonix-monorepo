@@ -28,10 +28,12 @@ export function useCategories() {
 
 // ── Admin ────────────────────────────────────────────────────────────────────
 
-export function useAdminCategories() {
+export function useAdminCategories(page = 1, perPage = 50) {
   return useQuery({
-    queryKey: ["admin", "categories"],
-    queryFn: () => apiClient.get<Category[]>("/categories/admin/all"),
+    queryKey: ["admin", "categories", { page, perPage }],
+    queryFn: () => apiClient.get<{ data: Category[]; total: number; totalPages: number }>(
+      "/categories/admin/all", { params: { page, perPage } }
+    ),
   });
 }
 

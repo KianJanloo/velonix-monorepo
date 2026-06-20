@@ -20,14 +20,14 @@ class CreateGameBodyDto {
   @ApiProperty({ required: false, example: "An exciting strategy game." })
   description?: string;
 
-  @ApiProperty({ required: false, enum: ["strategy", "puzzle", "trivia", "party", "rpg", "cooperative", "other"] })
-  category?: string;
+  @ApiProperty({ required: false, example: ["strategy", "cooperative"] })
+  categories?: string[];
 }
 
 class UpdateGameBodyDto {
   @ApiProperty({ required: false }) title?: string;
   @ApiProperty({ required: false }) description?: string;
-  @ApiProperty({ required: false }) category?: string;
+  @ApiProperty({ required: false }) categories?: string[];
   @ApiProperty({ required: false, nullable: true, description: "Price in USD cents; null = free" }) priceUsd?: number | null;
   @ApiProperty({ required: false, description: "Full studio JSON snapshot" }) studioData?: unknown;
 }

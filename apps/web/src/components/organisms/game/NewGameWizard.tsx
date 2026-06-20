@@ -23,7 +23,7 @@ export function NewGameWizard() {
   const router = useRouter();
   const createGame = useCreateGame();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const { data: categories = [], isLoading: catsLoading } = useCategories();
+  const { data: allCategories = [], isLoading: catsLoading } = useCategories();
 
   const {
     register,
@@ -42,16 +42,16 @@ export function NewGameWizard() {
       playtimeMin: 30,
       playtimeMax: 60,
       tags: [],
+      categories: [],
     },
   });
 
-  const category = watch("category");
   const complexity = watch("complexity");
 
   async function nextStep() {
     const fieldsPerStep: Record<number, (keyof CreateGameDto)[]> = {
       1: ["title", "shortDescription", "description"],
-      2: ["category", "complexity", "playerCountMin", "playerCountMax", "playtimeMin", "playtimeMax", "minAge"],
+      2: ["categories", "complexity", "playerCountMin", "playerCountMax", "playtimeMin", "playtimeMax", "minAge"],
     };
     const valid = await trigger(fieldsPerStep[step] as (keyof CreateGameDto)[]);
     if (valid) setStep((s) => (s < 3 ? ((s + 1) as 1 | 2 | 3) : s));
@@ -158,28 +158,37 @@ export function NewGameWizard() {
                 <p className="text-soft-gray text-sm font-ui">Help players find your game in the marketplace.</p>
               </div>
 
-              {/* Category */}
+              {/* Categories (multi-select) */}
               <div>
-                <p className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider mb-3">Category</p>
+                <p className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider mb-3">Categories</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {catsLoading ? (
                     <span className="text-[10px] text-soft-gray-dark font-ui animate-pulse col-span-full">Loading categories…</span>
-                  ) : categories.map(({ slug, label, icon }: any) => (
-                    <button
-                      key={slug}
-                      type="button"
-                      onClick={() => setValue("category", slug, { shouldValidate: true })}
-                      className={`px-3 py-2.5 rounded-lg text-sm font-ui border transition-all ${
-                        category === slug
-                          ? "bg-emerald-ghost border-emerald-glow/50 text-emerald-glow"
-                          : "border-warm-wood text-soft-gray hover:border-warm-wood-light hover:text-parchment-light"
-                      }`}
-                    >
-                      {icon ? `${icon} ` : ""}{label}
-                    </button>
-                  ))}
+                  ) : allCategories.map(({ slug, label, icon }: any) => {
+                    const selected = (watch("categories") ?? []).includes(slug);
+                    return (
+                      <button
+                        key={slug}
+                        type="button"
+                        onClick={() => {
+                          const current = watch("categories") ?? [];
+                          const next = selected
+                            ? current.filter((c: string) => c !== slug)
+                            : [...current, slug];
+                          setValue("categories", next, { shouldValidate: true });
+                        }}
+                        className={`px-3 py-2.5 rounded-lg text-sm font-ui border transition-all ${
+                          selected
+                            ? "bg-emerald-ghost border-emerald-glow/50 text-emerald-glow"
+                            : "border-warm-wood text-soft-gray hover:border-warm-wood-light hover:text-parchment-light"
+                        }`}
+                      >
+                        {icon ? `${icon} ` : ""}{label}
+                      </button>
+                    );
+                  })}
                 </div>
-                {errors.category && <p className="text-xs text-crimson-flame mt-1 font-ui">{errors.category.message}</p>}
+                {errors.categories && <p className="text-xs text-crimson-flame mt-1 font-ui">{errors.categories.message}</p>}
               </div>
 
               {/* Complexity */}
@@ -278,7 +287,7 @@ export function NewGameWizard() {
                   </div>
                   <div>
                     <p className="font-display text-sm font-bold text-parchment-light">{watch("title") || "—"}</p>
-                    <p className="text-2xs text-soft-gray font-ui capitalize">{watch("category") || "—"} · {watch("complexity")?.replace("_", " ") || "—"}</p>
+                    <p className="text-2xs text-soft-gray font-ui capitalize">{(watch("categories") ?? []).join(", ").replace(/_/g, " ") || "—"} · {watch("complexity")?.replace("_", " ") || "—"}</p>
                   </div>
                 </div>
                 <p className="text-sm text-parchment-mid font-ui leading-relaxed">{watch("shortDescription") || "—"}</p>

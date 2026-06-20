@@ -277,7 +277,12 @@ function CategoryRow({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AdminCategoriesPage() {
-  const { data: categories = [], isLoading } = useAdminCategories();
+  const [page, setPage] = useState(1);
+  const perPage = 50;
+  const { data: result, isLoading } = useAdminCategories(page, perPage);
+  const categories = result?.data ?? [];
+  const total = result?.total ?? 0;
+  const totalPages = result?.totalPages ?? 1;
   const create = useAdminCreateCategory();
   const update = useAdminUpdateCategory();
   const refresh = useAdminRefreshCategoryCounts();
@@ -293,13 +298,14 @@ export default function AdminCategoriesPage() {
   });
 
   function handleCreate(form: CreateCategoryPayload) {
-    create.mutate(form, { onSuccess: () => setShowForm(false) });
+    create.mutate(form, { onSuccess: () => { setShowForm(false); setPage(1); } });
   }
 
   function handleUpdate(form: CreateCategoryPayload) {
     if (!editing) return;
+    const { slug: _slug, ...payload } = form;
     update.mutate(
-      { id: editing.id, ...form },
+      { id: editing.id, ...payload },
       { onSuccess: () => setEditing(null) },
     );
   }
@@ -328,7 +334,7 @@ export default function AdminCategoriesPage() {
             Categories
           </h1>
           <p className="text-soft-gray text-sm font-ui mt-0.5">
-            {categories.length} categor{categories.length === 1 ? "y" : "ies"} ·{" "}
+            {total} categor{total === 1 ? "y" : "ies"} ·{" "}
             {categories.reduce((a, c) => a + c.gameCount, 0)} games total
           </p>
         </div>
@@ -424,6 +430,29 @@ export default function AdminCategoriesPage() {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:text-parchment-light transition-colors"
+          >
+            ← Prev
+          </button>
+          <span className="text-xs text-soft-gray font-ui">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 rounded-lg border border-warm-wood text-sm font-ui text-soft-gray disabled:opacity-40 hover:text-parchment-light transition-colors"
+          >
+            Next →
+          </button>
+        </div>
+      )}
 
       <p className="mt-4 text-xs text-soft-gray-dark font-ui">
         Slugs are immutable once created — they match the <code>category</code>{" "}

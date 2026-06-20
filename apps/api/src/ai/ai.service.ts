@@ -43,6 +43,16 @@ export class AiService {
     return !!this.config.get<boolean>("ai.enabled");
   }
 
+  getConfig() {
+    return {
+      enabled: this.enabled,
+      provider: this.config.get<string>("ai.provider"),
+      model: this.config.get<string>("ai.model"),
+      maxTokens: this.config.get<number>("ai.maxTokens"),
+      hasApiKey: !!this.config.get<string>("ai.apiKey"),
+    };
+  }
+
   async balanceGame(gameSummary: string): Promise<unknown> {
     const apiKey = this.config.get<string>("ai.apiKey");
     const model = this.config.get<string>("ai.model");

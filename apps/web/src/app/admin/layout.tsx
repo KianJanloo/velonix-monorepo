@@ -213,6 +213,22 @@ const NAV = [
     ),
   },
   {
+    href: "/admin/uploads",
+    label: "Uploads",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path
+          d="M7.5 1v8M4 5.5l3.5-4 3.5 4"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M1 11v2a1 1 0 001 1h11a1 1 0 001-1v-2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     href: "/admin/support",
     label: "Support",
     icon: (
@@ -281,6 +297,21 @@ const NAV = [
         <circle cx="4" cy="4" r="1" fill="currentColor" />
         <circle cx="4" cy="7.5" r="1" fill="currentColor" />
         <circle cx="4" cy="11" r="1" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    href: "/admin/ai",
+    label: "AI",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path
+          d="M7.5 1l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5z"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinejoin="round"
+        />
+        <path d="M4 10l-2 4M11 10l2 4M7.5 12v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
       </svg>
     ),
   },

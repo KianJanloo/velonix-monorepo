@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseGuards,
   HttpCode,
 } from "@nestjs/common";
@@ -16,6 +17,7 @@ import {
   ApiProperty,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from "@nestjs/swagger";
 import {
   IsString,
@@ -125,8 +127,16 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth("JWT")
   @ApiOperation({ summary: "List all categories incl. inactive (admin)" })
-  listAll() {
-    return this.categoriesService.listAll();
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "perPage", required: false, type: Number })
+  listAll(
+    @Query("page") page?: string,
+    @Query("perPage") perPage?: string,
+  ) {
+    return this.categoriesService.listAll(
+      page ? parseInt(page, 10) : 1,
+      perPage ? parseInt(perPage, 10) : 50,
+    );
   }
 
   @Post("admin")

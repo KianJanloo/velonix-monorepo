@@ -29,7 +29,7 @@ export function PublishSettings({ gameId }: { gameId: string }) {
     title: "",
     shortDescription: "",
     description: "",
-    category: "strategy",
+    categories: [] as string[],
     complexity: "medium",
     playerCountMin: 2,
     playerCountMax: 4,
@@ -49,7 +49,7 @@ export function PublishSettings({ gameId }: { gameId: string }) {
       title: game.title,
       shortDescription: game.shortDescription,
       description: game.description,
-      category: game.category,
+      categories: game.categories ?? [],
       complexity: game.complexity,
       playerCountMin: game.playerCountMin,
       playerCountMax: game.playerCountMax,
@@ -74,7 +74,7 @@ export function PublishSettings({ gameId }: { gameId: string }) {
         title: form.title,
         shortDescription: form.shortDescription,
         description: form.description,
-        category: form.category as never,
+        categories: form.categories,
         complexity: form.complexity as never,
         playerCountMin: form.playerCountMin,
         playerCountMax: form.playerCountMax,
@@ -207,24 +207,38 @@ export function PublishSettings({ gameId }: { gameId: string }) {
             <div className="grid grid-cols-2 gap-4">
               <label className="block">
                 <span className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider block mb-1.5">
-                  Category
+                  Categories <span className="text-soft-gray-dark normal-case">(select multiple)</span>
                 </span>
-                <select
-                  className="v-input capitalize"
-                  value={form.category}
-                  onChange={(e) => set("category", e.target.value)}
-                >
+                <div className="flex flex-wrap gap-1.5 mt-1">
                   {catsLoading ? (
-                    <option>Loading…</option>
+                    <span className="text-[10px] text-soft-gray-dark font-ui animate-pulse">Loading…</span>
                   ) : (
-                    categories.map((c) => (
-                      <option key={c.slug} value={c.slug}>
-                        {c.icon ? `${c.icon} ` : ""}
-                        {c.label}
-                      </option>
-                    ))
+                    categories.map((c) => {
+                      const selected = form.categories.includes(c.slug);
+                      return (
+                        <button
+                          key={c.slug}
+                          type="button"
+                          onClick={() =>
+                            set(
+                              "categories",
+                              selected
+                                ? form.categories.filter((s) => s !== c.slug)
+                                : [...form.categories, c.slug],
+                            )
+                          }
+                          className={`px-2.5 py-1.5 rounded-lg text-xs font-ui border transition-all ${
+                            selected
+                              ? "bg-emerald-ghost border-emerald-glow/50 text-emerald-glow"
+                              : "border-warm-wood text-soft-gray hover:border-warm-wood-light hover:text-parchment-light"
+                          }`}
+                        >
+                          {c.icon ? `${c.icon} ` : ""}{c.label}
+                        </button>
+                      );
+                    })
                   )}
-                </select>
+                </div>
               </label>
               <label className="block">
                 <span className="text-2xs font-ui font-semibold text-parchment-mid uppercase tracking-wider block mb-1.5">

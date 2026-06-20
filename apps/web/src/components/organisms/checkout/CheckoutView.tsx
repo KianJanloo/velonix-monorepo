@@ -233,7 +233,7 @@ export function CheckoutView({ gameId }: { gameId: string }) {
               </div>
               <div className="min-w-0">
                 <p className="font-ui font-semibold text-parchment-light truncate">{game.title}</p>
-                <p className="text-2xs text-soft-gray font-ui capitalize">{game.category?.replace("_", " ")} · {game.complexity?.replace("_", " ")}</p>
+                <p className="text-2xs text-soft-gray font-ui capitalize">{(game.categories ?? []).join(", ").replace(/_/g, " ")} · {game.complexity?.replace("_", " ")}</p>
                 {game.creator && <p className="text-2xs text-soft-gray font-ui mt-0.5">by {game.creator.displayName}</p>}
               </div>
             </div>

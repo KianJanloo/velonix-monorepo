@@ -128,7 +128,7 @@ export class AdminService {
 
     return {
       data: games.map(g => ({
-        id: g.id, title: g.title, status: g.status, category: g.category,
+        id: g.id, title: g.title, status: g.status, categories: g.categories,
         isFree: g.isFree, priceUsd: g.priceUsd, totalPurchases: g.totalPurchases,
         averageRating: g.averageRating, totalRatings: g.totalRatings,
         creator: { id: g.creatorId, username: g.creator?.username },
