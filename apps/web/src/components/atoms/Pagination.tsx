@@ -103,7 +103,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(
       [page, totalPages, siblingCount],
     );
 
-    // if (totalPages <= 1) return null;
+    if (totalPages <= 1) return null;
 
     const canGoPrev = page > 1;
     const canGoNext = page < totalPages;
