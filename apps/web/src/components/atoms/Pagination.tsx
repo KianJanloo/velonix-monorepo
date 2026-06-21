@@ -94,7 +94,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(
       onPageChange,
       siblingCount = 1,
       className,
-      compact = false,
+      // compact = false,
     },
     ref,
   ) => {
