@@ -88,7 +88,7 @@ export default function AdminAssetsPage() {
                     <div className="flex gap-3">
                       <button
                         onClick={() => setPublished.mutate({ id: asset.id, isPublished: !asset.isPublished })}
-                        className="text-cyan-spark text-xs font-ui hover:text-cyan-spark/80 transition-colors">
+                        className="text-emerald-glow text-xs font-ui hover:text-emerald-glow/80 transition-colors">
                         {asset.isPublished ? "Unpublish" : "Publish"}
                       </button>
                       <ConfirmDialog

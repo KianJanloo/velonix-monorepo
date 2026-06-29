@@ -99,7 +99,7 @@ const SWATCH_GROUPS = [
   },
   {
     label: "Accent",
-    swatches: ["#7c5cff", "#3ddc97", "#f5c451", "#ff3b5c", "#00e5ff", "#fb923c"],
+    swatches: ["#00D68F", "#3ddc97", "#f5c451", "#ff3b5c", "#00D68F", "#fb923c"],
   },
   {
     label: "Warm",

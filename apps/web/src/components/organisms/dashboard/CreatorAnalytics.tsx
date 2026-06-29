@@ -125,7 +125,7 @@ export function CreatorAnalytics() {
         <Kpi label="Total earnings" value={money(totals.totalRevenue)} accent="text-emerald-glow" />
         <Kpi label="Last 30 days" value={money(totals.revenue30d)} accent="text-royal-gold" />
         <Kpi label="Total sales" value={totals.totalSales.toLocaleString()} />
-        <Kpi label="Unique buyers" value={totals.uniqueBuyers.toLocaleString()} accent="text-cyan-spark" />
+        <Kpi label="Unique buyers" value={totals.uniqueBuyers.toLocaleString()} accent="text-emerald-glow" />
       </div>
 
       <RevenueChart series={series} />

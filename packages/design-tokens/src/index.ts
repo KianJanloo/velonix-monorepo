@@ -31,16 +31,16 @@ export const colors = {
   feltDark: "#2e1f14",
 
   // ── Primary Actions — Emerald Glow ──────────────────────────────────────
-  /** #7c5cff — Primary CTA, create/publish actions, success states. */
-  emeraldGlow: "#7c5cff",
-  /** #6344e6 — Emerald hover state, pressed primary buttons. */
-  emeraldDark: "#6344e6",
-  /** #9277ff — Emerald active glow, focus rings on primary. */
-  emeraldBright: "#9277ff",
-  /** rgba(124,92,255,0.15) — Emerald ghost backgrounds, chip fills. */
-  emeraldGhost: "rgba(124,92,255,0.15)",
-  /** rgba(124,92,255,0.08) — Subtle emerald tint on hover areas. */
-  emeraldSubtle: "rgba(124,92,255,0.08)",
+  /** #00D68F — Primary CTA, create/publish actions, success states. */
+  emeraldGlow: "#00D68F",
+  /** #00B07A — Emerald hover state, pressed primary buttons. */
+  emeraldDark: "#00B07A",
+  /** #40E0A8 — Emerald active glow, focus rings on primary. */
+  emeraldBright: "#40E0A8",
+  /** rgba(0,214,143,0.15) — Emerald ghost backgrounds, chip fills. */
+  emeraldGhost: "rgba(0,214,143,0.15)",
+  /** rgba(0,214,143,0.08) — Subtle emerald tint on hover areas. */
+  emeraldSubtle: "rgba(0,214,143,0.08)",
 
   // ── Premium Accents — Royal Gold ─────────────────────────────────────────
   /** #f5c451 — Premium badges, earnings display, highlight rings, crown icons. */
@@ -60,14 +60,6 @@ export const colors = {
   /** rgba(255,59,92,0.15) — Crimson ghost, error backgrounds. */
   crimsonGhost: "rgba(255,59,92,0.15)",
 
-  // ── Interactive / Info — Cyan Spark ─────────────────────────────────────
-  /** #00e5ff — Hover glow, info tooltips, link accents, selection handles. */
-  cyanSpark: "#00e5ff",
-  /** #00c4db — Cyan hover state. */
-  cyanDark: "#00c4db",
-  /** rgba(0,229,255,0.12) — Cyan ghost, info box backgrounds. */
-  cyanGhost: "rgba(0,229,255,0.12)",
-
   // ── Typography ───────────────────────────────────────────────────────────
   /** #e8d5b8 — Primary text. Warm parchment — evokes physical rulebooks. */
   parchmentLight: "#e8d5b8",
@@ -81,7 +73,7 @@ export const colors = {
   white: "#ffffff",
 
   // ── Semantic Aliases ─────────────────────────────────────────────────────
-  primary: "#7c5cff",
+  primary: "#00D68F",
   primaryForeground: "#0a0a0a",
   secondary: "#1c140f",
   secondaryForeground: "#e8d5b8",
@@ -93,7 +85,7 @@ export const colors = {
   mutedForeground: "#a8a29e",
   border: "#3a2a1f",
   input: "#241a12",
-  ring: "#7c5cff",
+  ring: "#00D68F",
   background: "#0a0a0a",
   foreground: "#e8d5b8",
   card: "#1c140f",
@@ -242,15 +234,15 @@ export const shadows = {
   /** Dramatic overlay shadow */
   xl: "0 24px 64px rgba(0,0,0,0.85), 0 12px 32px rgba(0,0,0,0.6)",
   /** Emerald primary button glow */
-  emerald: "0 0 20px rgba(124,92,255,0.35), 0 0 8px rgba(124,92,255,0.2)",
+  emerald: "0 0 20px rgba(0,214,143,0.35), 0 0 8px rgba(0,214,143,0.2)",
   /** Emerald focused ring glow */
-  emeraldFocus: "0 0 0 3px rgba(124,92,255,0.3)",
+  emeraldFocus: "0 0 0 3px rgba(0,214,143,0.3)",
   /** Gold premium element glow */
   gold: "0 0 20px rgba(245,196,81,0.4), 0 0 8px rgba(245,196,81,0.2)",
   /** Crimson danger glow */
   crimson: "0 0 16px rgba(255,59,92,0.35), 0 0 6px rgba(255,59,92,0.2)",
   /** Cyan interactive glow */
-  cyan: "0 0 16px rgba(0,229,255,0.3), 0 0 6px rgba(0,229,255,0.15)",
+  cyan: "0 0 16px rgba(0,214,143,0.3), 0 0 6px rgba(0,214,143,0.15)",
   /** Inner shadow for pressed/inset states */
   inner: "inset 0 2px 8px rgba(0,0,0,0.6)",
   none: "none",
@@ -294,11 +286,11 @@ export const threeColors = {
   richWoodDark: 0x1c140f,
   warmWood: 0x3a2a1f,
   warmWoodLight: 0x4a3728,
-  emeraldGlow: 0x7c5cff,
-  emeraldBright: 0x9277ff,
+  emeraldGlow: 0x00d68f,
+  emeraldBright: 0x40e0a8,
   royalGold: 0xf5c451,
   crimsonFlame: 0xff3b5c,
-  cyanSpark: 0x00e5ff,
+  cyanSpark: 0x00d68f,
   parchmentLight: 0xe8d5b8,
   tableTop: 0x2a1c12,      // Tabletop surface (darker warm wood)
   tableFelt: 0x1a1208,     // Felt/baize inlay
@@ -359,7 +351,7 @@ export const studioTokens = {
   /** Canvas grid major line color */
   gridMajor: "rgba(74,55,40,0.8)",
   /** Selection handle color */
-  selectionHandle: "#00e5ff",
+  selectionHandle: "#00D68F",
   /** Snap indicator color */
-  snapIndicator: "#7c5cff",
+  snapIndicator: "#00D68F",
 } as const;

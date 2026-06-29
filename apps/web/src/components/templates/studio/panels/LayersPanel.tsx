@@ -359,7 +359,7 @@ export function LayersPanel({
 
               <div
                 onClick={() => onSelect(node.members[0]!.id)}
-                className={`flex items-center gap-1 pl-1 pr-1 py-1.5 rounded-lg cursor-pointer group transition-colors ${groupSel ? "bg-[rgba(124,92,255,0.14)] text-[#a78bff] ring-1 ring-[rgba(124,92,255,0.4)]" : "text-soft-gray hover:bg-warm-wood hover:text-parchment-light"}`}
+                className={`flex items-center gap-1 pl-1 pr-1 py-1.5 rounded-lg cursor-pointer group transition-colors ${groupSel ? "bg-[rgba(0,214,143,0.14)] text-[#40E0A8] ring-1 ring-[rgba(0,214,143,0.4)]" : "text-soft-gray hover:bg-warm-wood hover:text-parchment-light"}`}
               >
                 <button
                   onClick={(e) => {
@@ -385,7 +385,7 @@ export function LayersPanel({
                   </svg>
                 </button>
 
-                <span className="text-[#a78bff] shrink-0" title="Group">
+                <span className="text-[#40E0A8] shrink-0" title="Group">
                   ⛓
                 </span>
 

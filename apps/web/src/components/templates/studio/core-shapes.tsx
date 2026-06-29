@@ -24,7 +24,7 @@ export function ShapeInner({ comp }: { comp: CanvasComp }) {
         className="absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(0,229,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.05) 1px,transparent 1px)",
+            "linear-gradient(rgba(0,214,143,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,214,143,0.05) 1px,transparent 1px)",
           backgroundSize: "24px 24px",
           borderRadius: "inherit",
         }}
@@ -209,7 +209,7 @@ export function ShapeInner({ comp }: { comp: CanvasComp }) {
       return `M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z`;
     });
     const PALETTE = [
-      "#7c5cff",
+      "#00D68F",
       "#ff3b5c",
       "#3ddc97",
       "#f5c451",
@@ -580,7 +580,7 @@ function CompViewImpl({
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            outline: `1.5px ${primary ? "solid" : "dashed"} #7c5cff`,
+            outline: `1.5px ${primary ? "solid" : "dashed"} #00D68F`,
             outlineOffset: 1,
           }}
         />
@@ -603,7 +603,7 @@ function CompViewImpl({
                 top: `calc(${hd.cy * 100}% - 4px)`,
                 width: 8,
                 height: 8,
-                background: "#7c5cff",
+                background: "#00D68F",
                 border: "1.5px solid #0a0a0a",
                 borderRadius: 1,
                 cursor: hd.cursor,

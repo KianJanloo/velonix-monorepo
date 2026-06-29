@@ -15,7 +15,7 @@ const BLANK: PromoEventInput = {
 };
 
 const VARIANT_DOT: Record<PromoEventVariant, string> = {
-  promo: "bg-[#7c5cff]", sale: "bg-crimson-flame", info: "bg-soft-gray", warning: "bg-royal-gold",
+  promo: "bg-[#00D68F]", sale: "bg-crimson-flame", info: "bg-soft-gray", warning: "bg-royal-gold",
 };
 
 function toLocalInput(iso: string | null | undefined): string {
@@ -209,7 +209,7 @@ export default function AdminEventsPage() {
 /** Static preview that mirrors PromoBanner styling without fetching. */
 function PreviewBanner({ event }: { event: PromoEvent }) {
   const style: Record<PromoEventVariant, string> = {
-    promo: "bg-gradient-to-r from-[#7c5cff] to-[#00b8d4] text-white",
+    promo: "bg-gradient-to-r from-[#00D68F] to-[#00b8d4] text-white",
     sale: "bg-gradient-to-r from-[#ff3b5c] to-[#f5c451] text-deep-void",
     info: "bg-rich-wood-mid text-parchment-light",
     warning: "bg-royal-gold text-deep-void",

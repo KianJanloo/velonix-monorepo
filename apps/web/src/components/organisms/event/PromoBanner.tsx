@@ -6,7 +6,7 @@ import { useActiveEvents } from "@/hooks/useEvents";
 import type { PromoEvent, PromoEventPlacement, PromoEventVariant } from "@velonix/types";
 
 const VARIANT_STYLE: Record<PromoEventVariant, string> = {
-  promo: "bg-gradient-to-r from-[#7c5cff] to-[#00b8d4] text-white",
+  promo: "bg-gradient-to-r from-[#00D68F] to-[#00b8d4] text-white",
   sale: "bg-gradient-to-r from-[#ff3b5c] to-[#f5c451] text-deep-void",
   info: "bg-rich-wood-mid text-parchment-light border-b border-warm-wood",
   warning: "bg-royal-gold text-deep-void",

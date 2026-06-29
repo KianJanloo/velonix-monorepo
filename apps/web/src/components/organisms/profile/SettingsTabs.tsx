@@ -174,8 +174,8 @@ function AppearanceTab() {
   const current = mounted ? (theme === "system" ? resolvedTheme : theme) ?? "dark" : "dark";
 
   const options = [
-    { id: "dark", label: "Dark", desc: "The classic Velonix table", bg: "#0a0a0a", fg: "#e8d5b8", accent: "#7c5cff" },
-    { id: "light", label: "Light", desc: "Bright parchment surfaces", bg: "#f5f1e8", fg: "#261e16", accent: "#6344e6" },
+    { id: "dark", label: "Dark", desc: "The classic Velonix table", bg: "#0a0a0a", fg: "#e8d5b8", accent: "#00D68F" },
+    { id: "light", label: "Light", desc: "Bright parchment surfaces", bg: "#f5f1e8", fg: "#261e16", accent: "#00B07A" },
   ];
 
   return (

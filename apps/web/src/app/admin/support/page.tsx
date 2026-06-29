@@ -16,7 +16,7 @@ const FILTERS: { value: TicketStatus | "all"; label: string }[] = [
 ];
 
 const statusBadge: Record<string, string> = {
-  open: "bg-cyan-spark/10 text-cyan-spark",
+  open: "bg-emerald-glow/10 text-emerald-glow",
   pending: "bg-royal-gold/10 text-royal-gold",
   resolved: "bg-emerald-ghost text-emerald-glow",
 };

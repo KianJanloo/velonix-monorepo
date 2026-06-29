@@ -23,7 +23,7 @@ export default function AdminGamesPage() {
 
   const statusColor: Record<string, string> = {
     published: "bg-emerald-ghost text-emerald-glow",
-    reviewing: "bg-[rgba(0,229,255,0.1)] text-cyan-spark",
+    reviewing: "bg-[rgba(0,214,143,0.1)] text-emerald-glow",
     draft: "bg-warm-wood text-soft-gray",
     rejected: "bg-crimson-ghost text-crimson-flame",
     unpublished: "bg-warm-wood text-soft-gray",
@@ -116,7 +116,7 @@ export default function AdminGamesPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2 items-center">
-                    <Link href={`/admin/games/${game.id}`} className="text-cyan-spark text-xs font-ui hover:opacity-80 transition-opacity">
+                    <Link href={`/admin/games/${game.id}`} className="text-emerald-glow text-xs font-ui hover:opacity-80 transition-opacity">
                       Review
                     </Link>
                     {game.status === "reviewing" && (

@@ -115,7 +115,7 @@ export function ProfileView({ username }: { username: string }) {
               </p>
             </div>
             <div className="text-center">
-              <p className="font-display text-2xl font-bold text-cyan-spark">
+              <p className="font-display text-2xl font-bold text-emerald-glow">
                 {profile.stats.followersCount}
               </p>
               <p className="text-2xs text-soft-gray font-ui uppercase tracking-wider">

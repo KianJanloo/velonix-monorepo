@@ -14,7 +14,7 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   game_rejected: <span className="text-crimson-flame">!</span>,
   new_review: <span className="text-royal-gold">★</span>,
   new_sale: <span className="text-emerald-glow">$</span>,
-  subscription: <span className="text-cyan-spark">↑</span>,
+  subscription: <span className="text-emerald-glow">↑</span>,
   system: <span className="text-soft-gray">•</span>,
 };
 

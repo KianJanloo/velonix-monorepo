@@ -35,9 +35,9 @@ const VELONIX_SWAGGER_DARK_CSS = `
   .swagger-ui .parameter__name, .swagger-ui .parameter__type,
   .swagger-ui .response-col_status, .swagger-ui .response-col_description,
   .swagger-ui label, .swagger-ui .tab li, .swagger-ui .opblock-title_normal p { color:#c4b49a !important; }
-  .swagger-ui .opblock.opblock-post { border-color:#7c5cff; background:rgba(124,92,255,0.06); }
-  .swagger-ui .opblock.opblock-post .opblock-summary-method { background:#7c5cff; }
-  .swagger-ui .opblock.opblock-get { border-color:#00e5ff; background:rgba(0,229,255,0.05); }
+  .swagger-ui .opblock.opblock-post { border-color:#00D68F; background:rgba(0,214,143,0.06); }
+  .swagger-ui .opblock.opblock-post .opblock-summary-method { background:#00D68F; }
+  .swagger-ui .opblock.opblock-get { border-color:#00D68F; background:rgba(0,214,143,0.05); }
   .swagger-ui .opblock.opblock-get .opblock-summary-method { background:#00b8d4; }
   .swagger-ui .opblock.opblock-patch { border-color:#f5c451; background:rgba(245,196,81,0.05); }
   .swagger-ui .opblock.opblock-patch .opblock-summary-method { background:#d4a93a; }
@@ -48,8 +48,8 @@ const VELONIX_SWAGGER_DARK_CSS = `
     background:#241a12 !important; color:#e8d5b8 !important; border:1px solid #3a2a1f !important;
   }
   .swagger-ui .btn { color:#e8d5b8; border-color:#3a2a1f; background:#241a12; }
-  .swagger-ui .btn.authorize { color:#7c5cff; border-color:#7c5cff; }
-  .swagger-ui .btn.execute { background:#7c5cff; color:#0a0a0a; border-color:#7c5cff; }
+  .swagger-ui .btn.authorize { color:#00D68F; border-color:#00D68F; }
+  .swagger-ui .btn.execute { background:#00D68F; color:#0a0a0a; border-color:#00D68F; }
   .swagger-ui .model, .swagger-ui .model-title, .swagger-ui .models, .swagger-ui section.models { color:#c4b49a !important; }
   .swagger-ui section.models { background:#1c140f; border:1px solid #3a2a1f; }
   .swagger-ui .model-box { background:#241a12; }

@@ -275,7 +275,7 @@ function PlayersTab({
           </button>
           <button
             onClick={onAddAI}
-            className="flex-1 py-1.5 rounded-lg border border-dashed border-[rgba(124,92,255,0.4)] text-[#a78bff] text-2xs font-ui hover:border-[rgba(124,92,255,0.7)] transition-colors"
+            className="flex-1 py-1.5 rounded-lg border border-dashed border-[rgba(0,214,143,0.4)] text-[#40E0A8] text-2xs font-ui hover:border-[rgba(0,214,143,0.7)] transition-colors"
           >
             + AI
           </button>
@@ -662,7 +662,7 @@ function AITab({
 
             <button
               onClick={onTriggerAI}
-              className="w-full py-2 rounded-xl bg-[rgba(124,92,255,0.15)] text-[#a78bff] text-2xs font-ui font-semibold border border-[rgba(124,92,255,0.3)] hover:bg-[rgba(124,92,255,0.25)] transition-colors"
+              className="w-full py-2 rounded-xl bg-[rgba(0,214,143,0.15)] text-[#40E0A8] text-2xs font-ui font-semibold border border-[rgba(0,214,143,0.3)] hover:bg-[rgba(0,214,143,0.25)] transition-colors"
             >
               🤖 Run AI turn now
             </button>

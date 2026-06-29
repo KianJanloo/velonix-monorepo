@@ -9,7 +9,7 @@ type TierFilter = (typeof TIERS)[number];
 
 const TIER_BADGE: Record<string, string> = {
   free: "bg-warm-wood text-soft-gray",
-  creator: "bg-cyan-spark/10 text-cyan-spark",
+  creator: "bg-emerald-glow/10 text-emerald-glow",
   pro: "bg-emerald-ghost text-emerald-glow",
   studio: "bg-royal-gold/10 text-royal-gold",
 };
@@ -23,7 +23,7 @@ export default function AdminSubscriptionsPage() {
 
   const statCards = [
     { label: "Free", value: stats?.byTier.free ?? 0, color: "text-soft-gray" },
-    { label: "Creator", value: stats?.byTier.creator ?? 0, color: "text-cyan-spark" },
+    { label: "Creator", value: stats?.byTier.creator ?? 0, color: "text-emerald-glow" },
     { label: "Pro", value: stats?.byTier.pro ?? 0, color: "text-emerald-glow" },
     { label: "Studio", value: stats?.byTier.studio ?? 0, color: "text-royal-gold" },
   ];

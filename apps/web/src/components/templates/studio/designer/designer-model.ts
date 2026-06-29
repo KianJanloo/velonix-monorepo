@@ -85,7 +85,7 @@ export function makeLayer(type: LayerType): DesignLayer {
     case "text":
       return { ...base, text: "Text", fontSize: 28, color: "#1a1410", align: "center", weight: "bold", h: 0.12 };
     case "rect":
-      return { ...base, fill: "#7c5cff", stroke: "", strokeWidth: 0, cornerRadius: 0 };
+      return { ...base, fill: "#00D68F", stroke: "", strokeWidth: 0, cornerRadius: 0 };
     case "ellipse":
       return { ...base, fill: "#3ddc97", stroke: "" };
     case "line":

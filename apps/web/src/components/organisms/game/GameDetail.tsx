@@ -14,7 +14,7 @@ interface GameRule { id: string; trigger: string; description: string }
 
 const DIFFICULTY_STYLE: Record<string, string> = {
   intro: "bg-emerald-ghost text-emerald-glow",
-  standard: "bg-[rgba(0,229,255,0.12)] text-cyan-spark",
+  standard: "bg-[rgba(0,214,143,0.12)] text-emerald-glow",
   advanced: "bg-crimson-ghost text-crimson-flame",
 };
 

@@ -15,33 +15,33 @@
   --warm-wood: #3a2a1f;
   --warm-wood-light: #4a3728;
   --felt-dark: #2e1f14;
-  --emerald-glow: #7c5cff;
-  --emerald-dark: #6344e6;
-  --emerald-bright: #9277ff;
+  --emerald-glow: #00D68F;
+  --emerald-dark: #00B07A;
+  --emerald-bright: #40E0A8;
   --royal-gold: #f5c451;
   --royal-gold-dark: #d4a93a;
   --crimson-flame: #ff3b5c;
-  --cyan-spark: #00e5ff;
+  --cyan-spark: #00D68F;
   --parchment-light: #e8d5b8;
   --parchment-mid: #c4b49a;
   --soft-gray: #a8a29e;
   --soft-gray-dark: #6b6460;
-  --shadow-emerald: 0 0 20px rgba(124,92,255,0.35), 0 0 8px rgba(124,92,255,0.2);
+  --shadow-emerald: 0 0 20px rgba(0,214,143,0.35), 0 0 8px rgba(0,214,143,0.2);
   --shadow-gold: 0 0 20px rgba(245,196,81,0.4), 0 0 8px rgba(245,196,81,0.2);
   --shadow-crimson: 0 0 16px rgba(255,59,92,0.35);
-  --shadow-cyan: 0 0 16px rgba(0,229,255,0.3);
+  --shadow-cyan: 0 0 16px rgba(0,214,143,0.3);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--rich-wood-dark)}::-webkit-scrollbar-thumb{background:var(--warm-wood-light);border-radius:3px}
-::selection{background:rgba(124,92,255,0.2);color:var(--emerald-bright)}
+::selection{background:rgba(0,214,143,0.2);color:var(--emerald-bright)}
 
 .page{max-width:1160px;margin:0 auto;padding:0 32px 100px}
 
 /* HERO */
 .hero{text-align:center;padding:80px 0 56px;position:relative}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(124,92,255,0.07),transparent);pointer-events:none}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(0,214,143,0.07),transparent);pointer-events:none}
 .hero-logo{margin-bottom:32px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .hero-title{font-family:'Cinzel',serif;font-size:clamp(2.8rem,6vw,4.5rem);font-weight:900;letter-spacing:0.12em;line-height:1;background:linear-gradient(135deg,var(--parchment-light) 0%,var(--royal-gold) 45%,var(--parchment-light) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
 .hero-tagline{font-family:'DM Sans',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.4em;text-transform:uppercase;color:var(--soft-gray);margin-bottom:16px}
@@ -83,9 +83,9 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .btn-outline:hover{background:var(--warm-wood);border-color:var(--soft-gray)}
 .btn-danger{background:var(--crimson-flame);color:white}
 .btn-danger:hover{box-shadow:var(--shadow-crimson)}
-.btn-ghost{background:rgba(124,92,255,0.08);color:var(--emerald-glow);border:1px solid rgba(124,92,255,0.22)}
-.btn-ghost:hover{background:rgba(124,92,255,0.15)}
-.btn-cyan{background:rgba(0,229,255,0.08);color:var(--cyan-spark);border:1px solid rgba(0,229,255,0.22)}
+.btn-ghost{background:rgba(0,214,143,0.08);color:var(--emerald-glow);border:1px solid rgba(0,214,143,0.22)}
+.btn-ghost:hover{background:rgba(0,214,143,0.15)}
+.btn-cyan{background:rgba(0,214,143,0.08);color:var(--cyan-spark);border:1px solid rgba(0,214,143,0.22)}
 .btn-sm{padding:7px 14px;font-size:0.78rem}
 .btn-lg{padding:14px 28px;font-size:1rem}
 
@@ -93,10 +93,10 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .badge-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase}
 .badge-premium{background:rgba(245,196,81,0.1);color:var(--royal-gold);border:1px solid rgba(245,196,81,0.28);box-shadow:0 0 12px rgba(245,196,81,0.15)}
-.badge-published{background:rgba(124,92,255,0.1);color:var(--emerald-glow);border:1px solid rgba(124,92,255,0.28)}
+.badge-published{background:rgba(0,214,143,0.1);color:var(--emerald-glow);border:1px solid rgba(0,214,143,0.28)}
 .badge-draft{background:rgba(168,162,158,0.08);color:var(--soft-gray);border:1px solid rgba(168,162,158,0.18)}
 .badge-sale{background:rgba(255,59,92,0.1);color:var(--crimson-flame);border:1px solid rgba(255,59,92,0.28)}
-.badge-info{background:rgba(0,229,255,0.08);color:var(--cyan-spark);border:1px solid rgba(0,229,255,0.22)}
+.badge-info{background:rgba(0,214,143,0.08);color:var(--cyan-spark);border:1px solid rgba(0,214,143,0.22)}
 .badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
 
 /* GAME CARDS */
@@ -124,7 +124,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:0.7rem;font-weight:600;color:var(--parchment-mid);letter-spacing:0.06em;text-transform:uppercase}
 .v-input{background:var(--rich-wood-mid);border:1px solid var(--warm-wood);border-radius:8px;padding:10px 14px;color:var(--parchment-light);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;transition:all 0.15s;width:100%}
-.v-input:focus{border-color:var(--emerald-glow);box-shadow:0 0 0 3px rgba(124,92,255,0.14)}
+.v-input:focus{border-color:var(--emerald-glow);box-shadow:0 0 0 3px rgba(0,214,143,0.14)}
 .v-input::placeholder{color:var(--soft-gray-dark)}
 .v-input.input-error{border-color:var(--crimson-flame);box-shadow:0 0 0 3px rgba(255,59,92,0.1)}
 .field-hint{font-size:0.68rem;color:var(--soft-gray-dark)}
@@ -137,7 +137,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .toolbar-sep{width:1px;height:22px;background:var(--warm-wood);margin:0 4px}
 .tb{width:30px;height:30px;border-radius:6px;border:none;background:transparent;color:var(--soft-gray);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.1s}
 .tb:hover{background:var(--warm-wood);color:var(--parchment-light)}
-.tb.active{background:rgba(124,92,255,0.12);color:var(--emerald-glow);box-shadow:inset 0 0 0 1px rgba(124,92,255,0.3)}
+.tb.active{background:rgba(0,214,143,0.12);color:var(--emerald-glow);box-shadow:inset 0 0 0 1px rgba(0,214,143,0.3)}
 .toolbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 .toolbar-zoom{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--soft-gray);background:var(--warm-wood);padding:4px 10px;border-radius:5px}
 .toolbar-save{font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:600;padding:6px 14px;border-radius:6px;background:var(--emerald-glow);color:var(--deep-void);border:none;cursor:pointer}
@@ -152,27 +152,27 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .psec-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--soft-gray-dark);margin-bottom:5px;padding:0 2px}
 .layer-item{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:5px;cursor:pointer;transition:background 0.1s}
 .layer-item:hover{background:var(--warm-wood)}
-.layer-item.sel{background:rgba(124,92,255,0.09);box-shadow:inset 0 0 0 1px rgba(124,92,255,0.18)}
+.layer-item.sel{background:rgba(0,214,143,0.09);box-shadow:inset 0 0 0 1px rgba(0,214,143,0.18)}
 .li-icon{width:17px;height:17px;border-radius:3px;background:var(--warm-wood);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--soft-gray);flex-shrink:0}
 .li-name{font-size:0.72rem;color:var(--parchment-mid)}
 .layer-item.sel .li-name{color:var(--emerald-glow)}
 .li-eye{margin-left:auto;font-size:10px;color:var(--soft-gray-dark);opacity:0.6}
 .asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px}
 .asset-thumb{aspect-ratio:1;border-radius:5px;background:var(--warm-wood);border:1px solid rgba(58,42,31,0.8);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all 0.1s;color:var(--parchment-mid)}
-.asset-thumb:hover{border-color:var(--emerald-glow);background:rgba(124,92,255,0.07)}
+.asset-thumb:hover{border-color:var(--emerald-glow);background:rgba(0,214,143,0.07)}
 .studio-canvas{background:#0c0c0c;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background-image:linear-gradient(rgba(58,42,31,0.35) 1px,transparent 1px),linear-gradient(90deg,rgba(58,42,31,0.35) 1px,transparent 1px);background-size:32px 32px}
 .canvas-board{width:210px;height:158px;background:linear-gradient(145deg,#1a2535,#141d2b);border-radius:6px;position:relative;box-shadow:0 12px 40px rgba(0,0,0,0.8),0 0 0 1px rgba(245,196,81,0.14)}
-.canvas-grid-ov{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.05) 1px,transparent 1px);background-size:18px 18px;border-radius:6px}
-.canvas-card-obj{position:absolute;border-radius:3px;background:linear-gradient(145deg,#1f2d42,#172233);border:1px solid rgba(124,92,255,0.25);box-shadow:2px 3px 8px rgba(0,0,0,0.7)}
+.canvas-grid-ov{position:absolute;inset:0;background-image:linear-gradient(rgba(0,214,143,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,214,143,0.05) 1px,transparent 1px);background-size:18px 18px;border-radius:6px}
+.canvas-card-obj{position:absolute;border-radius:3px;background:linear-gradient(145deg,#1f2d42,#172233);border:1px solid rgba(0,214,143,0.25);box-shadow:2px 3px 8px rgba(0,0,0,0.7)}
 .canvas-token-obj{position:absolute;border-radius:50%;border:2px solid rgba(245,196,81,0.5)}
-.sel-ring{position:absolute;inset:-3px;border:1px dashed var(--cyan-spark);border-radius:4px;pointer-events:none;box-shadow:0 0 10px rgba(0,229,255,0.2)}
+.sel-ring{position:absolute;inset:-3px;border:1px dashed var(--cyan-spark);border-radius:4px;pointer-events:none;box-shadow:0 0 10px rgba(0,214,143,0.2)}
 .sel-handle{position:absolute;width:7px;height:7px;background:var(--cyan-spark);border-radius:1px;border:1px solid rgba(0,0,0,0.4)}
 .props-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;border-bottom:1px solid var(--warm-wood)}
 .props-title{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--parchment-mid)}
 .prop-row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid rgba(58,42,31,0.4);gap:10px}
 .prop-label{font-size:0.68rem;color:var(--soft-gray);flex-shrink:0}
 .prop-val{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--parchment-mid);background:var(--rich-wood-mid);border:1px solid var(--warm-wood);padding:3px 8px;border-radius:4px;min-width:80px;text-align:right}
-.prop-val.em{color:var(--emerald-glow);border-color:rgba(124,92,255,0.2)}
+.prop-val.em{color:var(--emerald-glow);border-color:rgba(0,214,143,0.2)}
 .prop-val.go{color:var(--royal-gold);border-color:rgba(245,196,81,0.2)}
 .color-chips{display:flex;gap:4px}
 .chip{width:18px;height:18px;border-radius:3px;cursor:pointer;border:1px solid rgba(255,255,255,0.07);transition:transform 0.1s}
@@ -183,7 +183,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .pricing-card{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:14px;padding:24px 18px;position:relative;transition:all 0.2s}
 .pricing-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,0.55)}
-.pricing-card.featured{border-color:var(--emerald-glow);box-shadow:0 0 28px rgba(124,92,255,0.14)}
+.pricing-card.featured{border-color:var(--emerald-glow);box-shadow:0 0 28px rgba(0,214,143,0.14)}
 .pricing-card.gold-tier{border-color:var(--royal-gold);box-shadow:var(--shadow-gold)}
 .tier-pill{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:0.58rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;padding:3px 12px;border-radius:999px;white-space:nowrap}
 .tier-pill.green{background:var(--emerald-glow);color:var(--deep-void)}
@@ -211,16 +211,16 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px}
 .stat-card{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:10px;padding:18px 16px;position:relative;overflow:hidden}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.stat-card.em::before{background:var(--emerald-glow);box-shadow:0 0 8px rgba(124,92,255,0.5)}
+.stat-card.em::before{background:var(--emerald-glow);box-shadow:0 0 8px rgba(0,214,143,0.5)}
 .stat-card.go::before{background:var(--royal-gold);box-shadow:0 0 8px rgba(245,196,81,0.4)}
 .stat-card.cr::before{background:var(--crimson-flame)}
 .stat-card.cy::before{background:var(--cyan-spark)}
 .stat-label-txt{font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft-gray-dark);margin-bottom:6px}
 .stat-num{font-family:'Cinzel',serif;font-size:1.9rem;font-weight:900;line-height:1;margin-bottom:4px}
-.stat-num.em{color:var(--emerald-glow);text-shadow:0 0 14px rgba(124,92,255,0.35)}
+.stat-num.em{color:var(--emerald-glow);text-shadow:0 0 14px rgba(0,214,143,0.35)}
 .stat-num.go{color:var(--royal-gold);text-shadow:0 0 14px rgba(245,196,81,0.35)}
 .stat-num.pa{color:var(--parchment-light)}
-.stat-num.cy{color:var(--cyan-spark);text-shadow:0 0 14px rgba(0,229,255,0.3)}
+.stat-num.cy{color:var(--cyan-spark);text-shadow:0 0 14px rgba(0,214,143,0.3)}
 .stat-change{font-size:0.68rem;font-weight:600;color:var(--emerald-glow)}
 .stat-change.down{color:var(--crimson-flame)}
 
@@ -239,7 +239,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 /* ANIMATIONS */
 @keyframes float-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes shimmer-move{0%{background-position:-200% center}100%{background-position:200% center}}
-@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(124,92,255,0.5)}50%{box-shadow:0 0 0 8px rgba(124,92,255,0)}}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(0,214,143,0.5)}50%{box-shadow:0 0 0 8px rgba(0,214,143,0)}}
 @keyframes glow-blink{0%,100%{opacity:1;filter:brightness(1)}50%{opacity:0.55;filter:brightness(0.7)}}
 @keyframes spin-orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes card-appear{from{transform:rotateY(90deg) scale(0.8);opacity:0}to{transform:rotateY(0deg) scale(1);opacity:1}}
@@ -248,8 +248,8 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 .shimmer-box{width:80px;height:28px;border-radius:6px;background:linear-gradient(90deg,transparent 0%,rgba(245,196,81,0.3) 50%,transparent 100%);background-size:200% 100%;animation:shimmer-move 2s linear infinite;border:1px solid rgba(245,196,81,0.2)}
 .pulse-dot{width:40px;height:40px;border-radius:50%;background:var(--emerald-glow);animation:pulse-ring 2s ease-in-out infinite;box-shadow:var(--shadow-emerald)}
 .glow-gem{width:40px;height:40px;border-radius:6px;transform:rotate(45deg);background:var(--royal-gold);animation:glow-blink 2s ease-in-out infinite;box-shadow:var(--shadow-gold)}
-.orbit-ring{width:44px;height:44px;border-radius:50%;border:2px solid rgba(0,229,255,0.3);border-top-color:var(--cyan-spark);animation:spin-orbit 1.5s linear infinite}
-.card-flip-demo{width:44px;height:60px;border-radius:5px;background:linear-gradient(135deg,#1f2d42,#141d2b);border:1px solid rgba(124,92,255,0.3);animation:card-appear 1.5s cubic-bezier(0.5,0,0.5,1) infinite alternate}
+.orbit-ring{width:44px;height:44px;border-radius:50%;border:2px solid rgba(0,214,143,0.3);border-top-color:var(--cyan-spark);animation:spin-orbit 1.5s linear infinite}
+.card-flip-demo{width:44px;height:60px;border-radius:5px;background:linear-gradient(135deg,#1f2d42,#141d2b);border:1px solid rgba(0,214,143,0.3);animation:card-appear 1.5s cubic-bezier(0.5,0,0.5,1) infinite alternate}
 
 /* MONOREPO STRUCTURE */
 .tree-block{background:var(--rich-wood-dark);border:1px solid var(--warm-wood);border-radius:12px;padding:24px 28px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.8;overflow-x:auto}
@@ -313,12 +313,12 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
 
   <div style="margin-bottom:12px;font-size:0.72rem;color:var(--soft-gray-dark);font-family:'Cinzel',serif;letter-spacing:0.1em;text-transform:uppercase">Accent Colors</div>
   <div class="swatches">
-    <div class="swatch" style="box-shadow:0 0 14px rgba(124,92,255,0.25)"><div class="swatch-color" style="background:#7c5cff"></div><div class="swatch-info"><div class="swatch-name">Emerald Glow</div><div class="swatch-hex">#7c5cff</div><div class="swatch-desc">Primary actions, create</div></div></div>
-    <div class="swatch" style="box-shadow:0 0 14px rgba(124,92,255,0.12)"><div class="swatch-color" style="background:#6344e6"></div><div class="swatch-info"><div class="swatch-name">Emerald Dark</div><div class="swatch-hex">#6344e6</div><div class="swatch-desc">Button hover state</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 14px rgba(0,214,143,0.25)"><div class="swatch-color" style="background:#00D68F"></div><div class="swatch-info"><div class="swatch-name">Emerald Glow</div><div class="swatch-hex">#00D68F</div><div class="swatch-desc">Primary actions, create</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 14px rgba(0,214,143,0.12)"><div class="swatch-color" style="background:#00B07A"></div><div class="swatch-info"><div class="swatch-name">Emerald Dark</div><div class="swatch-hex">#00B07A</div><div class="swatch-desc">Button hover state</div></div></div>
     <div class="swatch" style="box-shadow:0 0 16px rgba(245,196,81,0.35)"><div class="swatch-color" style="background:#f5c451"></div><div class="swatch-info"><div class="swatch-name">Royal Gold</div><div class="swatch-hex">#f5c451</div><div class="swatch-desc">Premium, earnings</div></div></div>
     <div class="swatch" style="box-shadow:0 0 14px rgba(245,196,81,0.15)"><div class="swatch-color" style="background:#d4a93a"></div><div class="swatch-info"><div class="swatch-name">Royal Gold Dark</div><div class="swatch-hex">#d4a93a</div><div class="swatch-desc">Gold hover state</div></div></div>
     <div class="swatch" style="box-shadow:0 0 14px rgba(255,59,92,0.3)"><div class="swatch-color" style="background:#ff3b5c"></div><div class="swatch-info"><div class="swatch-name">Crimson Flame</div><div class="swatch-hex">#ff3b5c</div><div class="swatch-desc">Warnings, danger</div></div></div>
-    <div class="swatch" style="box-shadow:0 0 14px rgba(0,229,255,0.25)"><div class="swatch-color" style="background:#00e5ff"></div><div class="swatch-info"><div class="swatch-name">Cyan Spark</div><div class="swatch-hex">#00e5ff</div><div class="swatch-desc">Interactive, hover</div></div></div>
+    <div class="swatch" style="box-shadow:0 0 14px rgba(0,214,143,0.25)"><div class="swatch-color" style="background:#00D68F"></div><div class="swatch-info"><div class="swatch-name">Cyan Spark</div><div class="swatch-hex">#00D68F</div><div class="swatch-desc">Interactive, hover</div></div></div>
     <div class="swatch"><div class="swatch-color" style="background:#e8d5b8"></div><div class="swatch-info"><div class="swatch-name">Parchment Light</div><div class="swatch-hex">#e8d5b8</div><div class="swatch-desc">Primary text</div></div></div>
     <div class="swatch"><div class="swatch-color" style="background:#a8a29e"></div><div class="swatch-info"><div class="swatch-name">Soft Gray</div><div class="swatch-hex">#a8a29e</div><div class="swatch-desc">Secondary text</div></div></div>
   </div>
@@ -399,7 +399,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
     <span class="badge badge-draft">Draft</span>
     <span class="badge badge-sale"><span class="badge-dot"></span>Hot Sale</span>
     <span class="badge badge-info">New</span>
-    <span class="badge" style="background:rgba(124,92,255,0.08);color:var(--emerald-glow);border:1px solid rgba(124,92,255,0.2)">Free</span>
+    <span class="badge" style="background:rgba(0,214,143,0.08);color:var(--emerald-glow);border:1px solid rgba(0,214,143,0.2)">Free</span>
     <span class="badge" style="background:rgba(245,196,81,0.08);color:var(--royal-gold);border:1px solid rgba(245,196,81,0.2)">Strategy</span>
     <span class="badge" style="background:rgba(255,59,92,0.08);color:var(--crimson-flame);border:1px solid rgba(255,59,92,0.2)">Limited</span>
     <span class="badge" style="background:rgba(168,162,158,0.07);color:var(--soft-gray);border:1px solid rgba(168,162,158,0.15)">Cooperative</span>
@@ -415,8 +415,8 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
   <div class="cards-grid">
     <div class="game-card">
       <div class="card-thumb" style="background:linear-gradient(135deg,#0e1a28,#1a2535)">
-        <div class="card-thumb-art" style="background:rgba(124,92,255,0.07);border-color:rgba(124,92,255,0.2)">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="4" y="4" width="28" height="28" rx="3" stroke="rgba(124,92,255,0.6)" stroke-width="1.5"/><path d="M4 14h28M14 4v28" stroke="rgba(124,92,255,0.4)" stroke-width="1"/><circle cx="18" cy="18" r="4" fill="rgba(124,92,255,0.3)"/></svg>
+        <div class="card-thumb-art" style="background:rgba(0,214,143,0.07);border-color:rgba(0,214,143,0.2)">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="4" y="4" width="28" height="28" rx="3" stroke="rgba(0,214,143,0.6)" stroke-width="1.5"/><path d="M4 14h28M14 4v28" stroke="rgba(0,214,143,0.4)" stroke-width="1"/><circle cx="18" cy="18" r="4" fill="rgba(0,214,143,0.3)"/></svg>
         </div>
         <div class="card-thumb-grad"></div>
         <div class="card-thumb-badge"><span class="badge badge-published" style="font-size:0.55rem;padding:2px 7px"><span class="badge-dot"></span>Published</span></div>
@@ -455,7 +455,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
           <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="12" stroke="rgba(245,196,81,0.5)" stroke-width="1.5"/><path d="M18 10l2 5h5l-4 3 1.5 5L18 20l-4.5 3L15 18l-4-3h5z" fill="rgba(245,196,81,0.3)"/></svg>
         </div>
         <div class="card-thumb-grad" style="background:linear-gradient(to bottom,transparent 40%,rgba(10,14,10,0.92))"></div>
-        <div class="card-thumb-badge"><span class="badge" style="font-size:0.55rem;padding:2px 7px;background:rgba(0,229,255,0.1);color:var(--cyan-spark);border:1px solid rgba(0,229,255,0.25)">New</span></div>
+        <div class="card-thumb-badge"><span class="badge" style="font-size:0.55rem;padding:2px 7px;background:rgba(0,214,143,0.1);color:var(--cyan-spark);border:1px solid rgba(0,214,143,0.25)">New</span></div>
       </div>
       <div class="card-body">
         <div class="card-title">Gilded Realm</div>
@@ -469,8 +469,8 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
     </div>
     <div class="game-card">
       <div class="card-thumb" style="background:linear-gradient(135deg,#0a0f1a,#0e1528)">
-        <div class="card-thumb-art" style="background:rgba(0,229,255,0.06);border-color:rgba(0,229,255,0.18)">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="6" y="6" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><rect x="20" y="6" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><rect x="6" y="20" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><rect x="20" y="20" width="10" height="10" rx="1" stroke="rgba(0,229,255,0.5)" stroke-width="1.2"/><circle cx="18" cy="18" r="2" fill="rgba(0,229,255,0.5)"/></svg>
+        <div class="card-thumb-art" style="background:rgba(0,214,143,0.06);border-color:rgba(0,214,143,0.18)">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="6" y="6" width="10" height="10" rx="1" stroke="rgba(0,214,143,0.5)" stroke-width="1.2"/><rect x="20" y="6" width="10" height="10" rx="1" stroke="rgba(0,214,143,0.5)" stroke-width="1.2"/><rect x="6" y="20" width="10" height="10" rx="1" stroke="rgba(0,214,143,0.5)" stroke-width="1.2"/><rect x="20" y="20" width="10" height="10" rx="1" stroke="rgba(0,214,143,0.5)" stroke-width="1.2"/><circle cx="18" cy="18" r="2" fill="rgba(0,214,143,0.5)"/></svg>
         </div>
         <div class="card-thumb-grad" style="background:linear-gradient(to bottom,transparent 40%,rgba(8,10,18,0.92))"></div>
       </div>
@@ -529,7 +529,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
       </button>
       <div class="toolbar-right">
         <span class="toolbar-zoom">100%</span>
-        <span style="font-size:0.65rem;color:var(--emerald-glow);background:rgba(124,92,255,0.08);border:1px solid rgba(124,92,255,0.2);padding:3px 10px;border-radius:4px;font-family:'DM Sans',sans-serif;font-weight:600">Saved</span>
+        <span style="font-size:0.65rem;color:var(--emerald-glow);background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.2);padding:3px 10px;border-radius:4px;font-family:'DM Sans',sans-serif;font-weight:600">Saved</span>
         <button class="toolbar-save">Publish</button>
       </div>
     </div>
@@ -563,7 +563,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
         <div class="panel-section">
           <div class="psec-title">Cards (60)</div>
           <div class="layer-item">
-            <div class="li-icon" style="background:rgba(124,92,255,0.1);color:var(--emerald-glow)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="1" width="6" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-icon" style="background:rgba(0,214,143,0.1);color:var(--emerald-glow)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="1" width="6" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg></div>
             <div class="li-name">Player Card</div>
             <div class="li-eye">&#9728;</div>
           </div>
@@ -576,7 +576,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
         <div class="panel-section">
           <div class="psec-title">Tokens (30)</div>
           <div class="layer-item">
-            <div class="li-icon" style="background:rgba(0,229,255,0.08);color:var(--cyan-spark)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="li-icon" style="background:rgba(0,214,143,0.08);color:var(--cyan-spark)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.2"/></svg></div>
             <div class="li-name">Resource Token</div>
             <div class="li-eye">&#9728;</div>
           </div>
@@ -602,14 +602,14 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
           </div>
           <div class="canvas-card-obj" style="width:26px;height:38px;top:40px;left:56px;transform:rotate(5deg)"></div>
           <div class="canvas-card-obj" style="width:26px;height:38px;top:26px;left:90px;transform:rotate(-3deg)"></div>
-          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:32px;background:rgba(124,92,255,0.25)"></div>
+          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:32px;background:rgba(0,214,143,0.25)"></div>
           <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:58px;background:rgba(245,196,81,0.2);border-color:rgba(245,196,81,0.5)"></div>
           <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:84px;background:rgba(255,59,92,0.2);border-color:rgba(255,59,92,0.5)"></div>
-          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:110px;background:rgba(0,229,255,0.15);border-color:rgba(0,229,255,0.5)"></div>
+          <div class="canvas-token-obj" style="width:18px;height:18px;top:80px;left:110px;background:rgba(0,214,143,0.15);border-color:rgba(0,214,143,0.5)"></div>
           <div class="canvas-card-obj" style="width:26px;height:38px;top:38px;left:148px"></div>
           <div class="canvas-card-obj" style="width:26px;height:38px;top:33px;left:150px;transform:rotate(2deg)"></div>
           <!-- Alignment guide line -->
-          <div style="position:absolute;top:47px;left:0;right:0;height:1px;background:rgba(0,229,255,0.3);pointer-events:none"></div>
+          <div style="position:absolute;top:47px;left:0;right:0;height:1px;background:rgba(0,214,143,0.3);pointer-events:none"></div>
         </div>
       </div>
       <!-- Right properties panel -->
@@ -671,7 +671,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
     </div>
     <div class="field">
       <label>Category</label>
-      <input class="v-input" type="text" value="Strategy" style="border-color:var(--emerald-glow);box-shadow:0 0 0 3px rgba(124,92,255,0.14)" />
+      <input class="v-input" type="text" value="Strategy" style="border-color:var(--emerald-glow);box-shadow:0 0 0 3px rgba(0,214,143,0.14)" />
     </div>
   </div>
 </div>
@@ -742,7 +742,7 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
         <div class="p-amount" style="color:var(--royal-gold)"><sup style="color:var(--royal-gold-dark)">$</sup>79</div>
         <span class="p-period">per month</span>
       </div>
-      <div class="p-commission" style="color:var(--emerald-glow);border-color:rgba(124,92,255,0.15);background:rgba(124,92,255,0.04)">15% platform commission</div>
+      <div class="p-commission" style="color:var(--emerald-glow);border-color:rgba(0,214,143,0.15);background:rgba(0,214,143,0.04)">15% platform commission</div>
       <ul class="p-features">
         <li>Everything in Pro</li>
         <li>100 GB storage</li>
@@ -805,11 +805,11 @@ body{background:var(--deep-void);color:var(--parchment-light);font-family:'DM Sa
   <div class="shadow-grid">
     <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 4px 12px rgba(0,0,0,0.6)"></div><div class="shadow-name">shadow-md</div><div class="shadow-code">Default elevation</div></div>
     <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 16px 48px rgba(0,0,0,0.8)"></div><div class="shadow-name">shadow-lg</div><div class="shadow-code">Modal, panel</div></div>
-    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 20px rgba(124,92,255,0.35),0 0 8px rgba(124,92,255,0.2)"></div><div class="shadow-name">shadow-emerald</div><div class="shadow-code">Primary glow</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 20px rgba(0,214,143,0.35),0 0 8px rgba(0,214,143,0.2)"></div><div class="shadow-name">shadow-emerald</div><div class="shadow-code">Primary glow</div></div>
     <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 20px rgba(245,196,81,0.4),0 0 8px rgba(245,196,81,0.2)"></div><div class="shadow-name">shadow-gold</div><div class="shadow-code">Premium glow</div></div>
     <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 16px rgba(255,59,92,0.35)"></div><div class="shadow-name">shadow-crimson</div><div class="shadow-code">Danger glow</div></div>
-    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 16px rgba(0,229,255,0.3)"></div><div class="shadow-name">shadow-cyan</div><div class="shadow-code">Interactive glow</div></div>
-    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 0 3px rgba(124,92,255,0.3)"></div><div class="shadow-name">focus-ring</div><div class="shadow-code">Focus state</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 16px rgba(0,214,143,0.3)"></div><div class="shadow-name">shadow-cyan</div><div class="shadow-code">Interactive glow</div></div>
+    <div class="shadow-sample"><div class="shadow-box" style="box-shadow:0 0 0 3px rgba(0,214,143,0.3)"></div><div class="shadow-name">focus-ring</div><div class="shadow-code">Focus state</div></div>
     <div class="shadow-sample"><div class="shadow-box" style="box-shadow:inset 0 2px 8px rgba(0,0,0,0.6)"></div><div class="shadow-name">shadow-inner</div><div class="shadow-code">Pressed/inset</div></div>
   </div>
 </div>

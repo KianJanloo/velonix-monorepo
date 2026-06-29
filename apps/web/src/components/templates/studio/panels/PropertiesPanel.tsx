@@ -70,9 +70,9 @@ export function GroupBar({
   hasNestedGroups?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-[rgba(124,92,255,0.3)] bg-[rgba(124,92,255,0.08)] p-2.5">
+    <div className="rounded-lg border border-[rgba(0,214,143,0.3)] bg-[rgba(0,214,143,0.08)] p-2.5">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-2xs font-ui font-semibold text-[#a78bff]">
+        <span className="text-2xs font-ui font-semibold text-[#40E0A8]">
           {count > 1 ? `${count} selected` : "Group"}
           {hasNestedGroups && (
             <span className="ml-1.5 text-[10px] text-royal-gold font-normal">⤷ nested</span>
@@ -89,7 +89,7 @@ export function GroupBar({
           onClick={onGroup}
           disabled={!canGroup}
           title={hasNestedGroups ? "Nest selected groups into a parent group" : "Group selected components"}
-          className="flex-1 py-1.5 rounded-lg bg-[rgba(124,92,255,0.15)] text-[#a78bff] text-2xs font-ui font-semibold hover:bg-[rgba(124,92,255,0.25)] disabled:opacity-30 transition-colors"
+          className="flex-1 py-1.5 rounded-lg bg-[rgba(0,214,143,0.15)] text-[#40E0A8] text-2xs font-ui font-semibold hover:bg-[rgba(0,214,143,0.25)] disabled:opacity-30 transition-colors"
         >
           {hasNestedGroups ? "Nest groups" : "Group"}
         </button>

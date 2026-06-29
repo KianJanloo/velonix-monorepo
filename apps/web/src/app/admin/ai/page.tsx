@@ -143,7 +143,7 @@ export default function AdminAiPage() {
                 <span className="text-soft-gray-dark font-semibold">
                   Endpoint:{" "}
                 </span>
-                <code className="text-cyan-spark text-[10px] font-mono">
+                <code className="text-emerald-glow text-[10px] font-mono">
                   POST /v1/ai/balance
                 </code>
               </p>
@@ -158,52 +158,52 @@ export default function AdminAiPage() {
             <div className="space-y-3 text-sm font-ui">
               <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">Legacy (single provider)</p>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_API_KEY</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_API_KEY</code>
                 <span className="text-soft-gray">API key (overrides provider-specific keys)</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_MODEL</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_MODEL</code>
                 <span className="text-soft-gray">Model name (default: claude-sonnet-4-6)</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_MAX_TOKENS</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_MAX_TOKENS</code>
                 <span className="text-soft-gray">Max tokens per response (default: 1000)</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_PROVIDER</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_PROVIDER</code>
                 <span className="text-soft-gray">Active provider name (default: anthropic)</span>
               </div>
 
               <div className="h-px bg-warm-wood/40 my-3" />
               <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">Anthropic (Claude)</p>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_ANTHROPIC_API_KEY</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_ANTHROPIC_API_KEY</code>
                 <span className="text-soft-gray">Anthropic API key</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_ANTHROPIC_MODEL</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_ANTHROPIC_MODEL</code>
                 <span className="text-soft-gray">Model (default: claude-sonnet-4-6)</span>
               </div>
 
               <div className="h-px bg-warm-wood/40 my-3" />
               <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">OpenAI (GPT)</p>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_OPENAI_API_KEY</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_OPENAI_API_KEY</code>
                 <span className="text-soft-gray">OpenAI API key</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_OPENAI_MODEL</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_OPENAI_MODEL</code>
                 <span className="text-soft-gray">Model (default: gpt-4o)</span>
               </div>
 
               <div className="h-px bg-warm-wood/40 my-3" />
               <p className="text-2xs text-soft-gray-dark uppercase tracking-wider font-semibold">Google (Gemini)</p>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_GOOGLE_API_KEY</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_GOOGLE_API_KEY</code>
                 <span className="text-soft-gray">Google AI API key</span>
               </div>
               <div className="flex items-center gap-2">
-                <code className="text-[11px] font-mono text-cyan-spark bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_GOOGLE_MODEL</code>
+                <code className="text-[11px] font-mono text-emerald-glow bg-rich-wood-mid px-1.5 py-0.5 rounded">AI_GOOGLE_MODEL</code>
                 <span className="text-soft-gray">Model (default: gemini-2.0-flash)</span>
               </div>
             </div>

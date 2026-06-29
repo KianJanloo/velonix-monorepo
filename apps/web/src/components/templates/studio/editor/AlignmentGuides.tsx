@@ -157,7 +157,7 @@ function ComponentDimensionBadge({
         x={x - w / 2} y={y - 9}
         width={w} height={16}
         rx={4}
-        fill="#7c5cff" opacity={0.95}
+        fill="#00D68F" opacity={0.95}
       />
       <text
         x={x} y={y + 1}
@@ -205,7 +205,7 @@ export function AlignmentGuides({
       {/* ── Standard alignment snap lines ── */}
       {guides.map((g, i) => {
         const isCenter = g.kind === "center";
-        const color = isCenter ? "#7c5cff" : "#3ddc97";
+        const color = isCenter ? "#00D68F" : "#3ddc97";
         const dashArray = isCenter ? "4 3" : undefined;
 
         if (g.axis === "v") {

@@ -9,7 +9,7 @@ import { useCurrentUser } from "@/hooks/useAuth";
 // Presentation-only metadata (colors/highlight); pricing & features come from the API.
 const TIER_STYLE: Record<string, { tagline: string; color: string; highlighted: boolean }> = {
   free:    { tagline: "Start your journey", color: "border-warm-wood bg-rich-wood-dark", highlighted: false },
-  creator: { tagline: "For dedicated designers", color: "border-emerald-glow/50 bg-emerald-ghost shadow-[0_0_40px_rgba(124,92,255,0.12)]", highlighted: true },
+  creator: { tagline: "For dedicated designers", color: "border-emerald-glow/50 bg-emerald-ghost shadow-[0_0_40px_rgba(0,214,143,0.12)]", highlighted: true },
   pro:     { tagline: "Scale your studio", color: "border-royal-gold/40 bg-rich-wood-dark", highlighted: false },
   studio:  { tagline: "For teams & agencies", color: "border-warm-wood-light bg-rich-wood-dark", highlighted: false },
 };

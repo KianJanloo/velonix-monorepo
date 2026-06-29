@@ -36,7 +36,7 @@ function ThemedToaster() {
           success: "!border-[rgba(0,212,165,0.4)]",
           error: "!border-[rgba(255,59,92,0.4)]",
           warning: "!border-[rgba(245,196,81,0.4)]",
-          info: "!border-[rgba(0,229,255,0.3)]",
+          info: "!border-[rgba(0,214,143,0.3)]",
         },
       }}
     />

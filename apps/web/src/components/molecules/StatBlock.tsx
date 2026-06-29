@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type AccentColor = "emerald" | "gold" | "cyan" | "parchment";
+type AccentColor = "emerald" | "gold" | "parchment";
 
 interface StatBlockProps {
   label: string;
@@ -14,15 +14,11 @@ interface StatBlockProps {
 const accentStyles: Record<AccentColor, { bar: string; value: string }> = {
   emerald: {
     bar: "bg-emerald-glow shadow-emerald",
-    value: "text-emerald-glow [text-shadow:0_0_14px_rgba(124,92,255,0.35)]",
+    value: "text-emerald-glow [text-shadow:0_0_14px_rgba(0,214,143,0.35)]",
   },
   gold: {
     bar: "bg-royal-gold shadow-gold",
     value: "text-royal-gold [text-shadow:0_0_14px_rgba(245,196,81,0.35)]",
-  },
-  cyan: {
-    bar: "bg-cyan-spark shadow-cyan",
-    value: "text-cyan-spark [text-shadow:0_0_14px_rgba(0,229,255,0.3)]",
   },
   parchment: {
     bar: "bg-parchment-mid",
@@ -60,7 +56,7 @@ export function StatBlock({
         <p
           className={cn(
             "text-2xs font-ui font-semibold",
-            changePositive ? "text-emerald-glow" : "text-crimson-flame"
+            changePositive ? styles.value : "text-crimson-flame"
           )}
         >
           {change}

@@ -217,11 +217,11 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
   if (!isPro) {
     return (
       <div className="p-4 space-y-3">
-        <div className="rounded-xl border border-[rgba(124,92,255,0.4)] bg-[rgba(124,92,255,0.08)] p-4 space-y-3">
+        <div className="rounded-xl border border-[rgba(0,214,143,0.4)] bg-[rgba(0,214,143,0.08)] p-4 space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">🤖</span>
             <div>
-              <p className="text-sm font-display font-bold text-[#a78bff]">AI Game Balancer</p>
+              <p className="text-sm font-display font-bold text-[#40E0A8]">AI Game Balancer</p>
               <p className="text-[10px] text-soft-gray-dark font-ui">Pro feature</p>
             </div>
           </div>
@@ -243,7 +243,7 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
           </ul>
           <a
             href="/pricing"
-            className="block text-center py-2 rounded-lg bg-[rgba(124,92,255,0.2)] text-[#a78bff] text-2xs font-ui font-bold hover:bg-[rgba(124,92,255,0.35)] transition-colors"
+            className="block text-center py-2 rounded-lg bg-[rgba(0,214,143,0.2)] text-[#40E0A8] text-2xs font-ui font-bold hover:bg-[rgba(0,214,143,0.35)] transition-colors"
           >
             Upgrade to Pro →
           </a>
@@ -270,7 +270,7 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
         className={`w-full py-2.5 rounded-xl text-sm font-display font-bold transition-colors ${
           loading
             ? "bg-warm-wood text-soft-gray"
-            : "bg-[rgba(124,92,255,0.85)] text-white hover:bg-[#7c5cff]"
+            : "bg-[rgba(0,214,143,0.85)] text-white hover:bg-[#00D68F]"
         }`}
       >
         {loading ? "⏹ Cancel analysis" : analysis ? "↺ Re-analyse" : "Analyse my game"}
@@ -280,9 +280,9 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
       {loading && (
         <div className="rounded-xl border border-warm-wood/40 bg-rich-wood-mid p-3">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#a78bff] animate-pulse" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#a78bff] animate-pulse [animation-delay:0.2s]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#a78bff] animate-pulse [animation-delay:0.4s]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#40E0A8] animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#40E0A8] animate-pulse [animation-delay:0.2s]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#40E0A8] animate-pulse [animation-delay:0.4s]" />
             <span className="text-[10px] text-soft-gray-dark font-ui ml-1">Analysing game design…</span>
           </div>
           <p className="text-2xs text-soft-gray font-ui">
@@ -383,7 +383,7 @@ export function AIBalancerPanel({ components, rules, guide, pages, isPro }: Prop
                   <li key={i} className="flex items-start gap-2">
                     <span
                       className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-mono font-bold mt-0.5"
-                      style={{ background: "rgba(124,92,255,0.25)", color: "#a78bff" }}
+                      style={{ background: "rgba(0,214,143,0.25)", color: "#40E0A8" }}
                     >
                       {i + 1}
                     </span>

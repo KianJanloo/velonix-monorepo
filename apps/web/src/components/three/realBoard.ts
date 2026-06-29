@@ -711,7 +711,7 @@ function buildSpinner(
   console.log(color);
   const g = new THREE.Group();
   const r = diam / 2;
-  const PALETTE = [0x7c5cff, 0xff3b5c, 0x3ddc97, 0xf5c451, 0x22d3ee, 0xfb923c];
+  const PALETTE = [0x00d68f, 0xff3b5c, 0x3ddc97, 0xf5c451, 0x22d3ee, 0xfb923c];
   const segs = 6;
 
   for (let i = 0; i < segs; i++) {

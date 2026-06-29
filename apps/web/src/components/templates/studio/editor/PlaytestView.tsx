@@ -49,7 +49,7 @@ function PlayPiece({
         transform: `rotate(${c.rotation}deg)`,
         opacity: flipped ? 0.45 : c.opacity / 100,
         cursor: c.locked ? "not-allowed" : c.linkToPageId ? "pointer" : "grab",
-        outline: selected ? "2px solid #7c5cff" : "none",
+        outline: selected ? "2px solid #00D68F" : "none",
         outlineOffset: 2,
         transition: "outline 0.1s",
         userSelect: "none",

@@ -46,13 +46,13 @@ function deriveStats(games: GameRecord[], subscriptionTier: string) {
       label: "Total Purchases",
       value: totalPurchases.toLocaleString(),
       change: `${published.length} published games`,
-      accent: "emerald" as const,
+      accent: "gold" as const,
     },
     {
       label: "Marketplace Views",
       value: viewsDisplay,
       change: "All-time views",
-      accent: "cyan" as const,
+      accent: "gold" as const,
     },
     {
       label: "Active Games",
@@ -71,7 +71,7 @@ function deriveStats(games: GameRecord[], subscriptionTier: string) {
       label: "Total Games",
       value: String(games.length),
       change: `${games.filter((g) => g.status === "draft").length} drafts`,
-      accent: "emerald" as const,
+      accent: "parchment" as const,
     },
     {
       label: "Commission Rate",

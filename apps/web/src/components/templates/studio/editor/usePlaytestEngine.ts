@@ -69,7 +69,7 @@ export const AI_STRATEGY_LABELS: Record<AIStrategy, { label: string; desc: strin
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const COLORS = ["#34d399","#f5c451","#22d3ee","#f87171","#a78bff","#fb923c","#f472b6","#4ade80"];
+const COLORS = ["#34d399","#f5c451","#22d3ee","#f87171","#40E0A8","#fb923c","#f472b6","#4ade80"];
 const stamp  = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 let _eid = 0;
 const eid = () => `ev-${++_eid}-${Date.now()}`;

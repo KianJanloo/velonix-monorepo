@@ -21,7 +21,7 @@ export default function AdminDashboard() {
     { label: "Total Users", value: stats?.users.total ?? 0, href: "/admin/users", color: "text-emerald-glow" },
     { label: "Total Games", value: stats?.games.total ?? 0, href: "/admin/games", color: "text-royal-gold" },
     { label: "Published", value: stats?.games.published ?? 0, href: "/admin/games?status=published", color: "text-emerald-glow" },
-    { label: "Pending Review", value: stats?.games.pendingReview ?? 0, href: "/admin/games?status=reviewing", color: "text-cyan-spark" },
+    { label: "Pending Review", value: stats?.games.pendingReview ?? 0, href: "/admin/games?status=reviewing", color: "text-emerald-glow" },
   ];
 
   return (
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
                 </div>
                 <span className={`text-2xs px-2 py-0.5 rounded-full font-ui capitalize ${
                   g.status === "published" ? "bg-emerald-ghost text-emerald-glow" :
-                  g.status === "reviewing" ? "bg-[rgba(0,229,255,0.1)] text-cyan-spark" :
+                  g.status === "reviewing" ? "bg-[rgba(0,214,143,0.1)] text-emerald-glow" :
                   "bg-warm-wood text-soft-gray"
                 }`}>{g.status}</span>
               </div>

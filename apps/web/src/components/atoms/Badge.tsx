@@ -9,13 +9,13 @@ const badgeVariants = cva(
         premium:
           "bg-royal-gold-ghost text-royal-gold border border-[rgba(245,196,81,0.3)] shadow-gold",
         published:
-          "bg-emerald-ghost text-emerald-glow border border-[rgba(124,92,255,0.3)]",
+          "bg-emerald-ghost text-emerald-glow border border-[rgba(0,214,143,0.3)]",
         draft:
           "bg-[rgba(168,162,158,0.08)] text-soft-gray border border-[rgba(168,162,158,0.18)]",
         danger:
           "bg-crimson-ghost text-crimson-flame border border-[rgba(255,59,92,0.3)]",
         info:
-          "bg-cyan-ghost text-cyan-spark border border-[rgba(0,229,255,0.25)]",
+          "bg-emerald-ghost text-emerald-glow border border-[rgba(0,214,143,0.25)]",
         neutral:
           "bg-warm-wood text-soft-gray border border-warm-wood-light",
       },

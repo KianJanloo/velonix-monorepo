@@ -9,13 +9,12 @@ function cn(...inputs: Parameters<typeof clsx>) {
   return twMerge(clsx(inputs));
 }
 
-type ProgressVariant = "emerald" | "gold" | "crimson" | "cyan";
+type ProgressVariant = "emerald" | "gold" | "crimson";
 
 const variantStyles: Record<ProgressVariant, string> = {
   emerald: "bg-emerald-glow shadow-emerald",
   gold:    "bg-royal-gold shadow-gold",
   crimson: "bg-crimson-flame",
-  cyan:    "bg-cyan-spark",
 };
 
 interface ProgressProps

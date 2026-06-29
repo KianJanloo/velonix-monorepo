@@ -12,7 +12,7 @@ export const DRAW_TOOL_DEFAULTS: Record<
   { width: number; opacity: number; color: string }
 > = {
   pencil:      { width: 2,  opacity: 1,    color: "#f5c451" },
-  highlighter: { width: 12, opacity: 0.35, color: "#7c5cff" },
+  highlighter: { width: 12, opacity: 0.35, color: "#00D68F" },
   eraser:      { width: 16, opacity: 1,    color: "#transparent" },
   arrow:       { width: 2,  opacity: 1,    color: "#ff3b5c" },
   rect:        { width: 2,  opacity: 1,    color: "#3ddc97" },

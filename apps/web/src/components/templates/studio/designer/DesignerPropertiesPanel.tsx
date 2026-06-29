@@ -120,7 +120,7 @@ export function DesignerPropertiesPanel({ face, selectedId, onChange, onSelect }
         <div>
           <SectionLabel>Fill & stroke</SectionLabel>
           <div className="space-y-2.5">
-            <ColorField label="Fill" value={layer.fill ?? "#7c5cff"} onChange={(v) => patch({ fill: v })} allowTransparent />
+            <ColorField label="Fill" value={layer.fill ?? "#00D68F"} onChange={(v) => patch({ fill: v })} allowTransparent />
             <ColorField label="Stroke" value={layer.stroke || "transparent"} onChange={(v) => patch({ stroke: v === "transparent" ? "" : v })} allowTransparent />
             <Stepper label="Stroke width" value={layer.strokeWidth ?? 0} onChange={(v) => patch({ strokeWidth: v })} min={0} max={40} />
             {layer.type === "rect" && (

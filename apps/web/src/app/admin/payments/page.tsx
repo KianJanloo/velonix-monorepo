@@ -25,7 +25,7 @@ export default function AdminPaymentsPage() {
   const statCards = [
     { label: "Gross Revenue", value: stats ? usd(stats.grossRevenue) : "—", color: "text-royal-gold" },
     { label: "Platform Revenue", value: stats ? usd(stats.platformRevenue) : "—", color: "text-emerald-glow" },
-    { label: "Creator Payouts", value: stats ? usd(stats.creatorEarnings) : "—", color: "text-cyan-spark" },
+    { label: "Creator Payouts", value: stats ? usd(stats.creatorEarnings) : "—", color: "text-emerald-glow" },
     { label: "Transactions", value: stats ? stats.transactionCount.toLocaleString() : "—", color: "text-parchment-light" },
   ];
 
@@ -91,7 +91,7 @@ export default function AdminPaymentsPage() {
                 <tr key={`${tx.type}-${tx.id}`} className="border-b border-warm-wood/20 hover:bg-warm-wood/10 transition-colors">
                   <td className="px-4 py-3">
                     <span className={`text-2xs px-2 py-0.5 rounded-full font-ui capitalize ${
-                      tx.type === "game" ? "bg-royal-gold/10 text-royal-gold" : "bg-cyan-spark/10 text-cyan-spark"
+                      tx.type === "game" ? "bg-royal-gold/10 text-royal-gold" : "bg-emerald-glow/10 text-emerald-glow"
                     }`}>{tx.type}</span>
                   </td>
                   <td className="px-4 py-3 text-sm text-parchment-light font-ui">{tx.item?.title ?? <span className="text-soft-gray-dark italic">deleted</span>}</td>

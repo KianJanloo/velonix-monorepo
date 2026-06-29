@@ -354,9 +354,9 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
 
                 height: marquee.h,
 
-                border: "1px solid #7c5cff",
+                border: "1px solid #00D68F",
 
-                background: "rgba(124,92,255,0.12)",
+                background: "rgba(0,214,143,0.12)",
 
                 borderRadius: 2,
               }}
@@ -433,7 +433,7 @@ export function EditorBody({ ed }: { ed: StudioEditor }) {
                   const depth = members[0]?.parentGroupId ? 1 : 0;
                   const borderColor = depth > 0
                     ? "rgba(245,196,81,0.55)"   // gold for nested
-                    : "rgba(124,92,255,0.45)";  // violet for root
+                    : "rgba(0,214,143,0.45)";  // violet for root
 
                   return (
                     <div

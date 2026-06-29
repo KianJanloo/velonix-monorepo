@@ -113,7 +113,7 @@ export function PublishSettings({ gameId }: { gameId: string }) {
   const statusBadge =
     {
       draft: "bg-warm-wood text-soft-gray",
-      reviewing: "bg-[rgba(0,229,255,0.15)] text-cyan-spark",
+      reviewing: "bg-[rgba(0,214,143,0.15)] text-emerald-glow",
       published: "bg-emerald-ghost text-emerald-glow",
       rejected: "bg-crimson-ghost text-crimson-flame",
       unpublished: "bg-warm-wood text-soft-gray",
@@ -361,10 +361,10 @@ export function PublishSettings({ gameId }: { gameId: string }) {
                     const s = priceSuggestion.data;
                     const isApplied = form.priceUsd === s.suggestedUsd;
                     return (
-                      <div className="rounded-xl border border-cyan-spark/30 bg-[rgba(0,229,255,0.06)] p-4">
+                      <div className="rounded-xl border border-emerald-glow/30 bg-[rgba(0,214,143,0.06)] p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-sm font-ui font-semibold text-cyan-spark flex items-center gap-1.5">
+                            <p className="text-sm font-ui font-semibold text-emerald-glow flex items-center gap-1.5">
                               <span aria-hidden>✨</span> Smart pricing
                               suggestion
                             </p>

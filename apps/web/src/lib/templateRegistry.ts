@@ -179,14 +179,14 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
     estimatedTime: "45–90 min",
     tags: ["cards", "engine", "market", "hand"],
     icon: "🃏",
-    color: "#7c5cff",
+    color: "#00D68F",
     components: [
       // Play area / board
       C("board", "Play Area", 5, 5, {
         width: 440,
         height: 320,
         fill: "#0d1520",
-        stroke: "#7c5cff",
+        stroke: "#00D68F",
         strokeWidth: 2,
       }),
       // Market row label
@@ -203,7 +203,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
           width: 63,
           height: 88,
           fill: "#1a2535",
-          stroke: "#7c5cff",
+          stroke: "#00D68F",
         }),
       ),
       // Deck zones
@@ -225,7 +225,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
         height: 14,
         text: "HAND",
         fontSize: 10,
-        textColor: "#a78bff",
+        textColor: "#40E0A8",
       }),
       // Hand cards (5 slots)
       ...Array.from({ length: 5 }, (_, i) =>
@@ -233,7 +233,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
           width: 48,
           height: 68,
           fill: "#1c1a2e",
-          stroke: "#7c5cff",
+          stroke: "#00D68F",
           strokeWidth: 1,
         }),
       ),
@@ -334,7 +334,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
           ),
       ),
       // Player meeples (4 players × 3 meeples)
-      ...["#ff3b5c", "#22d3ee", "#f5c451", "#a78bff"].flatMap((color, pi) =>
+      ...["#ff3b5c", "#22d3ee", "#f5c451", "#40E0A8"].flatMap((color, pi) =>
         Array.from({ length: 3 }, (_, mi) =>
           C(
             "meeple",
@@ -444,7 +444,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
           width: 58,
           height: 62,
           fill: "#1c1a2e",
-          stroke: "#7c5cff",
+          stroke: "#00D68F",
         }),
       ),
       // Threat track
@@ -628,7 +628,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
       C("meeple", "B-Queen", 120, 10, {
         width: 20,
         height: 28,
-        fill: "#7c5cff",
+        fill: "#00D68F",
         stroke: "#0a0a0a",
       }),
       C("meeple", "B-King", 155, 10, {
@@ -782,7 +782,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
         width: 70,
         height: 100,
         fill: "#1c1a2e",
-        stroke: "#7c5cff",
+        stroke: "#00D68F",
       }),
       // Stats tokens
       C("token", "HP", 295, 115, {
@@ -795,7 +795,7 @@ export const TEMPLATE_REGISTRY: StudioTemplate[] = [
       C("token", "MP", 335, 115, {
         width: 28,
         height: 28,
-        fill: "#7c5cff",
+        fill: "#00D68F",
         stroke: "#0a0a0a",
         quantity: 15,
       }),

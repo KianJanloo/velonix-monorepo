@@ -138,7 +138,7 @@ export class MailService {
               overflow:hidden;
             ">
               <!-- Gold top bar -->
-              <div style="height:3px;background:linear-gradient(90deg,#7c5cff,#f5c451,#7c5cff);"></div>
+              <div style="height:3px;background:linear-gradient(90deg,#00D68F,#f5c451,#00D68F);"></div>
               <div style="padding:36px 40px 40px;">
                 ${body}
               </div>
@@ -203,7 +203,7 @@ export class MailService {
         color:#e8d5b8;
       ">Reset Your Password</h1>
 
-      <div style="width:40px;height:2px;background:#7c5cff;border-radius:2px;margin-bottom:20px;"></div>
+      <div style="width:40px;height:2px;background:#00D68F;border-radius:2px;margin-bottom:20px;"></div>
 
       <p style="margin:0 0 24px;font-size:14px;color:#a8a29e;line-height:1.7;">
         We received a request to reset the password for your Velonix account.
@@ -273,7 +273,7 @@ export class MailService {
         color:#e8d5b8;
       ">Verify Your Email</h1>
 
-      <div style="width:40px;height:2px;background:#7c5cff;border-radius:2px;margin-bottom:20px;"></div>
+      <div style="width:40px;height:2px;background:#00D68F;border-radius:2px;margin-bottom:20px;"></div>
 
       <p style="margin:0 0 24px;font-size:14px;color:#a8a29e;line-height:1.7;">
         We received a request to verify your email for your Velonix account.
@@ -373,7 +373,7 @@ export class MailService {
       <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
         <tr>
           <td align="center" style="
-            background:#7c5cff;
+            background:#00D68F;
             border-radius:8px;
             padding:0;
           ">

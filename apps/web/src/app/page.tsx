@@ -75,7 +75,7 @@ function Hero() {
       >
         <Link
           href="/auth/register"
-          className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_24px_rgba(124,92,255,0.35)]"
+          className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_24px_rgba(0,214,143,0.35)]"
         >
           Start Creating — Free
         </Link>
@@ -159,7 +159,7 @@ const FEATURES = [
     ),
     title: "Direct Payouts",
     desc: "Earn up to 85% revenue share via Stripe Connect. Get paid directly to your bank for every sale with transparent, low commission rates.",
-    accent: "cyan" as const,
+    accent: "emerald" as const,
   },
   {
     icon: (
@@ -201,7 +201,6 @@ const FEATURES = [
 const accentMap = {
   emerald: "text-emerald-glow bg-emerald-ghost border-emerald-glow/20",
   gold: "text-royal-gold bg-[rgba(245,196,81,0.08)] border-royal-gold/20",
-  cyan: "text-cyan-spark bg-[rgba(0,229,255,0.06)] border-cyan-spark/20",
   parchment: "text-parchment-light bg-warm-wood/40 border-warm-wood-light/30",
 };
 
@@ -331,7 +330,7 @@ function CTABanner() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/auth/register"
-            className="inline-flex items-center justify-center px-10 py-4 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_32px_rgba(124,92,255,0.3)]"
+            className="inline-flex items-center justify-center px-10 py-4 rounded-xl bg-emerald-glow text-deep-void font-ui font-bold text-sm hover:bg-emerald-bright transition-all active:scale-95 shadow-[0_0_32px_rgba(0,214,143,0.3)]"
           >
             Create Free Account
           </Link>

@@ -18,11 +18,11 @@
     --color-felt-dark: #2e1f14;
 
     /* ── Emerald Glow — Primary ─────────────────────────────────────────── */
-    --color-emerald-glow: #7c5cff;
-    --color-emerald-dark: #6344e6;
-    --color-emerald-bright: #9277ff;
-    --color-emerald-ghost: rgba(124,92,255, 0.15);
-    --color-emerald-subtle: rgba(124,92,255, 0.08);
+    --color-emerald-glow: #00D68F;
+    --color-emerald-dark: #00B07A;
+    --color-emerald-bright: #40E0A8;
+    --color-emerald-ghost: rgba(0,214,143, 0.15);
+    --color-emerald-subtle: rgba(0,214,143, 0.08);
 
     /* ── Royal Gold — Premium ───────────────────────────────────────────── */
     --color-royal-gold: #f5c451;
@@ -36,9 +36,9 @@
     --color-crimson-ghost: rgba(255, 59, 92, 0.15);
 
     /* ── Cyan Spark — Interactive ───────────────────────────────────────── */
-    --color-cyan-spark: #00e5ff;
-    --color-cyan-dark: #00c4db;
-    --color-cyan-ghost: rgba(0, 229, 255, 0.12);
+    --color-cyan-spark: #00D68F;
+    --color-cyan-dark: #00B07A;
+    --color-cyan-ghost: rgba(0, 214, 143, 0.12);
 
     /* ── Typography ─────────────────────────────────────────────────────── */
     --color-parchment-light: #e8d5b8;
@@ -54,7 +54,7 @@
     --card-foreground: 35 38% 82%;
     --popover: 22 38% 9%;
     --popover-foreground: 35 38% 82%;
-    --primary: 164 100% 42%;                /* #7c5cff */
+    --primary: 160 100% 42%;                /* #00D68F */
     --primary-foreground: 0 0% 4%;
     --secondary: 22 38% 9%;
     --secondary-foreground: 35 38% 82%;
@@ -66,7 +66,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 22 30% 18%;                   /* #3a2a1f */
     --input: 22 38% 12%;                    /* #241a12 */
-    --ring: 164 100% 42%;                   /* #7c5cff */
+    --ring: 160 100% 42%;                   /* #00D68F */
     --radius: 0.5rem;
 
     /* ── Shadows ────────────────────────────────────────────────────────── */
@@ -75,10 +75,10 @@
     --shadow-md: 0 8px 24px rgba(0,0,0,0.7), 0 4px 8px rgba(0,0,0,0.5);
     --shadow-lg: 0 16px 48px rgba(0,0,0,0.8), 0 8px 16px rgba(0,0,0,0.6);
     --shadow-xl: 0 24px 64px rgba(0,0,0,0.85), 0 12px 32px rgba(0,0,0,0.6);
-    --shadow-emerald: 0 0 20px rgba(124,92,255,0.35), 0 0 8px rgba(124,92,255,0.2);
+    --shadow-emerald: 0 0 20px rgba(0,214,143,0.35), 0 0 8px rgba(0,214,143,0.2);
     --shadow-gold: 0 0 20px rgba(245,196,81,0.4), 0 0 8px rgba(245,196,81,0.2);
     --shadow-crimson: 0 0 16px rgba(255,59,92,0.35), 0 0 6px rgba(255,59,92,0.2);
-    --shadow-cyan: 0 0 16px rgba(0,229,255,0.3), 0 0 6px rgba(0,229,255,0.15);
+    --shadow-cyan: 0 0 16px rgba(0,214,143,0.3), 0 0 6px rgba(0,214,143,0.15);
 
     /* ── Typography ─────────────────────────────────────────────────────── */
     --font-display: 'Cinzel', 'Trajan Pro', serif;
@@ -196,10 +196,10 @@
   .glow-cyan    { box-shadow: var(--shadow-cyan); }
 
   /* Text glow */
-  .text-glow-emerald { text-shadow: 0 0 12px rgba(124,92,255,0.6); }
+  .text-glow-emerald { text-shadow: 0 0 12px rgba(0,214,143,0.6); }
   .text-glow-gold    { text-shadow: 0 0 12px rgba(245,196,81,0.6); }
   .text-glow-crimson { text-shadow: 0 0 12px rgba(255,59,92,0.6); }
-  .text-glow-cyan    { text-shadow: 0 0 12px rgba(0,229,255,0.6); }
+  .text-glow-cyan    { text-shadow: 0 0 12px rgba(0,214,143,0.6); }
 
   /* Gradient text */
   .gradient-emerald-gold {
@@ -248,8 +248,8 @@
 
   /* Pulse glow for live indicators */
   @keyframes pulse-emerald {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(124,92,255,0.4); }
-    50%       { box-shadow: 0 0 0 6px rgba(124,92,255,0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,214,143,0.4); }
+    50%       { box-shadow: 0 0 0 6px rgba(0,214,143,0); }
   }
   .pulse-emerald { animation: pulse-emerald 2s ease-in-out infinite; }
 

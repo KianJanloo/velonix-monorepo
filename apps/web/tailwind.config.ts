@@ -47,11 +47,11 @@ const config: Config = {
         "warm-wood-light":  "rgb(var(--c-warm-wood-light) / <alpha-value>)",
         "felt-dark":        "rgb(var(--c-felt-dark) / <alpha-value>)",
 
-        "emerald-glow":     "#7c5cff",
-        "emerald-dark":     "#6344e6",
-        "emerald-bright":   "#9277ff",
-        "emerald-ghost":    "rgba(124,92,255,0.15)",
-        "emerald-subtle":   "rgba(124,92,255,0.08)",
+        "emerald-glow":     "#00D68F",
+        "emerald-dark":     "#00B07A",
+        "emerald-bright":   "#40E0A8",
+        "emerald-ghost":    "rgba(0,214,143,0.15)",
+        "emerald-subtle":   "rgba(0,214,143,0.08)",
 
         "royal-gold":       "#f5c451",
         "royal-gold-dark":  "#d4a93a",
@@ -62,8 +62,8 @@ const config: Config = {
         "crimson-dark":     "#e0243e",
         "crimson-ghost":    "rgba(255,59,92,0.15)",
 
-        "cyan-spark":       "#00e5ff",
-        "cyan-dark":        "#00c4db",
+        "cyan-spark":       "#00D68F",
+        "cyan-dark":        "#00B07A",
 
         "parchment-light":  "rgb(var(--c-parchment-light) / <alpha-value>)",
         "parchment-mid":    "rgb(var(--c-parchment-mid) / <alpha-value>)",
@@ -141,11 +141,11 @@ const config: Config = {
         lg:      "0 16px 48px rgba(0,0,0,0.8), 0 8px 16px rgba(0,0,0,0.6)",
         xl:      "0 24px 64px rgba(0,0,0,0.85), 0 12px 32px rgba(0,0,0,0.6)",
         inner:   "inset 0 2px 8px rgba(0,0,0,0.6)",
-        emerald: "0 0 20px rgba(124,92,255,0.35), 0 0 8px rgba(124,92,255,0.2)",
+        emerald: "0 0 20px rgba(0,214,143,0.35), 0 0 8px rgba(0,214,143,0.2)",
         gold:    "0 0 20px rgba(245,196,81,0.4), 0 0 8px rgba(245,196,81,0.2)",
         crimson: "0 0 16px rgba(255,59,92,0.35), 0 0 6px rgba(255,59,92,0.2)",
-        cyan:    "0 0 16px rgba(0,229,255,0.3), 0 0 6px rgba(0,229,255,0.15)",
-        "emerald-focus": "0 0 0 3px rgba(124,92,255,0.3)",
+        cyan:    "0 0 16px rgba(0,214,143,0.3), 0 0 6px rgba(0,214,143,0.15)",
+        "emerald-focus": "0 0 0 3px rgba(0,214,143,0.3)",
         "gold-focus":    "0 0 0 3px rgba(245,196,81,0.3)",
       },
 
@@ -165,7 +165,7 @@ const config: Config = {
           )
         `,
         // Radial spotlight for landing hero
-        "spotlight": "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124,92,255,0.15), transparent)",
+        "spotlight": "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,214,143,0.15), transparent)",
         // Gold shimmer for premium areas
         "gold-shimmer": "linear-gradient(135deg, #1c140f 0%, #2e1f14 25%, #3a2a1f 50%, #2e1f14 75%, #1c140f 100%)",
         // Subtle grid for canvas
@@ -196,8 +196,8 @@ const config: Config = {
           "50%":      { transform: "translateY(-6px)" },
         },
         "pulse-emerald": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(124,92,255,0.4)" },
-          "50%":      { boxShadow: "0 0 0 6px rgba(124,92,255,0)" },
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(0,214,143,0.4)" },
+          "50%":      { boxShadow: "0 0 0 6px rgba(0,214,143,0)" },
         },
         "card-flip": {
           from: { transform: "rotateY(90deg)", opacity: "0" },
