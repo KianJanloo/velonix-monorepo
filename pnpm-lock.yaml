@@ -322,6 +322,9 @@ importers:
       '@velonix/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.5.0(postcss@8.5.15)
       axios:
         specifier: ^1.7.9
         version: 1.16.1
@@ -361,6 +364,12 @@ importers:
       next-themes:
         specifier: ^0.4.4
         version: 0.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      postcss:
+        specifier: ^8.5.1
+        version: 8.5.15
+      postcss-import:
+        specifier: ^16.1.1
+        version: 16.1.1(postcss@8.5.15)
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -379,6 +388,9 @@ importers:
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19(yaml@2.9.0)
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.19(yaml@2.9.0))
@@ -407,27 +419,15 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.20.0
         version: 8.60.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
-      autoprefixer:
-        specifier: ^10.4.20
-        version: 10.5.0(postcss@8.5.15)
       eslint:
         specifier: ^9.18.0
         version: 9.39.4(jiti@1.21.7)
       eslint-config-next:
         specifier: ^15.1.11
         version: 15.5.19(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
-      postcss:
-        specifier: ^8.5.1
-        version: 8.5.15
-      postcss-import:
-        specifier: ^16.1.1
-        version: 16.1.1(postcss@8.5.15)
       resolve:
         specifier: ^1.22.12
         version: 1.22.12
-      tailwindcss:
-        specifier: ^3.4.17
-        version: 3.4.19(yaml@2.9.0)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
