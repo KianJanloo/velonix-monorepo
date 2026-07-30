@@ -69,7 +69,8 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.172.0",
     "zod": "^3.24.1",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "@types/node": "^22.10.7"
   },
   "devDependencies": {
     "@types/react": "19.0.7",
