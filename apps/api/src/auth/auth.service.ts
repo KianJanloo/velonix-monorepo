@@ -21,6 +21,7 @@ import type {
   ResetPassDto,
   RegisterCompleteDto,
 } from "@velonix/game-engine";
+import type { StringValue } from "ms";
 import { MailService } from "../mail/mail.service";
 
 interface JwtPayload {
@@ -401,12 +402,12 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.config.get<string>("jwt.accessSecret"),
-      expiresIn: this.config.get<string>("jwt.accessExpiresIn") ?? "15m",
+      expiresIn: this.config.get<StringValue>("jwt.accessExpiresIn") ?? "15m",
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.config.get<string>("jwt.refreshSecret"),
-      expiresIn: this.config.get<string>("jwt.refreshExpiresIn") ?? "30d",
+      expiresIn: this.config.get<StringValue>("jwt.refreshExpiresIn") ?? "30d",
     });
 
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
