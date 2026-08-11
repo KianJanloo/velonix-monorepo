@@ -58,7 +58,8 @@ export function NewGameWizard() {
   }
 
   async function onSubmit(data: CreateGameDto) {
-    if (createGame.isPending) return; // prevent double-submit
+    const creating = (createGame as any).isPending ?? (createGame as any).isLoading ?? false;
+    if (creating) return; // prevent double-submit
     try {
       const game = await createGame.mutateAsync(data);
       toast.success("Game created! Opening studio…");
@@ -330,7 +331,7 @@ export function NewGameWizard() {
                 type="submit"
                 variant="primary"
                 className="ml-auto"
-                isLoading={isSubmitting || createGame.isPending}
+                isLoading={isSubmitting || ((createGame as any).isPending ?? (createGame as any).isLoading ?? false)}
               >
                 Create Game & Open Studio
               </Button>
