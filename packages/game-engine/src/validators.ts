@@ -24,20 +24,10 @@ export const SemVerSchema = z
 // GAME METADATA
 // ---------------------------------------------------------------------------
 
-export const GameCategorySchema = z.enum([
-  "strategy",
-  "party",
-  "cooperative",
-  "deck_building",
-  "worker_placement",
-  "euro",
-  "ameritrash",
-  "abstract",
-  "rpg",
-  "trivia",
-  "family",
-  "other",
-]);
+export const GameCategorySchema = z
+  .string()
+  .min(1, "Category slug must not be empty")
+  .max(64, "Category slug cannot exceed 64 characters");
 
 export const GameCategoriesSchema = z
   .array(GameCategorySchema)
