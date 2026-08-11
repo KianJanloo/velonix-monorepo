@@ -31,6 +31,7 @@ export function NewGameWizard() {
     watch,
     setValue,
     trigger,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<CreateGameDto>({
     resolver: zodResolver(CreateGameSchema),
@@ -63,7 +64,20 @@ export function NewGameWizard() {
 
     // Show feedback when validation fails so users know why the Continue button didn't advance
     console.debug("NewGameWizard: validation errors", errors);
-    toast.error("Please complete the required fields before continuing.");
+
+    // Determine which specific fields failed so we can show helpful feedback
+    const stepFields = fieldsPerStep[step] as (keyof CreateGameDto)[];
+    const results = await Promise.all(
+      stepFields.map(async (f) => ({ field: f, ok: await trigger([f]) }))
+    );
+    const failed = results.filter((r) => !r.ok).map((r) => String(r.field));
+    console.debug("NewGameWizard: failed fields", { failed, values: getValues() });
+
+    if (failed.length) {
+      toast.error(`Please fill or correct: ${failed.join(", ")}`);
+    } else {
+      toast.error("Please complete the required fields before continuing.");
+    }
   }
   
 
