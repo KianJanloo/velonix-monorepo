@@ -49,17 +49,20 @@ export function NewGameWizard() {
   const complexity = watch("complexity");
 
   async function nextStep() {
+    console.debug("NewGameWizard: nextStep called", { step });
     const fieldsPerStep: Record<number, (keyof CreateGameDto)[]> = {
       1: ["title", "shortDescription", "description"],
       2: ["categories", "complexity", "playerCountMin", "playerCountMax", "playtimeMin", "playtimeMax", "minAge"],
     };
     const valid = await trigger(fieldsPerStep[step] as (keyof CreateGameDto)[]);
+    console.debug("NewGameWizard: validation result", { step, valid });
     if (valid) setStep((s) => (s < 3 ? ((s + 1) as 1 | 2 | 3) : s));
   }
 
   async function onSubmit(data: CreateGameDto) {
     const creating = (createGame as any).isPending ?? (createGame as any).isLoading ?? false;
     if (creating) return; // prevent double-submit
+    console.debug("NewGameWizard: onSubmit called", { creating, data });
     try {
       const game = await createGame.mutateAsync(data);
       toast.success("Game created! Opening studio…");
