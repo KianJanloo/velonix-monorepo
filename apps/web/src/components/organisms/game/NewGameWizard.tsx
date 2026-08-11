@@ -50,28 +50,22 @@ export function NewGameWizard() {
   const complexity = watch("complexity");
 
   async function nextStep() {
-    console.debug("NewGameWizard: nextStep called", { step });
     const fieldsPerStep: Record<number, (keyof CreateGameDto)[]> = {
       1: ["title", "shortDescription", "description"],
       2: ["categories", "complexity", "playerCountMin", "playerCountMax", "playtimeMin", "playtimeMax", "minAge"],
     };
     const valid = await trigger(fieldsPerStep[step] as (keyof CreateGameDto)[]);
-    console.debug("NewGameWizard: validation result", { step, valid });
     if (valid) {
       setStep((s) => (s < 3 ? ((s + 1) as 1 | 2 | 3) : s));
       return;
     }
 
-    // Show feedback when validation fails so users know why the Continue button didn't advance
-    console.debug("NewGameWizard: validation errors", errors);
-
-    // Determine which specific fields failed so we can show helpful feedback
+    // Show feedback when validation fails
     const stepFields = fieldsPerStep[step] as (keyof CreateGameDto)[];
     const results = await Promise.all(
       stepFields.map(async (f) => ({ field: f, ok: await trigger([f]) }))
     );
     const failed = results.filter((r) => !r.ok).map((r) => String(r.field));
-    console.debug("NewGameWizard: failed fields", { failed, values: getValues() });
 
     if (failed.length) {
       toast.error(`Please fill or correct: ${failed.join(", ")}`);
@@ -84,7 +78,6 @@ export function NewGameWizard() {
   async function onSubmit(data: CreateGameDto) {
     const creating = (createGame as any).isPending ?? (createGame as any).isLoading ?? false;
     if (creating) return; // prevent double-submit
-    console.debug("NewGameWizard: onSubmit called", { creating, data });
     try {
       const game = await createGame.mutateAsync(data);
       toast.success("Game created! Opening studio…");
