@@ -326,19 +326,8 @@ export interface GameCollaborator {
 // ---------------------------------------------------------------------------
 
 export type GameStatus = "draft" | "reviewing" | "published" | "unpublished" | "rejected";
-export type GameCategory =
-  | "strategy"
-  | "party"
-  | "cooperative"
-  | "deck_building"
-  | "worker_placement"
-  | "euro"
-  | "ameritrash"
-  | "abstract"
-  | "rpg"
-  | "trivia"
-  | "family"
-  | "other";
+// GameCategory is any string slug (from dynamic database categories, e.g., "cooperative_games", "fantasy")
+export type GameCategory = string;
 
 export type PlayerCountRange = {
   min: number;
