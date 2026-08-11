@@ -56,8 +56,16 @@ export function NewGameWizard() {
     };
     const valid = await trigger(fieldsPerStep[step] as (keyof CreateGameDto)[]);
     console.debug("NewGameWizard: validation result", { step, valid });
-    if (valid) setStep((s) => (s < 3 ? ((s + 1) as 1 | 2 | 3) : s));
+    if (valid) {
+      setStep((s) => (s < 3 ? ((s + 1) as 1 | 2 | 3) : s));
+      return;
+    }
+
+    // Show feedback when validation fails so users know why the Continue button didn't advance
+    console.debug("NewGameWizard: validation errors", errors);
+    toast.error("Please complete the required fields before continuing.");
   }
+  
 
   async function onSubmit(data: CreateGameDto) {
     const creating = (createGame as any).isPending ?? (createGame as any).isLoading ?? false;
