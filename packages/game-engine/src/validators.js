@@ -20,20 +20,14 @@ exports.SemVerSchema = zod_1.z
 // ---------------------------------------------------------------------------
 // GAME METADATA
 // ---------------------------------------------------------------------------
-exports.GameCategorySchema = zod_1.z.enum([
-    "strategy",
-    "party",
-    "cooperative",
-    "deck_building",
-    "worker_placement",
-    "euro",
-    "ameritrash",
-    "abstract",
-    "rpg",
-    "trivia",
-    "family",
-    "other",
-]);
+exports.GameCategorySchema = zod_1.z
+  .string()
+  .min(1, "Category slug must not be empty")
+  .max(64, "Category slug cannot exceed 64 characters");
+exports.GameCategoriesSchema = zod_1.z
+  .array(exports.GameCategorySchema)
+  .min(1, "At least one category is required")
+  .max(5, "Maximum 5 categories allowed");
 exports.GameComplexitySchema = zod_1.z.enum([
     "light",
     "medium",
@@ -55,7 +49,7 @@ var BaseCreateGameSchema = zod_1.z.object({
         .min(10, "Short description must be at least 10 characters")
         .max(160, "Short description cannot exceed 160 characters")
         .trim(),
-    category: exports.GameCategorySchema,
+    categories: exports.GameCategoriesSchema,
     tags: zod_1.z
         .array(zod_1.z.string().min(1).max(32).trim())
         .max(10, "Maximum 10 tags allowed")
